@@ -1,0 +1,164 @@
+---
+title: "04 - U-Werte, Fensterfläche und Gebäudemasse schätzen"
+author: "Curdin Derungs"
+date: "July 2018"
+output:
+  html_document:
+      toc: true
+      toc_float: true
+---
+
+```{r setup, include=FALSE}
+
+#loading libraries
+library(sp)
+library(rgdal)
+library(rgeos)
+library(leaflet)
+library(ggplot2)
+library(gridExtra)
+library(spatialEco)
+library(lakemorpho)
+
+#empty workspace
+rm(list=ls())
+```
+
+In diesem Skript werden ...
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Zusätzlich werden ein paar Werte pro Gebäude berechnet, welche für die spätere Visualisierung der SIA Klassifikation informativ sind.
+```{r reader av}
+load("output/03_output/geom/03_rolle_bld_out.Rdata")
+
+#pfad für daten auf T laufwerk
+dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
+
+#u-werte
+uValues_lookup<-read.csv(paste(dataPath,"12_uValues/uValues_lookup_wide.csv",sep=""))
+
+#fensterflaeche
+fenstFl_lookup<-read.csv(paste(dataPath,"13_fenster/fensterflaeche.csv",sep=""))
+```
+
+
+#U-Werte hinzufügen
+
+U-Werte werden aufgrund des Alters des Gebäudes für EFH und MFH anhand einer Liste von <Stefan Mennel> geschätzt. Zusätzlich werden noch die U-Werte bei der Annahme von idealer Sanierung angegeben. Die Informationen stammen von folgendem [Link](https://www.endk.ch/de/ablage/grundhaltung-der-endk/muken2014-d20150109-2.pdf).
+
+```{r uVal, warning=FALSE, paged.print=FALSE}
+rolle_bld_out$uPeriod<-cut(as.numeric(rolle_bld_out$GBAUJ),
+                           breaks=c(0,1945,1960,1970,1980,1990,2000,2005,2500),
+                           labels = c("0_1945","1945_1960","1960_1970","1970_1980",
+                                      "1980_1990","1990_2000","2000_2005","2005_2020"))
+
+rolle_bld_out@data<-merge(rolle_bld_out@data,uValues_lookup,by.x="uPeriod",by.y="period",all.x=T)
+
+#sanierung
+rolle_bld_out$uVal_ground_saniert<-0.25
+rolle_bld_out$uVal_roof_saniert<-0.25
+rolle_bld_out$uVal_wall_saniert<-0.25
+rolle_bld_out$uVal_window_saniert<-1
+```
+
+#G-Werte hinzufügen
+
+G-Werte werden aufgrund des Alters des Gebäudes geschätzt. Als Grundlage dienen Angaben von [energie.ch](www.energie.ch/fenster)
+
+```{r gVal, warning=FALSE, paged.print=FALSE}
+rolle_bld_out$gVal<-cut(as.numeric(rolle_bld_out$GBAUJ),
+                           breaks=c(0,1950,1980,1990,2500),
+                           labels = c(0.92,0.8,0.62,0.48))
+rolle_bld_out$gVal<-as.numeric(as.character(rolle_bld_out$gVal))
+```
+
+#Geographische Koordinaten
+
+Die Geographischen Koordinaten werden aus den Centroiden pro Gebäude gewonnen. Sie werden in WGS Koordianten angegeben (Grad Ost-West und Nord-Süd).
+
+```{r coor, warning=FALSE, paged.print=FALSE}
+centr <- gCentroid(spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326")),byid=TRUE)
+rolle_bld_out$longitude<-centr@coords[,1]
+rolle_bld_out$latitude<-centr@coords[,2]
+```
+
+
+#Fensterfläche
+Der Fensteranteil wird als Prozent der Wandfläche für unterschiedliche Bauperioden geschätzt, basierend auf einer Lookup-Table von <Thomas Schluck>. Die Fensterfläche wird sowohl in Prozent als auch als absolute Fläche angegeben.
+
+##Wandfläche berechnen
+Die Wandfläche wird aus dem Umfang des Gebäudes und der Stockwerkzahl gerechnet. Die Stockwerkhöhe von Wohngebäuden wird auf 3m festgelegt, bei nicht Wohngebäuden sind es 5m.
+
+```{r wandFl, warning=FALSE, paged.print=FALSE}
+umfang<-polyPerimeter(rolle_bld_out)
+wandFl_wohnen<-umfang*(as.numeric(rolle_bld_out$GASTW)*3)
+wandFl_nichtWohnen<-umfang*(as.numeric(rolle_bld_out$GASTW)*5)
+```
+
+##Fensterfläche aus Wandfläche ableiten
+...
+
+```{r fensterFl, warning=FALSE, paged.print=FALSE}
+rolle_bld_out$fPeriod<-cut(as.numeric(rolle_bld_out$GBAUJ),
+                           breaks=c(0,1950,1970,2000,2500),
+                           labels = c("0_1950","1950_1970","1970_2000","2000_2020"))
+
+rolle_bld_out@data<-merge(rolle_bld_out@data,fenstFl_lookup,by.x="fPeriod",by.y="periode",all.x=T)
+
+rolle_bld_out$fensterFl_wohnen<-wandFl_wohnen*rolle_bld_out$prozFl_wohnen
+rolle_bld_out$fensterFl_nichtWohnen<-wandFl_nichtWohnen*rolle_bld_out$prozFl_nichtWohnen
+```
+
+
+#Ausrichtung und Länge/Breite der Gebäude
+Für jedes Gebäude werden die Breite, Länge und die Ausrichtung berechnet. Die Ausrichtung wird für die längere Achse des Gebäudes in Grad angegeben. Die Ausrichtung nimmt nur Werte zwischen 0 und 90 Grad an: 0 = N-S (oder S-N) und 90 = E-W (oder W-E).
+
+Achtung: Die Berechnung stimmt nur für Gebäude mit relativ simpler Geometrie. Die Berechnung von Länge und Breite, und daraus abgeleitet die Ausrichtung, basieren auf der Convex-Hull der Gebäude. Für komplexe Formen, z.B. U-förmig oder gekrümmt, stimmt die Berechnung nicht. Um diesem Fehler beachtung zu schenken, wird ein Attribut hinzugefügt, welches die Ratio zwischen der Convex-Hull Fläche und der original Fläche des Gebäudes abbildet (ConvexHullArea/OrigArea, ist nie grösser als 1).
+
+```{r ausr, warning=FALSE, paged.print=FALSE}
+out<-data.frame(breite=NA, laenge=NA, ausricht=NA)
+ind<-3
+for(ind in 1:nrow(rolle_bld_out)){
+  bld.i<-SpatialPolygons(list(rolle_bld_out@polygons[[ind]]))
+  lm<-lakeMorphoClass(bld.i)
+  lm.mjl<-lakeMajorAxisLength(lm, addLine = T)
+  lm.mil<-lakeMinorAxisLength(lm, addLine = T)
+  
+  line.mj<-lm[[6]]
+  line.min<-lm[[7]]
+  
+  line.mj.int<-gIntersection(line.mj,bld.i)
+  line.min.int<-gIntersection(line.min,bld.i)
+
+  lm.mjl<-gLength(line.mj.int)
+  lm.mil<-gLength(line.min.int)
+
+  # plot(SpatialPolygons(list(rolle_bld_out@polygons[[ind]])))
+  # plot(lm[[6]],add=T)
+  # plot(line.mj.int, col="red",add=T)
+  
+  xy_diff<-abs(lm[[6]]@bbox[,1]-lm[[6]]@bbox[,2])
+  angle<-atan(xy_diff[1]/xy_diff[2])/pi*180
+  
+  out<-rbind(out,data.frame(breite=lm.mil, laenge=lm.mjl, ausricht=angle))
+}
+out<-out[-1,]
+
+rolle_bld_out@data<-cbind(rolle_bld_out@data,out)
+
+rolle_ch<-gConvexHull(rolle_bld_out,byid = T)
+areaCH<-as.data.frame(t(sapply(rolle_ch@polygons,function(x) {return(c(x@ID,x@area))})))
+areaOrig<-as.data.frame(t(sapply(rolle_bld_out@polygons,function(x) {return(c(x@ID,x@area))})))
+
+rolle_bld_out$area_cv_ratio<-as.numeric(as.character(areaOrig$V2))/as.numeric(as.character(areaCH$V2))
+rolle_bld_out$area_breiteLaenge_ratio<-as.numeric(as.character(areaOrig$V2))/(rolle_bld_out$laenge*rolle_bld_out$breite)
+
+rolle_bld_out$breite<-rolle_bld_out$breite*rolle_bld_out$area_breiteLaenge_ratio
+```
+
+
+##Save all Information
+```{r save}
+#buildings speichern
+save(rolle_bld_out,file="output/04_output/geom/04_rolle_bld_out.Rdata")
+```

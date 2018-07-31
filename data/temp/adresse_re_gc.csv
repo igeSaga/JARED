@@ -1,0 +1,873 @@
+"","lon","lat","address"
+"1",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"2",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"3",6.3305583,46.4565615,"allée des santolines 1, 1180 rolle, switzerland"
+"4",NA,NA,NA
+"5",6.330742,46.4564913,"allée des santolines 3, 1180 rolle, switzerland"
+"6",NA,NA,NA
+"7",6.3308998,46.4564119,"allée des santolines 5, 1180 rolle, switzerland"
+"8",6.3305974,46.4560986,"allée des santolines 6, 1180 rolle, switzerland"
+"9",6.3310966,46.4563148,"allée des santolines 7, 1180 rolle, switzerland"
+"10",6.330801,46.4560076,"allée des santolines 8, 1180 rolle, switzerland"
+"11",6.3269087,46.4503099,"route de genève 34, 1180 rolle, switzerland"
+"12",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"13",6.3410404,46.4609098,"avenue châtelain 1, 1180 rolle, switzerland"
+"14",6.3399887,46.4614124,"avenue châtelain 10, 1180 rolle, switzerland"
+"15",6.3409143,46.4613494,"avenue châtelain 2, 1180 rolle, switzerland"
+"16",6.3405852,46.4610274,"', avenue châtelain 3, 1180 rolle, switzerland"
+"17",6.3406939,46.4613023,"avenue châtelain 4, 1180 rolle, switzerland"
+"18",6.3404653,46.4610212,"avenue châtelain 5, 1180 rolle, switzerland"
+"19",6.3404727,46.4613002,"avenue châtelain 6, 1180 rolle, switzerland"
+"20",NA,NA,NA
+"21",6.3289037,46.4540892,"avenue de beaulieu 10, 1180 rolle, switzerland"
+"22",6.3287722,46.4535212,"avenue de beaulieu 12, 1180 rolle, switzerland"
+"23",6.3291933,46.4539301,"avenue de beaulieu 14, 1180 rolle, switzerland"
+"24",6.3291734,46.4536331,"avenue de beaulieu 16, 1180 rolle, switzerland"
+"25",6.3290482,46.4533889,"avenue de beaulieu 18, 1180 rolle, switzerland"
+"26",NA,NA,NA
+"27",6.3280897,46.4537934,"avenue de beaulieu 2, 1180 rolle, switzerland"
+"28",6.3295997,46.4537902,"avenue de beaulieu 20, 1180 rolle, switzerland"
+"29",6.3286743,46.4544828,"avenue de beaulieu 22, 1180 rolle, switzerland"
+"30",6.328671,46.4546447,"avenue de beaulieu 24, 1180 rolle, switzerland"
+"31",6.3288525,46.4546825,"avenue de beaulieu 26, 1180 rolle, switzerland"
+"32",6.328862,46.4548535,"avenue de beaulieu 28, 1180 rolle, switzerland"
+"33",6.3290305,46.4548912,"avenue de beaulieu 30, 1180 rolle, switzerland"
+"34",6.3297511,46.4540256,"avenue de beaulieu 32, 1180 rolle, switzerland"
+"35",6.3298536,46.4541075,"avenue de beaulieu 34, 1180 rolle, switzerland"
+"36",NA,NA,NA
+"37",6.3300576,46.4543165,"avenue de beaulieu 38, 1180 rolle, switzerland"
+"38",NA,NA,NA
+"39",NA,NA,NA
+"40",6.328517,46.4539055,"avenue de beaulieu 6, 1180 rolle, switzerland"
+"41",NA,NA,NA
+"42",6.340022,46.4610529,"avenue de la gare 10, 1180 rolle, switzerland"
+"43",NA,NA,NA
+"44",6.3390295,46.4605665,"avenue de la gare 13, 1180 rolle, switzerland"
+"45",6.3372642,46.4622317,"avenue de la gare 14, 1180 rolle, switzerland"
+"46",NA,NA,NA
+"47",6.3367662,46.4623988,"avenue de la gare 16, 1180 rolle, switzerland"
+"48",NA,NA,NA
+"49",NA,NA,NA
+"50",NA,NA,NA
+"51",NA,NA,NA
+"52",NA,NA,NA
+"53",NA,NA,NA
+"54",6.3376817,46.461047,"avenue de la gare 19, 1180 rolle, switzerland"
+"55",6.3400887,46.4603338,"avenue de la gare 1b, 1180 rolle, switzerland"
+"56",NA,NA,NA
+"57",NA,NA,NA
+"58",NA,NA,NA
+"59",NA,NA,NA
+"60",NA,NA,NA
+"61",NA,NA,NA
+"62",6.3380173,46.4629677,"avenue de la gare 24, 1180 rolle, switzerland"
+"63",6.3377124,46.4614499,"avenue de la gare, 1180 tartegnin, switzerland"
+"64",6.3365635,46.4621169,"avenue de la gare 25, 1180 rolle, switzerland"
+"65",6.3361064,46.4621844,"avenue de la gare 25b, 1180 rolle, switzerland"
+"66",6.336247,46.4623117,"avenue de la gare 27, 1180 rolle, switzerland"
+"67",6.3399727,46.4602787,"avenue de la gare 3, 1180 rolle, switzerland"
+"68",NA,NA,NA
+"69",6.3398156,46.4603222,"avenue de la gare 5, 1180 rolle, switzerland"
+"70",6.3377124,46.4614499,"avenue de la gare, 1180 tartegnin, switzerland"
+"71",6.3377124,46.4614499,"avenue de la gare, 1180 tartegnin, switzerland"
+"72",NA,NA,NA
+"73",6.3394758,46.4599671,"avenue des poiriers 3, 1180 rolle, switzerland"
+"74",NA,NA,NA
+"75",6.3383961,46.4603444,"avenue des poiriers 6, 1180 rolle, switzerland"
+"76",6.3387163,46.4599607,"avenue des poiriers 7, 1180 rolle, switzerland"
+"77",6.338149,46.460333,"avenue des poiriers 8, 1180 rolle, switzerland"
+"78",6.338379,46.4599034,"avenue des poiriers 9, 1180 rolle, switzerland"
+"79",6.3388702,46.4600861,"avenue des poiriers, 1180 rolle, switzerland"
+"80",6.3320423,46.4552895,"avenue des uttins 1, 1180 rolle, switzerland"
+"81",6.3344632,46.4559428,"avenue des uttins 10, 1180 rolle, switzerland"
+"82",NA,NA,NA
+"83",6.3346461,46.4559086,"avenue des uttins 12, 1180 rolle, switzerland"
+"84",6.3336604,46.4556893,"avenue des uttins 13, 1180 rolle, switzerland"
+"85",6.3337397,46.4563136,"avenue des uttins 15, 1180 rolle, switzerland"
+"86",6.3335177,46.4563475,"avenue des uttins 17, 1180 rolle, switzerland"
+"87",NA,NA,NA
+"88",6.3340011,46.4549847,"avenue des uttins 2, 1180 rolle, switzerland"
+"89",6.3330592,46.4564869,"avenue des uttins 21, 1180 rolle, switzerland"
+"90",6.3326151,46.4552861,"avenue des uttins 3, 1180 rolle, switzerland"
+"91",NA,NA,NA
+"92",6.3331377,46.4551922,"avenue des uttins 5, 1180 rolle, switzerland"
+"93",NA,NA,NA
+"94",NA,NA,NA
+"95",6.3343061,46.4559863,"avenue des uttins 8, 1180 rolle, switzerland"
+"96",6.3335578,46.4556551,"avenue des uttins 9, 1180 rolle, switzerland"
+"97",6.3232934,46.4572459,"avenue du jura 40, 1180 rolle, switzerland"
+"98",NA,NA,NA
+"99",6.3236465,46.4571684,"avenue du jura 44, 1180 rolle, switzerland"
+"100",NA,NA,NA
+"101",NA,NA,NA
+"102",6.3229974,46.4564513,"avenue du jura 50, 1180 rolle, switzerland"
+"103",NA,NA,NA
+"104",NA,NA,NA
+"105",NA,NA,NA
+"106",NA,NA,NA
+"107",NA,NA,NA
+"108",NA,NA,NA
+"109",6.3366212,46.4611998,"avenue général-guisan 1, 1180 rolle, switzerland"
+"110",6.3335226,46.4604672,"avenue général-guisan 10, 1180 rolle, switzerland"
+"111",6.3287591,46.4566968,"avenue général-guisan 100, 1180 rolle, switzerland"
+"112",NA,NA,NA
+"113",NA,NA,NA
+"114",6.3282629,46.4567729,"avenue général-guisan 104a, 1180 rolle, switzerland"
+"115",6.3282118,46.4567274,"avenue général-guisan 104b, 1180 rolle, switzerland"
+"116",6.3284125,46.4564595,"avenue général-guisan 106, 1180 rolle, switzerland"
+"117",6.328965,46.4563454,"avenue général-guisan 108, 1180 rolle, switzerland"
+"118",NA,NA,NA
+"119",6.3336561,46.4604062,"avenue général-guisan 10b, 1180 rolle, switzerland"
+"120",6.3340121,46.4601848,"avenue général-guisan 11, 1180 rolle, switzerland"
+"121",6.3295115,46.4561914,"avenue général-guisan 110, 1180 rolle, switzerland"
+"122",6.3292684,46.4559821,"avenue général-guisan 112, 1180 rolle, switzerland"
+"123",6.328693,46.4561114,"avenue général-guisan 114, 1180 rolle, switzerland"
+"124",6.3279857,46.4563564,"avenue général-guisan 116, 1180 rolle, switzerland"
+"125",6.328058,46.456609,"avenue général-guisan 118a, 1180 rolle, switzerland"
+"126",6.3279938,46.4565634,"avenue général-guisan 118b, 1180 rolle, switzerland"
+"127",6.3331762,46.4603206,"avenue général-guisan 12, 1180 rolle, switzerland"
+"128",6.3278791,46.4564453,"avenue général-guisan 120a, 1180 rolle, switzerland"
+"129",6.3277891,46.4563904,"avenue général-guisan 120b, 1180 rolle, switzerland"
+"130",6.3275831,46.4562805,"avenue général-guisan 122a, 1180 rolle, switzerland"
+"131",6.3275191,46.4562258,"avenue général-guisan 122b, 1180 rolle, switzerland"
+"132",6.3273268,46.45608,"avenue général-guisan 122c, 1180 rolle, switzerland"
+"133",6.3272497,46.4560343,"avenue général-guisan 122d, 1180 rolle, switzerland"
+"134",NA,NA,NA
+"135",6.3282676,46.4559093,"avenue général-guisan 126, 1180 rolle, switzerland"
+"136",6.3287,46.4557696,"avenue général-guisan 128, 1180 rolle, switzerland"
+"137",NA,NA,NA
+"138",6.3290274,46.4556738,"avenue général-guisan 130, 1180 rolle, switzerland"
+"139",6.3330101,46.460166,"avenue général-guisan 14, 1180 rolle, switzerland"
+"140",6.3330101,46.460166,"avenue général-guisan 14, 1180 rolle, switzerland"
+"141",NA,NA,NA
+"142",6.3333352,46.4597689,"avenue général-guisan 16, 1180 rolle, switzerland"
+"143",6.3330292,46.4598693,"avenue général-guisan 16b, 1180 rolle, switzerland"
+"144",NA,NA,NA
+"145",6.3322928,46.4595923,"avenue général-guisan 22, 1180 rolle, switzerland"
+"146",NA,NA,NA
+"147",6.332165,46.4594741,"avenue général-guisan 24, 1180 rolle, switzerland"
+"148",6.3310554,46.4570791,"avenue général-guisan 25, 1180 rolle, switzerland"
+"149",NA,NA,NA
+"150",NA,NA,NA
+"151",6.3314703,46.4590714,"avenue général-guisan 28, 1180 rolle, switzerland"
+"152",NA,NA,NA
+"153",NA,NA,NA
+"154",NA,NA,NA
+"155",6.3311843,46.4565046,"avenue général-guisan 31, 1180 rolle, switzerland"
+"156",NA,NA,NA
+"157",NA,NA,NA
+"158",6.3319996,46.4586538,"avenue général-guisan 36, 1180 rolle, switzerland"
+"159",NA,NA,NA
+"160",6.3313066,46.4587999,"avenue général-guisan 40, 1180 rolle, switzerland"
+"161",NA,NA,NA
+"162",NA,NA,NA
+"163",NA,NA,NA
+"164",6.3307158,46.4584073,"avenue général-guisan 44, 1180 rolle, switzerland"
+"165",NA,NA,NA
+"166",NA,NA,NA
+"167",NA,NA,NA
+"168",NA,NA,NA
+"169",NA,NA,NA
+"170",6.3306568,46.4581098,"avenue général-guisan 56, 1180 rolle, switzerland"
+"171",6.3300852,46.4580503,"avenue général-guisan 58, 1180 rolle, switzerland"
+"172",6.3341128,46.4609955,"avenue général-guisan 6, 1180 rolle, switzerland"
+"173",6.3302953,46.4579624,"avenue général-guisan 60, 1180 rolle, switzerland"
+"174",6.330714,46.4578585,"avenue général-guisan 62, 1180 rolle, switzerland"
+"175",NA,NA,NA
+"176",6.3303295,46.4575669,"avenue général-guisan 66, 1180 rolle, switzerland"
+"177",6.3299626,46.4576802,"avenue général-guisan 68, 1180 rolle, switzerland"
+"178",6.3344319,46.4606657,"avenue général-guisan 7, 1180 rolle, switzerland"
+"179",6.3296206,46.4578568,"avenue général-guisan 70, 1180 rolle, switzerland"
+"180",6.3293003,46.4576018,"avenue général-guisan 72, 1180 rolle, switzerland"
+"181",6.3296582,46.4574759,"avenue général-guisan 74, 1180 rolle, switzerland"
+"182",6.3300615,46.4573033,"avenue général-guisan 76, 1180 rolle, switzerland"
+"183",6.3305594,46.4571463,"avenue général-guisan 78, 1180 rolle, switzerland"
+"184",6.3337146,46.4607307,"avenue général-guisan 8, 1180 rolle, switzerland"
+"185",6.3302897,46.4569637,"avenue général-guisan 80, 1180 rolle, switzerland"
+"186",6.3298569,46.4571214,"avenue général-guisan 82, 1180 rolle, switzerland"
+"187",6.3293741,46.4571797,"avenue général-guisan 84a, 1180 rolle, switzerland"
+"188",NA,NA,NA
+"189",6.3289282,46.4573372,"avenue général-guisan 86, 1180 rolle, switzerland"
+"190",6.3286858,46.4571009,"avenue général-guisan 88a, 1180 rolle, switzerland"
+"191",NA,NA,NA
+"192",6.3342575,46.4604639,"avenue général-guisan 9, 1180 rolle, switzerland"
+"193",6.3290925,46.456943,"avenue général-guisan 90, 1180 rolle, switzerland"
+"194",6.3295629,46.4568576,"avenue général-guisan 92, 1180 rolle, switzerland"
+"195",6.3300218,46.4567002,"avenue général-guisan 94, 1180 rolle, switzerland"
+"196",6.329741,46.4564275,"avenue général-guisan 96, 1180 rolle, switzerland"
+"197",6.3293204,46.4566213,"avenue général-guisan 98, 1180 rolle, switzerland"
+"198",6.332234,46.4585644,"avenue général-guisan, 1180 rolle, switzerland"
+"199",NA,NA,NA
+"200",6.345239,46.461868,"rue arthur vittel 7, 1180 rolle, switzerland"
+"201",6.3455738,46.4620512,"rue arthur vittel 9, 1180 rolle, switzerland"
+"202",6.347135,46.4633977,"chemin de bellefontaine 1, 1180 rolle, switzerland"
+"203",6.3333898,46.4537996,"chemin bellevue 10, 1180 rolle, switzerland"
+"204",6.3326732,46.4529891,"chemin bellevue 2, 1180 rolle, switzerland"
+"205",6.3397549,46.4612971,"rolle, switzerland"
+"206",NA,NA,NA
+"207",6.3413993,46.4585646,"1180 rolle, switzerland"
+"208",NA,NA,NA
+"209",NA,NA,NA
+"210",NA,NA,NA
+"211",NA,NA,NA
+"212",6.3391188,46.4624046,"chemin de jolimont 4, 1180 rolle, switzerland"
+"213",6.3376133,46.464907,"chemin de jolimont 5, 1180 rolle, switzerland"
+"214",NA,NA,NA
+"215",6.3379496,46.4650182,"chemin de jolimont 7, 1180 rolle, switzerland"
+"216",6.3401469,46.463879,"chemin de jolimont 8, 1180 rolle, switzerland"
+"217",NA,NA,NA
+"218",NA,NA,NA
+"219",NA,NA,NA
+"220",6.3413993,46.4585646,"1180 rolle, switzerland"
+"221",6.3305636,46.4632999,"chemin de la bigaire 24, 1180 rolle, switzerland"
+"222",NA,NA,NA
+"223",NA,NA,NA
+"224",6.3226765,46.4552974,"chemin de la combe 3, 1180 rolle, switzerland"
+"225",6.3381374,46.4609086,"avenue de la gare, 1180 rolle, switzerland"
+"226",6.3226765,46.4552974,"chemin de la combe 9, 1180 rolle, switzerland"
+"227",6.324265,46.4552,"chemin de la combe, 1180 rolle, switzerland"
+"228",NA,NA,NA
+"229",NA,NA,NA
+"230",NA,NA,NA
+"231",NA,NA,NA
+"232",NA,NA,NA
+"233",6.3486635,46.4619549,"chemin de la plage, 1180 tartegnin, switzerland"
+"234",NA,NA,NA
+"235",6.3465226,46.4614846,"chemin de la plage 4, 1180 rolle, switzerland"
+"236",6.3486635,46.4619549,"chemin de la plage, 1180 tartegnin, switzerland"
+"237",6.3486635,46.4619549,"chemin de la plage, 1180 tartegnin, switzerland"
+"238",6.3486635,46.4619549,"chemin de la plage, 1180 tartegnin, switzerland"
+"239",6.3347535,46.4583028,"chemin de la prairie 11a, 1180 rolle, switzerland"
+"240",NA,NA,NA
+"241",6.3349916,46.4581162,"chemin de la prairie 13a, 1180 rolle, switzerland"
+"242",6.3350833,46.4580901,"chemin de la prairie 13b, 1180 rolle, switzerland"
+"243",6.3350807,46.458216,"chemin de la prairie 15a, 1180 rolle, switzerland"
+"244",6.335133,46.4582075,"chemin de la prairie 15b, 1180 rolle, switzerland"
+"245",NA,NA,NA
+"246",6.3336109,46.4581567,"chemin de la prairie 4, 1180 rolle, switzerland"
+"247",6.3345655,46.4580002,"chemin de la prairie 5, 1180 rolle, switzerland"
+"248",6.3333999,46.4582441,"chemin de la prairie 6, 1180 rolle, switzerland"
+"249",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"250",6.3345576,46.4583368,"chemin de la prairie 9b, 1180 rolle, switzerland"
+"251",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"252",6.3420824,46.4621704,"chemin de plein-air 1, 1180 rolle, switzerland"
+"253",6.3411425,46.4629797,"chemin de plein-air 10, 1180 rolle, switzerland"
+"254",6.3410076,46.4631765,"chemin de plein-air 12, 1180 rolle, switzerland"
+"255",NA,NA,NA
+"256",6.3417981,46.4627432,"chemin de plein-air 2, 1180 rolle, switzerland"
+"257",6.3415434,46.4631006,"chemin de plein-air 4, 1180 rolle, switzerland"
+"258",NA,NA,NA
+"259",NA,NA,NA
+"260",6.3262915,46.4627543,"chemin des abattoirs 4, 1180 rolle, switzerland"
+"261",6.3317571,46.4654168,"chemin des bugnons 9, 1180 rolle, switzerland"
+"262",6.3286333,46.4615627,"chemin des cruz 1, 1180 rolle, switzerland"
+"263",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"264",6.3359223,46.4590788,"chemin des oiseaux 1, 1180 rolle, switzerland"
+"265",6.3364061,46.4589756,"chemin des oiseaux 2, 1180 rolle, switzerland"
+"266",NA,NA,NA
+"267",6.3365462,46.4591299,"chemin des oiseaux 4, 1180 rolle, switzerland"
+"268",6.33624,46.4594598,"chemin des oiseaux 5, 1180 rolle, switzerland"
+"269",NA,NA,NA
+"270",6.3367101,46.4593924,"chemin des oiseaux 8, 1180 rolle, switzerland"
+"271",6.3402595,46.4590137,"grand-rue 1, 1180 rolle, switzerland"
+"272",NA,NA,NA
+"273",NA,NA,NA
+"274",6.3395055,46.4628078,"chemin des pépiniéres 3, 1180 rolle, switzerland"
+"275",NA,NA,NA
+"276",NA,NA,NA
+"277",6.3411871,46.4613791,"chemin des plantaz 1, 1180 rolle, switzerland"
+"278",6.3410208,46.46252,"chemin des plantaz 10/imm. d, 1180 rolle, switzerland"
+"279",NA,NA,NA
+"280",6.3406597,46.4631024,"chemin des plantaz 12, 1180 rolle, switzerland"
+"281",NA,NA,NA
+"282",NA,NA,NA
+"283",6.3399332,46.4622128,"chemin des plantaz 17, 1180 rolle, switzerland"
+"284",6.339717,46.4626479,"chemin des plantaz 18, 1180 rolle, switzerland"
+"285",6.3413466,46.4612187,"chemin des plantaz 2, 1180 rolle, switzerland"
+"286",NA,NA,NA
+"287",NA,NA,NA
+"288",6.3412605,46.4616137,"chemin des plantaz 3, 1180 rolle, switzerland"
+"289",NA,NA,NA
+"290",6.3408815,46.461682,"chemin des plantaz 7/imm. c, 1180 rolle, switzerland"
+"291",6.3413036,46.4620549,"chemin des plantaz 8/imm. e, 1180 rolle, switzerland"
+"292",6.3406814,46.461923,"chemin des plantaz 9/imm. b, 1180 rolle, switzerland"
+"293",NA,NA,NA
+"294",NA,NA,NA
+"295",6.3342527,46.4630284,"chemin du closel 1, 1180 rolle, switzerland"
+"296",NA,NA,NA
+"297",6.3324002,46.4626161,"chemin du closel 13, 1180 rolle, switzerland"
+"298",6.3340863,46.4629295,"chemin du closel 3, 1180 rolle, switzerland"
+"299",6.3339061,46.4628287,"chemin du closel 5, 1180 rolle, switzerland"
+"300",6.3336993,46.4627548,"chemin du closel 7, 1180 rolle, switzerland"
+"301",6.3332323,46.4625664,"chemin du closel 9, 1180 rolle, switzerland"
+"302",6.3310884,46.4554691,"chemin du couchant 11, 1180 rolle, switzerland"
+"303",6.3314436,46.4556614,"chemin du couchant 13, 1180 rolle, switzerland"
+"304",NA,NA,NA
+"305",6.3312439,46.4561364,"chemin du couchant 17, 1180 rolle, switzerland"
+"306",6.3316509,46.4559694,"chemin du couchant 19, 1180 rolle, switzerland"
+"307",6.3296034,46.4555175,"chemin du couchant 2, 1180 rolle, switzerland"
+"308",NA,NA,NA
+"309",6.3315632,46.4564364,"chemin du couchant 23, 1180 rolle, switzerland"
+"310",6.3318054,46.4566906,"chemin du couchant 25, 1180 rolle, switzerland"
+"311",6.3321725,46.4565593,"chemin du couchant 27, 1180 rolle, switzerland"
+"312",6.3325477,46.4567502,"chemin du couchant 29, 1180 rolle, switzerland"
+"313",6.3298662,46.4554147,"chemin du couchant 4, 1180 rolle, switzerland"
+"314",6.3304571,46.4557672,"chemin du couchant 5, 1180 rolle, switzerland"
+"315",NA,NA,NA
+"316",6.3302341,46.4556109,"chemin du couchant 7, 1180 rolle, switzerland"
+"317",6.3316966,46.4553811,"chemin du couchant 8, 1180 rolle, switzerland"
+"318",6.3306202,46.4554465,"chemin du couchant 9, 1180 rolle, switzerland"
+"319",6.3346008,46.4635467,"chemin du famolens 1, 1180 rolle, switzerland"
+"320",NA,NA,NA
+"321",6.3345107,46.4634901,"chemin du famolens 3, 1180 rolle, switzerland"
+"322",6.3331818,46.4629081,"chemin du famolens 5, 1180 rolle, switzerland"
+"323",NA,NA,NA
+"324",6.3342404,46.4633204,"chemin du famolens 9, 1180 rolle, switzerland"
+"325",NA,NA,NA
+"326",6.3338839,46.4575386,"chemin du martinet 10, 1180 rolle, switzerland"
+"327",NA,NA,NA
+"328",6.3335432,46.4578401,"chemin du martinet 14, 1180 rolle, switzerland"
+"329",6.33349,46.4579039,"chemin du martinet 16, 1180 rolle, switzerland"
+"330",NA,NA,NA
+"331",NA,NA,NA
+"332",NA,NA,NA
+"333",NA,NA,NA
+"334",NA,NA,NA
+"335",6.3335656,46.457518,"chemin du martinet, 1180 rolle, switzerland"
+"336",NA,NA,NA
+"337",NA,NA,NA
+"338",NA,NA,NA
+"339",NA,NA,NA
+"340",NA,NA,NA
+"341",6.3308204,46.4532983,"chemin du maupas 3, 1180 rolle, switzerland"
+"342",6.3315895,46.4532428,"chemin du maupas 4, 1180 rolle, switzerland"
+"343",6.3306279,46.4531615,"chemin du maupas 5, 1180 rolle, switzerland"
+"344",6.3305727,46.4533139,"chemin du maupas 5b, 1180 rolle, switzerland"
+"345",NA,NA,NA
+"346",NA,NA,NA
+"347",6.3309586,46.4535426,"chemin du maupas 8, 1180 rolle, switzerland"
+"348",6.3300811,46.4538039,"chemin du maupas 9, 1180 rolle, switzerland"
+"349",6.3418125,46.4619969,"chemin du pré-du-gaud 2, 1180 rolle, switzerland"
+"350",6.3416133,46.4623184,"chemin du pré-du-gaud 4, 1180 rolle, switzerland"
+"351",NA,NA,NA
+"352",6.3356737,46.4564013,"chemin du rosey 1, 1180 rolle, switzerland"
+"353",NA,NA,NA
+"354",6.3317758,46.4570569,"chemin du rosey 11, 1180 rolle, switzerland"
+"355",6.3316022,46.4570755,"chemin du rosey 13, 1180 rolle, switzerland"
+"356",6.3313082,46.4572004,"chemin du rosey 15, 1180 rolle, switzerland"
+"357",6.3312154,46.4572381,"chemin du rosey 17, 1180 rolle, switzerland"
+"358",6.3351152,46.4566644,"chemin du rosey 2, 1180 rolle, switzerland"
+"359",6.3354114,46.4564061,"chemin du rosey 3, 1180 rolle, switzerland"
+"360",6.3333519,46.4568137,"chemin du rosey 4, 1180 rolle, switzerland"
+"361",6.3350588,46.4563468,"chemin du rosey 5, 1180 rolle, switzerland"
+"362",NA,NA,NA
+"363",6.3348756,46.456335,"chemin du rosey 7, 1180 rolle, switzerland"
+"364",6.3326139,46.4570482,"chemin du rosey 8, 1180 rolle, switzerland"
+"365",6.3320064,46.4569233,"chemin du rosey 9, 1180 rolle, switzerland"
+"366",6.3336288,46.4566332,"chemin du rosey, 1180 rolle, switzerland"
+"367",6.3336288,46.4566332,"chemin du rosey, 1180 rolle, switzerland"
+"368",6.3348613,46.4594014,"chemin jacques-dalcroze 1, 1180 rolle, switzerland"
+"369",6.335869,46.4604188,"chemin jacques-dalcroze 11, 1180 rolle, switzerland"
+"370",6.3358286,46.460437,"chemin jacques-dalcroze 15, 1180 rolle, switzerland"
+"371",6.3353592,46.4592443,"chemin jacques-dalcroze 2, 1180 rolle, switzerland"
+"372",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"373",6.3356004,46.4595435,"chemin jacques-dalcroze 4, 1180 rolle, switzerland"
+"374",6.3352433,46.4598189,"chemin jacques-dalcroze 5, 1180 rolle, switzerland"
+"375",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"376",6.3354472,46.4600368,"chemin jacques-dalcroze 7, 1180 rolle, switzerland"
+"377",NA,NA,NA
+"378",NA,NA,NA
+"379",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"380",6.3387869,46.4620418,"chemin du général bouquet 1, 1180 rolle, switzerland"
+"381",NA,NA,NA
+"382",6.338246,46.461823,"chemin du général bouquet 5, 1180 rolle, switzerland"
+"383",6.3376521,46.4623614,"chemin j.-j. porchat 1, 1180 rolle, switzerland"
+"384",NA,NA,NA
+"385",NA,NA,NA
+"386",NA,NA,NA
+"387",NA,NA,NA
+"388",NA,NA,NA
+"389",NA,NA,NA
+"390",NA,NA,NA
+"391",NA,NA,NA
+"392",NA,NA,NA
+"393",NA,NA,NA
+"394",NA,NA,NA
+"395",NA,NA,NA
+"396",NA,NA,NA
+"397",NA,NA,NA
+"398",NA,NA,NA
+"399",NA,NA,NA
+"400",6.3354494,46.4605677,"chemin veyrassat 12, 1180 rolle, switzerland"
+"401",6.3344809,46.4595416,"chemin veyrassat 2, 1180 rolle, switzerland"
+"402",6.3341744,46.4598895,"chemin veyrassat 3, 1180 rolle, switzerland"
+"403",6.3346326,46.4597643,"chemin veyrassat 4, 1180 rolle, switzerland"
+"404",6.3343918,46.4600805,"chemin veyrassat 5, 1180 rolle, switzerland"
+"405",6.3349419,46.459915,"chemin veyrassat 6, 1180 rolle, switzerland"
+"406",NA,NA,NA
+"407",6.3351203,46.4601056,"chemin veyrassat 8, 1180 rolle, switzerland"
+"408",6.334838,46.4605437,"chemin veyrassat 9, 1180 rolle, switzerland"
+"409",6.3413783,46.4585794,"grand-rue 1, 1180 rolle, switzerland"
+"410",6.3409992,46.4603539,"grand-rue 10, 1180 rolle, switzerland"
+"411",6.336638,46.4565398,"grand-rue 100, 1180 rolle, switzerland"
+"412",6.3365884,46.4564791,"grand-rue 102, 1180 rolle, switzerland"
+"413",NA,NA,NA
+"414",6.3365248,46.4563408,"grand-rue 106, 1180 rolle, switzerland"
+"415",6.3363331,46.456168,"grand-rue 108, 1180 rolle, switzerland"
+"416",6.3394759,46.4586791,"grand-rue 11, 1180 rolle, switzerland"
+"417",6.340939,46.4602818,"grand-rue 12, 1180 rolle, switzerland"
+"418",6.3394338,46.4585598,"grand-rue 13, 1180 rolle, switzerland"
+"419",6.340501,46.459906,"grand-rue 14, 1180 rolle, switzerland"
+"420",6.339366,46.4584947,"grand-rue 15, 1180 rolle, switzerland"
+"421",6.3403054,46.4597176,"grand-rue 16, 1180 rolle, switzerland"
+"422",6.3402705,46.4596645,"grand-rue 16b, 1180 rolle, switzerland"
+"423",6.339339,46.4584667,"grand-rue 17, 1180 rolle, switzerland"
+"424",NA,NA,NA
+"425",NA,NA,NA
+"426",6.3416135,46.4608289,"grand-rue 2, 1180 rolle, switzerland"
+"427",6.3400913,46.459603,"grand-rue 20, 1180 rolle, switzerland"
+"428",6.339182,46.4582488,"grand-rue 21, 1180 rolle, switzerland"
+"429",6.3400919,46.4595558,"grand-rue 22, 1180 rolle, switzerland"
+"430",6.339013,46.4581732,"grand-rue 23, 1180 rolle, switzerland"
+"431",6.3399183,46.4594712,"grand-rue 24, 1180 rolle, switzerland"
+"432",6.3389186,46.4582217,"grand-rue 25, 1180 rolle, switzerland"
+"433",6.3399811,46.4593991,"grand-rue 26, 1180 rolle, switzerland"
+"434",NA,NA,NA
+"435",NA,NA,NA
+"436",NA,NA,NA
+"437",6.3398719,46.4589647,"grand-rue 3, 1180 rolle, switzerland"
+"438",6.3398847,46.4593106,"grand-rue 30, 1180 rolle, switzerland"
+"439",NA,NA,NA
+"440",6.3397224,46.4592575,"grand-rue 32, 1180 rolle, switzerland"
+"441",6.3384629,46.4577001,"grand-rue 33, 1180 rolle, switzerland"
+"442",NA,NA,NA
+"443",NA,NA,NA
+"444",NA,NA,NA
+"445",NA,NA,NA
+"446",NA,NA,NA
+"447",NA,NA,NA
+"448",NA,NA,NA
+"449",NA,NA,NA
+"450",NA,NA,NA
+"451",NA,NA,NA
+"452",NA,NA,NA
+"453",NA,NA,NA
+"454",6.3382212,46.4574188,"grand-rue 45, 1180 rolle, switzerland"
+"455",6.3380752,46.4573487,"grand-rue 47, 1180 rolle, switzerland"
+"456",6.3390027,46.4586358,"grand-rue 48, 1180 rolle, switzerland"
+"457",NA,NA,NA
+"458",NA,NA,NA
+"459",6.3380159,46.4572729,"grand-rue 51, 1180 rolle, switzerland"
+"460",NA,NA,NA
+"461",6.3378862,46.4570952,"grand-rue 53, 1180 rolle, switzerland"
+"462",6.3386401,46.4582977,"grand-rue 54, 1180 rolle, switzerland"
+"463",NA,NA,NA
+"464",6.3385444,46.4582653,"grand-rue 56, 1180 rolle, switzerland"
+"465",6.3397549,46.4612971,"rolle, switzerland"
+"466",6.3384405,46.4581957,"grand-rue 58, 1180 rolle, switzerland"
+"467",6.337593,46.4569449,"grand-rue 59, 1180 rolle, switzerland"
+"468",6.3411634,46.4604956,"grand-rue 6, 1180 rolle, switzerland"
+"469",6.3381344,46.4578498,"grand-rue 60, 1180 rolle, switzerland"
+"470",NA,NA,NA
+"471",NA,NA,NA
+"472",NA,NA,NA
+"473",6.3379928,46.4577675,"grand-rue 64, 1180 rolle, switzerland"
+"474",6.3374139,46.4567902,"grand-rue 65, 1180 rolle, switzerland"
+"475",6.3378898,46.4577125,"grand-rue 66, 1180 rolle, switzerland"
+"476",NA,NA,NA
+"477",6.337826,46.4576489,"grand-rue 68, 1180 rolle, switzerland"
+"478",NA,NA,NA
+"479",6.3396785,46.4588473,"grand-rue 7, 1180 rolle, switzerland"
+"480",6.3377583,46.4575642,"grand-rue 70, 1180 rolle, switzerland"
+"481",6.3371837,46.4565901,"grand-rue 71, 1180 rolle, switzerland"
+"482",6.3377152,46.4575195,"grand-rue 72, 1180 rolle, switzerland"
+"483",6.3376346,46.4574581,"grand-rue 74, 1180 rolle, switzerland"
+"484",6.3369166,46.4564137,"grand-rue 75, 1180 rolle, switzerland"
+"485",6.3375587,46.4573494,"grand-rue 76, 1180 rolle, switzerland"
+"486",6.3369177,46.4563194,"grand-rue 77, 1180 rolle, switzerland"
+"487",6.337341,46.4571764,"grand-rue 78, 1180 rolle, switzerland"
+"488",6.3367338,46.4563068,"grand-rue 79, 1180 rolle, switzerland"
+"489",6.3411923,46.4604795,"grand-rue 8, 1180 rolle, switzerland"
+"490",6.3372647,46.4570857,"grand-rue 80, 1180 rolle, switzerland"
+"491",6.3367795,46.4561951,"grand-rue 81, 1180 rolle, switzerland"
+"492",6.3372132,46.4570582,"grand-rue 82, 1180 rolle, switzerland"
+"493",6.3366453,46.45618,"grand-rue 83, 1180 rolle, switzerland"
+"494",NA,NA,NA
+"495",6.3370977,46.4569761,"grand-rue 86, 1180 rolle, switzerland"
+"496",6.3370065,46.4569178,"grand-rue 88, 1180 rolle, switzerland"
+"497",6.3395843,46.4587907,"grand-rue 9, 1180 rolle, switzerland"
+"498",6.3370086,46.4568763,"grand-rue 90, 1180 rolle, switzerland"
+"499",6.336932,46.4568035,"grand-rue 92, 1180 rolle, switzerland"
+"500",6.3368081,46.4567214,"grand-rue 94, 1180 rolle, switzerland"
+"501",NA,NA,NA
+"502",NA,NA,NA
+"503",NA,NA,NA
+"504",NA,NA,NA
+"505",NA,NA,NA
+"506",6.3374046,46.457249,"passage vuillermet 1, 1180 rolle, switzerland"
+"507",NA,NA,NA
+"508",NA,NA,NA
+"509",NA,NA,NA
+"510",6.3373427,46.4573602,"passage vuillermet, 1180 rolle, switzerland"
+"511",NA,NA,NA
+"512",6.3428599,46.4610624,"place de l'industrie 1, 1180 rolle, switzerland"
+"513",NA,NA,NA
+"514",6.3426625,46.4611684,"place de l'industrie 3, 1180 rolle, switzerland"
+"515",6.3364533,46.4630549,"place de la gare, 1180 rolle, switzerland"
+"516",6.335668,46.4629234,"place de la gare 1, 1180 rolle, switzerland"
+"517",6.3363757,46.4628815,"place de la gare 2, 1180 rolle, switzerland"
+"518",NA,NA,NA
+"519",6.3373788,46.4636362,"place de la gare 7, 1180 rolle, switzerland"
+"520",6.335668,46.4629234,"place de la gare 1, 1180 rolle, switzerland"
+"521",6.3362005,46.4562195,"place de la harpe 1, 1180 rolle, switzerland"
+"522",6.3358423,46.4564545,"place de la harpe 2, 1180 rolle, switzerland"
+"523",6.3358423,46.4564545,"place de la harpe 3, 1180 rolle, switzerland"
+"524",6.3360314,46.4565283,"place de la harpe 4, 1180 rolle, switzerland"
+"525",6.3360553,46.4565727,"place de la harpe 5, 1180 rolle, switzerland"
+"526",6.3360925,46.4566082,"place de la harpe 6, 1180 rolle, switzerland"
+"527",6.3364405,46.4566458,"place de la harpe 7, 1180 rolle, switzerland"
+"528",6.3361768,46.4565694,"place de la harpe 8, 1180 rolle, switzerland"
+"529",6.3398361,46.4599535,"rue des anciens-bains 10, 1180 rolle, switzerland"
+"530",6.3401206,46.4600821,"rue des anciens-bains 4, 1180 rolle, switzerland"
+"531",NA,NA,NA
+"532",6.3371795,46.4553743,"place du port 6, 1180 rolle, switzerland"
+"533",6.3371795,46.4553743,"place du port 7, 1180 rolle, switzerland"
+"534",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"535",6.3358766,46.4670763,"pontereuse 18, 1185 mont-sur-rolle, switzerland"
+"536",6.3291453,46.4594462,"1180 tartegnin, switzerland"
+"537",6.3419679,46.4593424,"prom. des amoureux, 1180 rolle, switzerland"
+"538",6.3419679,46.4593424,"prom. des amoureux, 1180 rolle, switzerland"
+"539",6.336762,46.4600406,"prom. grandes-buttes 1, 1180 rolle, switzerland"
+"540",6.3377816,46.4598346,"prom. grandes-buttes 10, 1180 rolle, switzerland"
+"541",NA,NA,NA
+"542",NA,NA,NA
+"543",NA,NA,NA
+"544",6.3372805,46.4588671,"prom. grandes-buttes 2, 1180 rolle, switzerland"
+"545",NA,NA,NA
+"546",6.3438264,46.460262,"prom. john-berney 12, 1180 rolle, switzerland"
+"547",6.3438538,46.4601993,"prom. john-berney 14, 1180 rolle, switzerland"
+"548",6.3434808,46.4606141,"prom. john-berney 16, 1180 rolle, switzerland"
+"549",6.3429759,46.4591922,"prom. john-berney 2, 1180 rolle, switzerland"
+"550",6.3429759,46.4591922,"prom. john-berney 2, 1180 rolle, switzerland"
+"551",6.3428775,46.4595511,"prom. john-berney 4, 1180 rolle, switzerland"
+"552",NA,NA,NA
+"553",NA,NA,NA
+"554",6.3430021,46.4601076,"prom. john-berney, 1180 rolle, switzerland"
+"555",NA,NA,NA
+"556",NA,NA,NA
+"557",6.3343565,46.4535127,"route de genève 12, 1180 rolle, switzerland"
+"558",NA,NA,NA
+"559",6.3336476,46.453173,"route de genève 16a, 1180 rolle, switzerland"
+"560",NA,NA,NA
+"561",6.3334787,46.4531533,"route de genève 16c, 1180 rolle, switzerland"
+"562",6.3351213,46.4536731,"route de genève 17, 1180 rolle, switzerland"
+"563",NA,NA,NA
+"564",NA,NA,NA
+"565",NA,NA,NA
+"566",NA,NA,NA
+"567",NA,NA,NA
+"568",6.3343087,46.4520279,"route de genève 27, 1180 rolle, switzerland"
+"569",NA,NA,NA
+"570",6.3335525,46.4520925,"route de genève 29, 1180 rolle, switzerland"
+"571",NA,NA,NA
+"572",6.332586,46.4516152,"route de genève 33, 1180 rolle, switzerland"
+"573",6.3268979,46.450345,"route de genève 34, 1180 rolle, switzerland"
+"574",NA,NA,NA
+"575",6.3334999,46.452557,"route de genève 25, 1180 rolle, switzerland"
+"576",6.3316571,46.4512103,"route de genève 37, 1180 rolle, switzerland"
+"577",6.3252372,46.4507156,"route de genève 38, 1180 rolle, switzerland"
+"578",6.3358255,46.4548855,"route de genève 5, 1180 rolle, switzerland"
+"579",6.326877,46.4481946,"route de genève 59, 1180 rolle, switzerland"
+"580",NA,NA,NA
+"581",NA,NA,NA
+"582",6.3225948,46.4475678,"route de genève 62, 1180 rolle, switzerland"
+"583",6.3261822,46.447801,"route de genève 63, 1180 rolle, switzerland"
+"584",6.3257061,46.4475354,"route de genève 65, 1180 rolle, switzerland"
+"585",6.325393,46.4469386,"route de genève 67, 1180 rolle, switzerland"
+"586",6.3243551,46.4467754,"route de genève 69, 1180 rolle, switzerland"
+"587",6.3356543,46.4548337,"route de genève 7, 1180 rolle, switzerland"
+"588",6.3241709,46.4462428,"route de genève 71, 1180 rolle, switzerland"
+"589",6.3205846,46.4446179,"route de genève 75, 1180 rolle, switzerland"
+"590",6.3336567,46.4540007,"route de genève 8, 1180 rolle, switzerland"
+"591",6.326447,46.4504557,"route de genève, 1180 rolle, switzerland"
+"592",6.326447,46.4504557,"route de genève, 1180 rolle, switzerland"
+"593",6.3331364,46.4527092,"route de gilly 1, 1180 rolle, switzerland"
+"594",6.3305207,46.4526746,"route de gilly 10a, 1180 rolle, switzerland"
+"595",6.3306265,46.4525947,"route de gilly 10b, 1180 rolle, switzerland"
+"596",6.3311073,46.4526354,"route de gilly 12a, 1180 rolle, switzerland"
+"597",6.3309757,46.4527061,"route de gilly 12b, 1180 rolle, switzerland"
+"598",6.3286455,46.4520805,"route de gilly 13, 1180 rolle, switzerland"
+"599",6.3307121,46.4528654,"route de gilly 14a, 1180 rolle, switzerland"
+"600",NA,NA,NA
+"601",6.3286806,46.4524777,"route de gilly 15, 1180 rolle, switzerland"
+"602",6.3303693,46.453078,"route de gilly 16a, 1180 rolle, switzerland"
+"603",6.3302377,46.4531487,"route de gilly 16b, 1180 rolle, switzerland"
+"604",6.3299611,46.4533079,"route de gilly 16c, 1180 rolle, switzerland"
+"605",NA,NA,NA
+"606",6.3279823,46.4526858,"route de gilly 17, 1180 rolle, switzerland"
+"607",6.3279823,46.4526858,"route de gilly 17, 1180 rolle, switzerland"
+"608",6.3300795,46.4526073,"route de gilly 18, 1180 rolle, switzerland"
+"609",6.3275489,46.4529551,"route de gilly 19, 1180 rolle, switzerland"
+"610",NA,NA,NA
+"611",NA,NA,NA
+"612",NA,NA,NA
+"613",NA,NA,NA
+"614",NA,NA,NA
+"615",NA,NA,NA
+"616",6.3291766,46.4528414,"route de gilly 26, 1180 rolle, switzerland"
+"617",NA,NA,NA
+"618",NA,NA,NA
+"619",NA,NA,NA
+"620",NA,NA,NA
+"621",NA,NA,NA
+"622",NA,NA,NA
+"623",NA,NA,NA
+"624",NA,NA,NA
+"625",NA,NA,NA
+"626",6.3301389,46.4528868,"route de gilly 8a, 1180 rolle, switzerland"
+"627",NA,NA,NA
+"628",NA,NA,NA
+"629",6.3256134,46.4529294,"route de gilly, 1180 rolle, switzerland"
+"630",6.3283302,46.4646138,"route de l'etraz, rolle, switzerland"
+"631",6.3429882,46.4624401,"route de l'hôpital 1, 1180 rolle, switzerland"
+"632",6.3440889,46.4633774,"route de l'hôpital 10, 1180 rolle, switzerland"
+"633",NA,NA,NA
+"634",NA,NA,NA
+"635",6.3445727,46.4632741,"route de l'hôpital 14b, 1180 rolle, switzerland"
+"636",6.3446767,46.4632841,"route de l'hôpital 14c, 1180 rolle, switzerland"
+"637",NA,NA,NA
+"638",6.3451463,46.4638824,"route de l'hôpital 18, 1180 rolle, switzerland"
+"639",6.343601,46.4626041,"route de l'hôpital 2, 1180 rolle, switzerland"
+"640",6.3453708,46.4637226,"route de l'hôpital 20, 1180 rolle, switzerland"
+"641",6.3430346,46.4632389,"route de l'hôpital 21, 1180 rolle, switzerland"
+"642",6.3456122,46.4640218,"route de l'hôpital 22, 1180 rolle, switzerland"
+"643",6.3459414,46.4639421,"route de l'hôpital 24, 1185 rolle, switzerland"
+"644",6.3464152,46.4642275,"route de l'hôpital 26, 1180 rolle, switzerland"
+"645",6.342573,46.4623731,"route de l'hôpital 3, 1180 rolle, switzerland"
+"646",6.3435622,46.4629268,"route de l'hôpital 4, 1180 rolle, switzerland"
+"647",6.3428389,46.4627445,"route de l'hôpital 5, 1180 rolle, switzerland"
+"648",NA,NA,NA
+"649",6.3423756,46.4624791,"route de l'hôpital 7, 1180 rolle, switzerland"
+"650",6.3438548,46.4633661,"route de l'hôpital 8, 1180 rolle, switzerland"
+"651",6.3447814,46.4638829,"route de l'hôpital, rolle, switzerland"
+"652",6.3355501,46.4625982,"route de la vallée 1, 1180 rolle, switzerland"
+"653",6.3339826,46.4622717,"route de la vallée 11, 1180 rolle, switzerland"
+"654",6.332902,46.4622702,"route de la vallée 13, 1180 rolle, switzerland"
+"655",6.3348757,46.4631399,"route de la vallée 17, 1180 rolle, switzerland"
+"656",6.3355593,46.4630257,"route de la vallée 2, 1180 rolle, switzerland"
+"657",6.3342502,46.4651082,"route de la vallée 6, 1180 rolle, switzerland"
+"658",NA,NA,NA
+"659",6.3344334,46.46251,"route de la vallée 9, 1180 rolle, switzerland"
+"660",NA,NA,NA
+"661",6.333525,46.4646589,"route de la vallée, 1180 rolle, switzerland"
+"662",6.333525,46.4646589,"route de la vallée, 1180 rolle, switzerland"
+"663",6.3419044,46.4613407,"route de lausanne 1, 1180 rolle, switzerland"
+"664",NA,NA,NA
+"665",6.3442678,46.4629023,"route de lausanne 11, 1180 rolle, switzerland"
+"666",NA,NA,NA
+"667",6.34449,46.4628594,"route de lausanne 13, 1180 rolle, switzerland"
+"668",NA,NA,NA
+"669",6.3455425,46.4629596,"route de lausanne 19, 1180 rolle, switzerland"
+"670",6.3428821,46.4613618,"route de lausanne 2, 1180 rolle, switzerland"
+"671",NA,NA,NA
+"672",NA,NA,NA
+"673",6.3481682,46.462517,"route de lausanne 22, 1180 rolle, switzerland"
+"674",6.3456064,46.4636619,"route de lausanne 23, 1180 rolle, switzerland"
+"675",6.3486762,46.4625039,"route de lausanne 24, 1180 rolle, switzerland"
+"676",NA,NA,NA
+"677",6.3466992,46.4627183,"route de lausanne, 1180 tartegnin, switzerland"
+"678",NA,NA,NA
+"679",6.3465447,46.4629692,"route de lausanne 27, 1180 rolle, switzerland"
+"680",NA,NA,NA
+"681",6.3466413,46.463348,"route de lausanne 29, 1180 rolle, switzerland"
+"682",NA,NA,NA
+"683",6.3492103,46.4624911,"route de lausanne 30, 1180 rolle, switzerland"
+"684",NA,NA,NA
+"685",NA,NA,NA
+"686",NA,NA,NA
+"687",NA,NA,NA
+"688",NA,NA,NA
+"689",NA,NA,NA
+"690",6.3431066,46.4615756,"route de lausanne 4, 1180 rolle, switzerland"
+"691",6.3502522,46.4626059,"route de lausanne 40, 1180 rolle, switzerland"
+"692",6.3507332,46.4626404,"route de lausanne 42, 1180 rolle, switzerland"
+"693",6.3424242,46.4616889,"route de lausanne 5, 1180 rolle, switzerland"
+"694",6.3435728,46.461861,"route de lausanne 6, 1180 rolle, switzerland"
+"695",6.3430894,46.4622537,"route de lausanne 7, 1180 rolle, switzerland"
+"696",6.3431358,46.4622256,"route de lausanne 7b, 1180 rolle, switzerland"
+"697",6.3465447,46.4629692,"route de lausanne 27, 1180 rolle, switzerland"
+"698",6.3466992,46.4627183,"route de lausanne, 1180 tartegnin, switzerland"
+"699",NA,NA,NA
+"700",6.3309634,46.4609378,"route des quatre-communes 20, 1180 rolle, switzerland"
+"701",6.3289115,46.4613315,"route des quatre-communes 40, 1180 rolle, switzerland"
+"702",NA,NA,NA
+"703",NA,NA,NA
+"704",NA,NA,NA
+"705",6.3313586,46.4543472,"rue auguste matringe 1, 1180 rolle, switzerland"
+"706",6.3323566,46.4532863,"rue auguste matringe 10, 1180 rolle, switzerland"
+"707",6.331664,46.4540533,"rue auguste matringe 11, 1180 rolle, switzerland"
+"708",6.331664,46.4540533,"rue auguste matringe 11, 1180 rolle, switzerland"
+"709",6.3324845,46.4533955,"rue auguste matringe 12, 1180 rolle, switzerland"
+"710",6.3318096,46.4539377,"rue auguste matringe 13, 1180 rolle, switzerland"
+"711",6.3325353,46.453459,"rue auguste matringe 14, 1180 rolle, switzerland"
+"712",6.3321368,46.453851,"rue auguste matringe 15, 1180 rolle, switzerland"
+"713",6.3325734,46.4535044,"rue auguste matringe 16, 1180 rolle, switzerland"
+"714",6.3323201,46.4537988,"rue auguste matringe 17, 1180 rolle, switzerland"
+"715",6.3325987,46.4535406,"rue auguste matringe 18, 1180 rolle, switzerland"
+"716",6.3325996,46.4541344,"rue auguste matringe 19, 1180 rolle, switzerland"
+"717",6.3313095,46.4537647,"rue auguste matringe 2, 1180 rolle, switzerland"
+"718",6.3327507,46.4536849,"rue auguste matringe 20, 1180 rolle, switzerland"
+"719",6.3324425,46.4541778,"rue auguste matringe 21, 1180 rolle, switzerland"
+"720",NA,NA,NA
+"721",6.3321272,46.4543187,"rue auguste matringe 23, 1180 rolle, switzerland"
+"722",NA,NA,NA
+"723",NA,NA,NA
+"724",NA,NA,NA
+"725",NA,NA,NA
+"726",6.3331456,46.4541667,"rue auguste matringe 28, 1180 rolle, switzerland"
+"727",NA,NA,NA
+"728",NA,NA,NA
+"729",NA,NA,NA
+"730",NA,NA,NA
+"731",6.333273,46.4543029,"rue auguste matringe 32, 1180 rolle, switzerland"
+"732",6.3316651,46.4545991,"rue auguste matringe 33, 1180 rolle, switzerland"
+"733",6.3331543,46.4543827,"rue auguste matringe 34, 1180 rolle, switzerland"
+"734",6.3316861,46.4536126,"rue auguste matringe 4, 1180 rolle, switzerland"
+"735",NA,NA,NA
+"736",NA,NA,NA
+"737",NA,NA,NA
+"738",NA,NA,NA
+"739",NA,NA,NA
+"740",6.3386261,46.459276,"rue des jardins 10, 1180 rolle, switzerland"
+"741",NA,NA,NA
+"742",NA,NA,NA
+"743",NA,NA,NA
+"744",6.3398951,46.4596122,"rue des jardins 5, 1180 rolle, switzerland"
+"745",NA,NA,NA
+"746",NA,NA,NA
+"747",6.3390347,46.4596669,"rue des jardins 8, 1180 rolle, switzerland"
+"748",6.3395146,46.4596444,"rue des jardins 9, 1180 rolle, switzerland"
+"749",NA,NA,NA
+"750",6.3391971,46.4595539,"rue des jardins, 1180 rolle, switzerland"
+"751",6.3391971,46.4595539,"rue des jardins, 1180 rolle, switzerland"
+"752",6.3362816,46.4575706,"rue des petites-buttes, 1180 rolle, switzerland"
+"753",NA,NA,NA
+"754",6.3358428,46.4578725,"rue des petites-buttes 10, 1180 rolle, switzerland"
+"755",6.3365986,46.4578349,"rue des petites-buttes 11, 1180 rolle, switzerland"
+"756",6.3357944,46.4576921,"rue des petites-buttes 12, 1180 rolle, switzerland"
+"757",NA,NA,NA
+"758",6.335387,46.4578861,"rue des petites-buttes 14, 1180 rolle, switzerland"
+"759",6.3364715,46.4576807,"rue des petites-buttes 15, 1180 rolle, switzerland"
+"760",6.3353442,46.4576014,"rue des petites-buttes 16, 1180 rolle, switzerland"
+"761",6.3354983,46.4575273,"rue des petites-buttes 16a, 1180 rolle, switzerland"
+"762",6.3353537,46.4575979,"rue des petites-buttes 16b, 1180 rolle, switzerland"
+"763",6.3351066,46.4575865,"rue des petites-buttes 16c, 1180 rolle, switzerland"
+"764",6.3350428,46.4575229,"rue des petites-buttes 16d, 1180 rolle, switzerland"
+"765",6.3363951,46.457599,"rue des petites-buttes 17, 1180 rolle, switzerland"
+"766",6.3357387,46.4570823,"rue des petites-buttes 18, 1180 rolle, switzerland"
+"767",NA,NA,NA
+"768",6.3364851,46.4582926,"rue des petites-buttes 2, 1180 rolle, switzerland"
+"769",6.3352507,46.4571428,"rue des petites-buttes 20, 1180 rolle, switzerland"
+"770",NA,NA,NA
+"771",6.3352763,46.4569224,"rue des petites-buttes 20b, 1180 rolle, switzerland"
+"772",6.335118,46.4570288,"rue des petites-buttes 20c, 1180 rolle, switzerland"
+"773",6.3350256,46.4570909,"rue des petites-buttes 20d, 1180 rolle, switzerland"
+"774",6.3348267,46.4572689,"rue des petites-buttes 20f, 1180 rolle, switzerland"
+"775",NA,NA,NA
+"776",6.335715,46.4568763,"rue des petites-buttes 22, 1180 rolle, switzerland"
+"777",6.336218,46.4573454,"rue des petites-buttes 23, 1180 rolle, switzerland"
+"778",NA,NA,NA
+"779",6.3358732,46.4567921,"rue des petites-buttes 24, 1180 rolle, switzerland"
+"780",6.3361931,46.4572912,"rue des petites-buttes 25, 1180 rolle, switzerland"
+"781",6.3359912,46.4569743,"rue des petites-buttes 27, 1180 rolle, switzerland"
+"782",NA,NA,NA
+"783",NA,NA,NA
+"784",NA,NA,NA
+"785",NA,NA,NA
+"786",NA,NA,NA
+"787",NA,NA,NA
+"788",NA,NA,NA
+"789",NA,NA,NA
+"790",NA,NA,NA
+"791",6.3369351,46.4579281,"rue du n 12, 1180 rolle, switzerland"
+"792",NA,NA,NA
+"793",NA,NA,NA
+"794",6.3372784,46.4575437,"rue du n 15, 1180 rolle, switzerland"
+"795",6.3370644,46.4573356,"rue du n 17, 1180 rolle, switzerland"
+"796",NA,NA,NA
+"797",NA,NA,NA
+"798",NA,NA,NA
+"799",NA,NA,NA
+"800",6.3368919,46.4574959,"rue du n 20, 1180 rolle, switzerland"
+"801",NA,NA,NA
+"802",6.3368149,46.4574412,"rue du n 22, 1180 rolle, switzerland"
+"803",NA,NA,NA
+"804",NA,NA,NA
+"805",NA,NA,NA
+"806",NA,NA,NA
+"807",6.3367839,46.457045,"rue du n 27, 1180 rolle, switzerland"
+"808",NA,NA,NA
+"809",6.3367008,46.4569347,"rue du n 31, 1180 rolle, switzerland"
+"810",6.3365155,46.4570958,"rue du n 32, 1180 rolle, switzerland"
+"811",6.3364847,46.4570331,"rue du n 34, 1180 rolle, switzerland"
+"812",6.3365285,46.4567996,"rue du n 35, 1180 rolle, switzerland"
+"813",6.3364339,46.4569696,"rue du n 36, 1180 rolle, switzerland"
+"814",6.3364777,46.4567362,"rue du n 37, 1180 rolle, switzerland"
+"815",6.3363566,46.4569329,"rue du n 38, 1180 rolle, switzerland"
+"816",6.3374416,46.457987,"rue du n 4, 1180 rolle, switzerland"
+"817",6.3362794,46.4568872,"rue du n 40, 1180 rolle, switzerland"
+"818",NA,NA,NA
+"819",6.3375005,46.4580026,"rue du n 6, 1180 rolle, switzerland"
+"820",6.3374816,46.4577115,"rue du n 9, 1180 rolle, switzerland"
+"821",6.3366863,46.4560814,"rue du port 1, 1180 rolle, switzerland"
+"822",6.3370476,46.4555991,"rue du port 11, 1180 rolle, switzerland"
+"823",6.3372709,46.4555023,"rue du port 13, 1180 rolle, switzerland"
+"824",6.3359569,46.4541858,"rue du port 14, 1180 rolle, switzerland"
+"825",6.3368262,46.4552122,"rue du port 15, 1180 rolle, switzerland"
+"826",6.3352888,46.453117,"rue du port 17, 1180 rolle, switzerland"
+"827",6.3354312,46.4537931,"rue du port 18, 1180 rolle, switzerland"
+"828",6.3351753,46.4529359,"rue du port 19, 1180 rolle, switzerland"
+"829",6.3364053,46.4558178,"rue du port 2, 1180 rolle, switzerland"
+"830",NA,NA,NA
+"831",6.3347715,46.45295,"rue du port 21, 1180 rolle, switzerland"
+"832",NA,NA,NA
+"833",6.3346559,46.4528769,"rue du port 23, 1180 rolle, switzerland"
+"834",NA,NA,NA
+"835",NA,NA,NA
+"836",6.3367446,46.4557761,"rue du port 5, 1180 rolle, switzerland"
+"837",6.3360042,46.4550582,"rue du port 8, 1180 rolle, switzerland"
+"838",6.336987,46.4556369,"rue du port 9, 1180 rolle, switzerland"
+"839",6.3362621,46.4543887,"rue du port, 1180 rolle, switzerland"
+"840",NA,NA,NA
+"841",NA,NA,NA
+"842",6.3362621,46.4543887,"rue du port, 1180 rolle, switzerland"
+"843",6.3362621,46.4543887,"rue du port, 1180 rolle, switzerland"
+"844",6.3375203,46.4583315,"rue du temple, 1180 rolle, switzerland"
+"845",NA,NA,NA
+"846",NA,NA,NA
+"847",6.3380011,46.4580015,"rue du temple 3, 1180 rolle, switzerland"
+"848",NA,NA,NA
+"849",NA,NA,NA
+"850",6.3372671,46.4582462,"rue du temple 7a, 1180 rolle, switzerland"
+"851",NA,NA,NA
+"852",NA,NA,NA
+"853",NA,NA,NA
+"854",NA,NA,NA
+"855",NA,NA,NA
+"856",6.3397549,46.4612971,"rolle, switzerland"
+"857",6.3387813,46.4576629,"rlle des halles, 1180 rolle, switzerland"
+"858",NA,NA,NA
+"859",6.3394482,46.4581313,"rlle des prudhommes, 1180 rolle, switzerland"
+"860",6.3237986,46.4609203,"z.a la pièce, 1180 rolle, switzerland"
+"861",6.322474,46.461614,"z. a. la pièce 1, 1180 rolle, switzerland"
+"862",6.3237986,46.4609203,"z.a la pièce 12, 1180 rolle, switzerland"
+"863",NA,NA,NA
+"864",NA,NA,NA
+"865",6.3219291,46.4613397,"efort head office, z. a. la pièce 2, 1180 rolle, switzerland"
+"866",6.3237986,46.4609203,"z.a la pièce 20, 1180 rolle, switzerland"
+"867",6.3230637,46.4618958,"z.a la pièce 5, 1180 rolle, switzerland"
+"868",6.3237986,46.4609203,"z.a la pièce 7, 1180 rolle, switzerland"
+"869",6.3237986,46.4609203,"z.a la pièce, 1180 rolle, switzerland"
+"870",6.3237986,46.4609203,"z.a la pièce, 1180 rolle, switzerland"
+"871",NA,NA,NA
+"872",6.3237986,46.4609203,"z.a la pièce, 1180 rolle, switzerland"

@@ -1,0 +1,46 @@
+---
+title: "05 - Windpotential"
+author: "Curdin Derungs"
+date: "July 2018"
+output:
+  html_document:
+      toc: true
+      toc_float: true
+---
+
+```{r setup, include=FALSE}
+
+#loading libraries
+library(sp)
+library(rgdal)
+library(rgeos)
+library(leaflet)
+library(ggplot2)
+library(gridExtra)
+
+#empty workspace
+rm(list=ls())
+```
+
+In diesem Skript werden ...
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Zusätzlich werden ein paar Werte pro Gebäude berechnet, welche für die spätere Visualisierung der SIA Klassifikation informativ sind.
+```{r reader av}
+load("output/04_output/geom/04_rolle_bld_out.Rdata")
+
+#pfad für daten auf T laufwerk
+dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
+
+# #u-werte
+# uValues_lookup<-read.csv(paste(dataPath,"12_uValues/uValues_lookup_wide.csv",sep=""))
+```
+
+
+#U-Werte hinzufügen
+
+U-Werte werden aufgrund des Alters des Gebäudes für EFH und MFH anhand einer Liste von <Stefan Mennel> geschätzt. Zusätzlich werden noch die U-Werte bei der Annahme von idealer Sanierung angegeben. Die Informationen stammen von folgendem [Link](https://www.endk.ch/de/ablage/grundhaltung-der-endk/muken2014-d20150109-2.pdf).
+
+```{r uVal, warning=FALSE, paged.print=FALSE}
+
+```

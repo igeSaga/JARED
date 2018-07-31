@@ -1,0 +1,258 @@
+---
+title: "03 - Methoden zur Energiebedarfs-Schätzung"
+author: "Curdin Derungs"
+date: "July 2018"
+output:
+  html_document:
+      toc: true
+      toc_float: true
+---
+
+```{r setup, include=FALSE}
+
+#loading libraries
+library(sp)
+library(rgdal)
+library(leaflet)
+library(ggplot2)
+library(gridExtra)
+library(rgdal)
+library(ggmap)
+library(nominatim)
+library(data.table)
+
+#empty workspace
+rm(list=ls())
+Sys.setlocale(category = "LC_ALL", locale = "en_US.UTF-8")
+```
+
+In diesem Skript werden ...
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Zusätzlich werden ein paar Werte pro Gebäude berechnet, welche für die spätere Visualisierung der SIA Klassifikation informativ sind.
+```{r reader av}
+load("output/02_output/geom/02_rolle_bld_out.Rdata")
+
+#pfad für daten auf T laufwerk
+dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
+
+#wärmebedarf geschätzt von stefan
+energyDem_ss<-read.csv(paste(dataPath,"03_SteSchGenf/HeatDemand_Rolle.csv",sep=""),sep="\t")
+
+#energieverbrauch von romande energie
+energyVerb_re<-fread(paste(dataPath,"08_Elektrizitaet_RE/Consommation_Rolle.csv",sep=""),encoding="UTF-8")
+```
+
+
+#Energiebedarf pro Gebäude
+
+##Wärmebedarf Methode 1: Schätzen anhand von EBF und Alter
+In diesem Schritt wird anhand der Energiebedarfsfläche (Gebäudefläche * Anzahl Stockwerke) und dem Gebäudealter der jährliche Energieverbrauch geschätzt. Die Schätzung beruht auf Daten aus dem [Energieplanungsbereicht](https://www.zh.ch/internet/de/aktuell/news/medienmitteilungen/2014/energieplanungsbericht_zeigt_erfolge_und_herausforderungen/_jcr_content/contentPar/downloadlist/downloaditems/44_1389359316861.spooler.download.1389359268717.pdf/Energieplanungsbericht-2013.pdf) des Kantons Zürich aus dem Jahr 2013 (S.19, Abbildung 14). Das Szenario "thomas" beruht auf Annahmen welche im Energiekonzept der Gemeinde Wohlen gemacht wurden (S.19, Abbildung 12).
+
+```{r energieFunk, warning=FALSE, paged.print=FALSE}
+#function to compute energie use per year from the age and the total area of a building
+#different scenarios can be selected
+#the conversion of age/are into energy use is based on a study cited in the header
+energyUse<-function(age,ebf,scenario="2011"){
+  if(scenario=="2011"){
+    age.c<-as.numeric(as.character(
+      cut(x = age,
+          breaks=c(1000,1919,1959,1979,1989,1999,2020),
+          labels=c(137,173,170,127,95,87))))
+  } else if(scenario=="1990"){
+    age.c<-as.numeric(as.character(
+      cut(x = age,
+          breaks=c(1000,1919,1959,1979,1989,1999,2020),
+          labels=c(187,217,223,170,100,90))))
+  }else if(scenario=="2006"){
+    age.c<-as.numeric(as.character(
+      cut(x = age,
+          breaks=c(1000,1919,1959,1979,1989,1999,2020),
+          labels=c(142,177,180,140,100,90))))
+  }else if(scenario=="minergie"){
+    age.c<-as.numeric(as.character(
+      cut(x = age,
+          breaks=c(1000,2001,2020),
+          labels=c(60,38))))
+  }else if(scenario=="thomas"){
+    age.c<-as.numeric(as.character(
+      cut(x = age,
+          breaks=c(1000,1919,1959,1979,1989,1994,1999,2004,2009,2020),
+          labels=c(140,178,171,120,95,88,80,70,50))))
+  }else{
+    stop("<scenario> should be: 1990, 2006, 2011, minergie or thomas")
+  }
+  return(age.c*ebf)
+}
+
+age<-as.numeric(rolle_bld_out$GBAUJ)
+ebf<-rolle_bld_out$ebf
+rolle_bld_out$enerBed_m1<-energyUse(age,ebf,scenario = "thomas")
+```
+
+##Wärmebedarf Methode 2: Daten von <Stefan Schneider>
+
+Anmerkung: Die Daten von Stefan Schneider liegen nur für Rolle vor. Ein Datensatz für MS-Rolle muss erst noch bestellt werden.
+
+```{r energieSS, warning=FALSE, paged.print=FALSE}
+energyDem_ss<-energyDem_ss[,c("GKODX",
+                              "GKODY",
+                              "EnPredCat_Ehww",
+                              "Qh_cc_Est",
+                              "Qww_Est",
+                              "Ehww_Est",
+                              "Ehww_Est_Net")]
+
+names(energyDem_ss)<-paste(names(energyDem_ss),"_ss",sep="")
+
+coordinates(energyDem_ss)<-~GKODX_ss+GKODY_ss
+proj4string(energyDem_ss)<-CRS("+init=epsg:21781")
+
+ov<-over(rolle_bld_out,energyDem_ss)
+
+rolle_bld_out@data<-cbind(rolle_bld_out@data,ov)
+```
+
+##Stromverbrauch von Romande Energie
+
+Anmerkung: Hier fehlt es einerseits an einer Datengrundlage um die Strassenadressen räumlich zu Referenzieren. Ein solcher Datensatz wurde bestellt, ist aber noch bei der Gemeinde in Bearbeitung. Zum anderen verstehe ich die Daten von RE nicht. Es gibt beispielsweise zwei Messungen pro Gebäude. Welche soll benützt werden? ...
+
+```{r energieRE, warning=FALSE, paged.print=FALSE}
+# #pro eindeutige adresse aggregieren
+# adresse_re<-energyVerb_re %>%
+#   group_by(`Localité PtConso`,`Rue PtConso`) %>%
+#   tally()
+# 
+# adresse_re<-as.data.frame(adresse_re)
+# 
+# # --> this code, using googles geocoding service in order to find coordinates for the energy use data from re only finds coordinates for some 55% of all entries.
+# # --> a more detailed dataset with all building adresses in rolle and ms-rolle should be conetributed by the comunity
+# # #addressen mit google zu koordinaten georeferenzieren
+# # adresse_re_gc<-geocode(paste(adresse_re$`Localité PtConso`[3:7],adresse_re$`Rue PtConso`[3:7],sep=", "),
+# #                        output = "latlona", source = "google")
+# # 
+# # write.csv(adresse_re_gc,file="adresse_re_gc.csv")
+# 
+# adresse_re_gc<-read.csv("data/temp/adresse_re_gc.csv")
+# adresse_re<-cbind(adresse_re,adresse_re_gc)
+# 
+# energyVerb_re<-merge(energyVerb_re,adresse_re, by="Rue PtConso")
+# 
+# #will be continued
+# #I do not understand the input data, in particular, there are two measure per household, hphq-double and hqhc-double. which one should be consideredd. then, there is data for different years and months, which value represents energy use best?
+```
+
+
+
+#Visualisierung
+
+
+
+```{r geoviz, fig.width = 10, fig.height = 5.5}
+
+rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+
+qpal <- colorBin(
+  palette = "YlGnBu",
+  domain = c(rolle_bld_out.wgs$enerBed_m1,rolle_bld_out.wgs$Ehww_Est_ss*1000),
+  bins=quantile(c(rolle_bld_out.wgs$enerBed_m1,rolle_bld_out.wgs$Ehww_Est_ss*1000),na.rm=T,seq(0,1,length.out = 5))
+)
+
+rolle_bld_out.wgs$DemDiff<-rolle_bld_out.wgs$enerBed_m1-rolle_bld_out.wgs$Ehww_Est_ss*1000
+
+rolle_bld_out.wgs.und<-rolle_bld_out.wgs[rolle_bld_out.wgs$DemDiff<0 & !is.na(rolle_bld_out.wgs$DemDiff),]
+qpal_under <- colorBin(
+  palette = "YlGnBu",
+  reverse = T,
+  domain = rolle_bld_out.wgs.und$DemDiff,
+  bins=quantile(rolle_bld_out.wgs.und$DemDiff,na.rm=T,seq(0,1,length.out = 5))
+)
+
+rolle_bld_out.wgs.ov<-rolle_bld_out.wgs[rolle_bld_out.wgs$DemDiff>=0 & !is.na(rolle_bld_out.wgs$DemDiff),]
+qpal_over<- colorBin(
+  palette = "YlOrRd",
+  domain = rolle_bld_out.wgs.ov$DemDiff,
+  bins=quantile(rolle_bld_out.wgs.ov$DemDiff,na.rm=T,seq(0,1,length.out = 5))
+)
+
+#visualisierung mit leaflet
+m <- leaflet() %>%
+    
+  addProviderTiles(providers$OpenStreetMap, group = "normal") %>%
+  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
+  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              color = ~qpal(rolle_bld_out.wgs$enerBed_m1),
+              weight=1,
+              popup=paste(sep=" / ",rolle_bld_out.wgs$sia,rolle_bld_out.wgs$GBAUJ,round(rolle_bld_out.wgs$ebf),rolle_bld_out.wgs$GENWW_text,round(rolle_bld_out.wgs$enerBed_m1)),
+              group = "Energiebedarf (AWEL)")%>%
+  
+    
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              color = ~qpal(rolle_bld_out.wgs$Ehww_Est_ss*1000),
+              weight=1,
+              popup=paste(sep=" / ",rolle_bld_out.wgs$sia,rolle_bld_out.wgs$GBAUJ,round(rolle_bld_out.wgs$ebf),rolle_bld_out.wgs$GENWW_text,round(rolle_bld_out.wgs$Ehww_Est_ss*1000)),
+              group = "Energiebedarf (S.Schneid.)")%>%
+  
+  addPolygons(data=rolle_bld_out.wgs.ov,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              color = ~qpal_over(rolle_bld_out.wgs.ov$DemDiff),
+              weight=1,
+              popup = as.character(rolle_bld_out.wgs.ov$DemDiff),
+              group = "Energiebedarf (WBL > SS)")%>%
+  
+    addPolygons(data=rolle_bld_out.wgs.und,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              color = ~qpal_under(rolle_bld_out.wgs.und$DemDiff),
+              weight=1,
+              popup = as.character(rolle_bld_out.wgs.und$DemDiff),
+              group = "Energiebedarf (WBL < SS)")%>%
+  
+  addLayersControl(
+    baseGroups = c("normal", "OSM (b/w)","ESRI"),
+    overlayGroups = c("Energiebedarf (AWEL)",
+                      "Energiebedarf (S.Schneid.)",
+                      "Energiebedarf (WBL > SS)",
+                      "Energiebedarf (WBL < SS)"),
+    options = layersControlOptions(collapsed = F)
+  )%>%
+  addLegend(pal = qpal, 
+            values =c(rolle_bld_out.wgs$enerBed_m1,rolle_bld_out.wgs$Ehww_Est_ss*1000), 
+            opacity = 1,
+            title = "Bedarf: log10(kWh/a)",
+            position = "bottomleft"
+            )%>%
+  addLegend(pal = qpal_over, 
+            values =rolle_bld_out.wgs.ov$DemDiff, 
+            opacity = 1,
+            title = "WBL > SS: log10(kWh/a)",
+            position = "bottomleft"
+            )%>%
+  addLegend(pal = qpal_under, 
+            values =rolle_bld_out.wgs.und$DemDiff, 
+            opacity = 1,
+            title = "WBL < SS: log10(kWh/a)",
+            position = "bottomleft"
+            )
+
+#leaflet karte ausführen
+m
+```
+
+
+##Save all Information
+```{r save}
+#html karte speichern
+wd<-getwd()
+htmlwidgets::saveWidget(m, file=paste(wd,"/output/03_output/map/mapEnergy.html",sep=""),selfcontained = T)
+
+#buildings speichern
+save(rolle_bld_out,file="output/03_output/geom/03_rolle_bld_out.Rdata")
+```

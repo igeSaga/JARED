@@ -1,0 +1,346 @@
+id,fullText,shortText
+100,"Deaktivierter Datensatz (""gelöscht"")",deaktiviert
+101,Vollständig geprüfter und fehlerfreier Datensatz,fehlerfrei
+111,Vollständig geprüfter Datensatz mit Fehlermeldungen MISS,ohne Fehler BAU (MISS)
+113,Vollständig geprüfter Datensatz mit Fehlermeldungen G+W,ohne Fehler BAU (G+W)
+114,Vollständig geprüfter Datensatz mit Fehlermeldungen BAU,mit Fehler BAU
+115,Vollständig geprüfter Datensatz mit Fehlermeldungen ADR,mit Fehler BAU/ADR
+116,Vollständig geprüfter Datensatz mit Fehlermeldungen KLX,mit Fehler KLX
+150,Datensatz ohne Verletzung der Gültigkeitsregeln,nicht geprüft
+300,Anzahl Wohnungen gemäss BFS Initialdaten,Gem. BFS Initialbestand
+301,Anzahl Wohnungen gemäss  Amtsstelle,gemäss Amtsstelle
+302,Anzahl Wohnungen identisch mit VZ90,Identisch VZ90
+303,Anzahl Wohungen identisch mit VZ90 und der Amtsstelle,Ident. Amtsstelle VZ90
+304,Anzahl Wohnungen identisch mit der Post,Identisch mit der Post
+305,Anzahl Wohnungen Identisch mit der Post und der Amtsstelle,Ident. Post und Amtsst.
+306,Anzahl Wohungen identisch mit der Post und VZ90,Ident. Post und VZ90
+307,Anz.  Wohungen ident. mit der Post und Amtsstelle und VZ90,"Ident. Post, Amst., VZ90"
+901,"Amtliche Vermessung, DM.01","AV, DM.01"
+902,Aus amtlicher Vermessung hergeleitet,"AV, hergeleitet"
+903,Angabe Nachführungsgeometer,Geometer
+904,Angabe Baugesuch,Baugesuch
+905,Bundesamt für Statistik,BFS
+906,Datensatz GeoPost,GeoPost
+909,Andere Datenquelle,Andere Datenquelle
+1001,Gebäude projektiert,projektiert
+1003,Gebäude im Bau,im Bau
+1004,Gebäude bestehend,bestehend
+1007,Gebäude abgebrochen,abgebrochen
+1010,Provisorische Unterkunft,Prov. Unterkunft
+1021,"Einfamilienhaus, ohne Nebennutzung",Einfamilienhaus (EFH)
+1025,"Mehrfamilienhaus, ohne Nebennutzung",Mehrfamilienhaus (MFH)
+1030,Wohngebäude mit Nebennutzung,Wohnhaus m. Nebennutzung
+1040,Gebäude mit teilweiser Wohnnutzung,Mit  teilw. Wohnnutzung
+1060,Gebäude ohne Wohnnutzung,Ohne Wohnnutzung
+1080,Sonderbau,Sonderbau
+1110,Gebäude mit einer Wohnung,Gebäude mit 1 Wohnung
+1121,Gebäude mit zwei  Wohnungen,Gebäude mit 2 Wohnungen
+1122,Gebäude mit drei oder mehr Wohnungen,Gebäude mit 3+ Whgen
+1130,Wohngebäude für Gemeinschaften,Wohngeb.f.Gemeinschaften
+1211,Hotelgebäude,Hotelgebäude
+1212,Andere Gebäude für kurzfristige Beherbergung,Andere Beherbergung
+1220,Bürogebäude,Bürogebäude
+1230,Gross-und Einzelhandelsgebäude,Gross- und Einzelhandel
+1241,Gebäude des Verkehrs- und Nachrichtenswesens ohne Garagen,Verkehr / Kommunikation
+1242,Garagengebäude,Garagengebäude
+1251,Industriegebäude,Industriegebäude
+1252,"Behälter, Silos und Lagergebäude","Behälter, Silo, Lager"
+1261,Gebäude für Kultur- und Freizeitzwecke,Kultur-/Freizeitstätte
+1262,Museen und Bibliotheken,Museum / Bibliothek
+1263,"Schul- und Hochschulgebäude, Forschungseinrichtungen",Schul-/Hochschulgebäude
+1264,Krankenhäuser und Facheinrichtungen des Gesundheitswesens,Krankenhaus
+1265,Sporthallen,Sporthalle
+1271,Landwirtschaftliche Betriebsgebäude,Landw. Betriebsgebäude
+1272,Kirchen und sonstige Kultgebäude,Kirche / Kultgebäude
+1273,Denkmäler oder unter Denkmalschutz stehende Bauwerke,Denkmal
+1274,"Sonstige Hochbauten, anderweitig nicht genannt",Sonstiger Hochbau
+2001,Gebäudeeingang projektiert,projektiert
+2003,Gebäudeeingang im Bau,im Bau
+2004,Gebäudeeingang bestehend,bestehend
+2007,Gebäudeeingang aufgehoben,aufgehoben
+3001,Wohnung projektiert,projektiert
+3003,Wohnung im Bau,im Bau
+3004,Wohnung bestehend,bestehend
+3007,Wohnung aufgehoben,aufgehoben
+3010,"Erstwohnung, Art. 2 Abs. 2 ZWG",Erstwohnung
+3020,"Zweitwohnung, Art. 2 Abs. 4 ZWG",Zweitwohnung
+3030,Anders als zum Wohnen genutzt Art. 2 Abs. 3 Bst. h ZWG,Anders als zum Wohnen genutzt
+3031,Erwerbs- oder Ausbildungszwecken Art. 2 Abs. 3 Bst. a ZWG,Erwerbs-/Ausbildungszwecken
+3032,Privathaushalt mit mehr. Wohngungen Art. 2 Abs. 3 Bst. b ZWG,PH mit mehreren Whg im Geb
+3033,Nicht meldepflichtigen Personen Art. 2 Abs. 3 Bst. c ZWG,Personen nicht im EWR
+3034,"Leerstehend, höchstens zwei Jahren Art. 2 Abs. 3 Bst. d ZWG",Leerwohnung (<2 Jahre)
+3035,Alpwirtschaftliche Zwecke Art. 2 Abs. 3 Bst. e ZWG,Alpwirtschaftlich
+3036,Unterbringung von Personal Art. 2 Abs. 3 Bst. f ZWG,Personalunterkunft
+3037,Dienstwohnungen Art. 2 Abs. 3 Bst. g ZWG,Dienstwohnungen
+3038,"Kollektivhaushalt, Art. 2 Bst. abis RHV ",Kollektivhaushalt
+3070,Wohnung unbewohnbar,Wohnung unbewohnbar
+3090,Automatische Aktualisierung (Art. 2 Abs. 1 ZWV),Automatische Aktualisierung
+3091,Einwohnerkontrolle,Einwohnerkontrolle
+3092,Eigentümer/in oder Verwaltung,Eigentümer/in oder Verwaltung
+3093,Andere Datenquelle,Andere Datenquelle
+3100,Parterre inkl. Hochparterre,Parterre
+3101,1. Stock,1. Stock
+3102,2. Stock,2. Stock
+3103,3. Stock,3. Stock
+3104,4. Stock,4. Stock
+3105,5. Stock,5. Stock
+3106,6. Stock,6. Stock
+3107,7. Stock,7. Stock
+3108,8. Stock,8. Stock
+3109,9. Stock,9. Stock
+3110,10. Stock,10. Stock
+3111,11. Stock,11. Stock
+3112,12. Stock,12. Stock
+3113,13. Stock,13. Stock
+3114,14. Stock,14. Stock
+3115,15. Stock,15. Stock
+3116,16. Stock,16. Stock
+3117,17. Stock,17. Stock
+3118,18. Stock,18. Stock
+3119,19. Stock,19. Stock
+3120,20. Stock,20. Stock
+3121,21. Stock,21. Stock
+3122,22. Stock,22. Stock
+3123,23. Stock,23. Stock
+3124,24. Stock,24. Stock
+3125,25. Stock,25. Stock
+3126,26. Stock,26. Stock
+3127,27. Stock,27. Stock
+3128,28. Stock,28. Stock
+3129,29. Stock,29. Stock
+3130,30. Stock,30. Stock
+3131,31. Stock,31. Stock
+3132,32. Stock,32. Stock
+3133,33. Stock,33. Stock
+3134,34. Stock,34. Stock
+3135,35. Stock,35. Stock
+3136,36. Stock,36. Stock
+3137,37. Stock,37. Stock
+3138,38. Stock,38. Stock
+3139,39. Stock,39. Stock
+3140,40. Stock,40. Stock
+3141,41. Stock,41. Stock
+3142,42. Stock,42. Stock
+3143,43. Stock,43. Stock
+3144,44. Stock,44. Stock
+3145,45. Stock,45. Stock
+3146,46. Stock,46. Stock
+3147,47. Stock,47. Stock
+3148,48. Stock,48. Stock
+3149,49. Stock,49. Stock
+3201,1. Untergeschoss,1. Untergeschoss
+3202,2. Untergeschoss,2. Untergeschoss
+3203,3. Untergeschoss,3. Untergeschoss
+3204,4. Untergeschoss,4. Untergeschoss
+3205,5. Untergeschoss,5. Untergeschoss
+3206,6. Untergeschoss,6. Untergeschoss
+3207,7. Untergeschoss,7. Untergeschoss
+3208,8. Untergeschoss,8. Untergeschoss
+3209,9. Untergeschoss,9. Untergeschoss
+3300,"Parterre, mehrgeschossig","Parterre, mehrgeschoss."
+3301,"1. Stock, mehrgeschossig","1. Stock, mehrgeschoss."
+3302,"2. Stock, mehrgeschossig","2. Stock, mehrgeschoss."
+3303,"3. Stock, mehrgeschossig","3. Stock, mehrgeschoss."
+3304,"4. Stock, mehrgeschossig","4. Stock, mehrgeschoss."
+3305,"5. Stock, mehrgeschossig","5. Stock, mehrgeschoss."
+3306,"6. Stock, mehrgeschossig","6. Stock, mehrgeschoss."
+3307,"7. Stock, mehrgeschossig","7. Stock, mehrgeschoss."
+3308,"8. Stock, mehrgeschossig","8. Stock, mehrgeschoss."
+3309,"9. Stock, mehrgeschossig","9. Stock, mehrgeschoss."
+3310,"10. Stock, mehrgeschossig","10. Stock, mehrgeschoss."
+3311,"11. Stock, mehrgeschossig","11. Stock, mehrgeschoss."
+3312,"12. Stock, mehrgeschossig","12. Stock, mehrgeschoss."
+3313,"13. Stock, mehrgeschossig","13. Stock, mehrgeschoss."
+3314,"14. Stock, mehrgeschossig","14. Stock, mehrgeschoss."
+3315,"15. Stock, mehrgeschossig","15. Stock, mehrgeschoss."
+3316,"16. Stock, mehrgeschossig","16. Stock, mehrgeschoss."
+3317,"17. Stock, mehrgeschossig","17. Stock, mehrgeschoss."
+3318,"18. Stock, mehrgeschossig","18. Stock, mehrgeschoss."
+3319,"19. Stock, mehrgeschossig","19. Stock, mehrgeschoss."
+3320,"20. Stock, mehrgeschossig","20. Stock, mehrgeschoss."
+3321,"21. Stock, mehrgeschossig","21. Stock, mehrgeschoss."
+3322,"22. Stock, mehrgeschossig","22. Stock, mehrgeschoss."
+3323,"23. Stock, mehrgeschossig","23. Stock, mehrgeschoss."
+3324,"24. Stock, mehrgeschossig","24. Stock, mehrgeschoss."
+3325,"25. Stock, mehrgeschossig","25. Stock, mehrgeschoss."
+3326,"26. Stock, mehrgeschossig","26. Stock, mehrgeschoss."
+3327,"27. Stock, mehrgeschossig","27. Stock, mehrgeschoss."
+3328,"28. Stock, mehrgeschossig","28. Stock, mehrgeschoss."
+3329,"29. Stock, mehrgeschossig","29. Stock, mehrgeschoss."
+3330,"30. Stock, mehrgeschossig","30. Stock, mehrgeschoss."
+3331,"31. Stock, mehrgeschossig","31. Stock, mehrgeschoss."
+3332,"32. Stock, mehrgeschossig","32. Stock, mehrgeschoss."
+3333,"33. Stock, mehrgeschossig","33. Stock, mehrgeschoss."
+3334,"34. Stock, mehrgeschossig","34. Stock, mehrgeschoss."
+3335,"35. Stock, mehrgeschossig","35. Stock, mehrgeschoss."
+3336,"36. Stock, mehrgeschossig","36. Stock, mehrgeschoss."
+3337,"37. Stock, mehrgeschossig","37. Stock, mehrgeschoss."
+3338,"38. Stock, mehrgeschossig","38. Stock, mehrgeschoss."
+3339,"39. Stock, mehrgeschossig","39. Stock, mehrgeschoss."
+3340,"40. Stock, mehrgeschossig","40. Stock, mehrgeschoss."
+3341,"41. Stock, mehrgeschossig","41. Stock, mehrgeschoss."
+3342,"42. Stock, mehrgeschossig","42. Stock, mehrgeschoss."
+3343,"43. Stock, mehrgeschossig","43. Stock, mehrgeschoss."
+3344,"44. Stock, mehrgeschossig","44. Stock, mehrgeschoss."
+3345,"45. Stock, mehrgeschossig","45. Stock, mehrgeschoss."
+3346,"46. Stock, mehrgeschossig","46. Stock, mehrgeschoss."
+3347,"47. Stock, mehrgeschossig","47. Stock, mehrgeschoss."
+3348,"48. Stock, mehrgeschossig","48. Stock, mehrgeschoss."
+3349,"49. Stock, mehrgeschossig","49. Stock, mehrgeschoss."
+3401,"Keine Beschränkung (Art. 8, 9 und 10 ZWG)","Keine Beschränk. Art.8,9,10ZWG"
+3402,Erstwohnung (Art. 7 Abs.1 Bst. a ZWG),Erstwohnung Art.7 Abs.1 Bst.a ZWG
+3403,Tour. bewirtschaftete Wohnung ( Art. 7 Abs. 2 Bst. a ZWG),Tour. bew. Art.7 Abs.2 Bst.a ZWG
+3404,Tour. bewirtschaftete Wohnung (Art. 7 Abs. 2 Bst. b ZWG),Tour. bew. Art.7 Abs.2 Bst.b ZWG
+5001,Ökonomiebauten für die bodenabhängige Landwirtschaft,RPG 16a I / RPV 34 I
+5002,"Landwirtschaftliche Bauten: Aufbereitung, Lagerung, Verkauf",RPG 16a I / RPV 34 II
+5003,Wohnbauten für landwirtschaftliche Gewerbe,RPG 16a I / RPV 34 III
+5004,Gemeinschaftliche Stallbauten,RPG 16a / RPV 35
+5005,"Innere Aufstockung (Schweineställe, Gefügelhallen)",RPG 16a II / RPV 36
+5006,Innere Aufstockung (Gewächshäuser),RPG 16a II / RPV 37
+5007,Bauten und Anlagen in Speziallandwirtschaftszonen,RPG 16a III / RPV 38
+5008,Gewinnung von Energie aus Biomasse,RPG 16a I / RPV 34a
+5011,"Bauten und Anlagen in Spezialzonen (Deponie, Sport u.ä.)",RPG 18 allg.
+5012,Zonenkonforme Bauten in Weiler- oder Erhaltungszonen u. ä.,RPG 18 / RPV 33
+5015,Solaranlagen,RPG 18a
+5021,Standortgebundene Bauten und Anlagen,RPG 24
+5022,Vollst. Zweckänderung von Bauten in Streusiedlungsgebieten,RPG 24 / RPV 39 I
+5023,Vollständige Zweckänderung landschaftsprägender Bauten,RPG 24 / RPV 39 II
+5031,Zweckänderungen ohne bauliche Massnahmen,RPG 24a
+5041,Nichtlandwirtschaftliche Nebenbetriebe zur Existenzsicherung,RPG 24b I
+5043,Nichtlandw. Nebenbetriebe mit engem Bezug zum landw. Gewerbe,RPG 24b Ibis
+5044,Nichtlandw. Nebenbetriebe in temporären Betriebszentren,RPG 24b Iter
+5051,Änderung zonenwidrig gewordener Bauten und Anlagen,RPG 24c / RPV 42
+5061,Änderung an ehem. landw. genutzten Wohnbauten,RPG 24d I / RPV 42a
+5062,Vollständige Zweckänderung geschützter Bauten,RPG 24d II
+5063,Hobbymässige Tierhaltung in  nahe gelegenen Gebäuden,RPG 24d Ibis Satz 1
+5064,Aussenanlagen zur hobbymässigen Tierhaltung,RPG 24d Ibis Satz 2
+5071,Änderung zonenwidrig gewordener gewerblicher Bauten,RPG 37a / RPV 43
+5090,Keine Angabe,Keine Angabe
+6003,Neubau mit Abbruch,Neubau mit Abbruch
+6004,Neubau ohne Abbruch,Neubau ohne Abbruch
+6005,"Umbau, Erweiterung, Renovation, Sanierung",Umbau
+6007,Nur Abbruch (ohne Neubau oder Umbau),Abbruch
+6010,Tiefbau,Tiefbau
+6011,Hochbau,Hochbau
+6101,SBB (Schweizerische Bundesbahnen),SBB
+6103,"VBS (Eidg. Dep. für Verteidigung, Bev.-schutz und Sport)",VBS
+6104,BBL (Bundesamt für Bauten und Logistik),BBL
+6105,Bundesamt für Strassen,ASTRA
+6107,SWISSCOM,SWISSCOM
+6108,Die Post,Die Post
+6110,Kantone (ohne öffentliche Unternehmen),Kanton Verwaltung
+6111,Öffentliche Unternehmen eines Kantons,Kanton Unternehmung
+6115,Gemeinden ohne öffentliche Unternehmen,Gemeinde Verwaltung
+6116,Öffentliche Unternehmen einer Gemeinde,Gemeinde Unternehmung
+6121,Versicherungsgesellschaften,Versicherung
+6122,Personalfürsorgestiftungen (Pensionskassen),Personalfürsorgestiftung
+6123,"Krankenkassen, SUVA","Krankenkasse, SUVA"
+6124,"Banken, Immobilienfonds oder Finanzholdings",Bank
+6131,Private Elektrizitätswerke,Priv.  Elektrizitätswerk
+6132,Private Gaswerke,Privates Gaswerk
+6133,Privatbahnen,Privatbahn
+6141,Einzelfirmen oder Personengesellsch. der Immobilienbranche,Ein-/Pers.-Immob.-Gesell
+6142,Wohnbaugenossenschaften,Wohnbaugenossenschaft
+6143,Kapitalgesellschaften der Immobilienbranche,Kap.-Gesellsch. (Immob.)
+6151,Einzelfirmen oder Personengesellsch. ohne  Immobilienbranche,Einzelfirma oder Person
+6152,Kapitalgesellschaften ohne Immobilienbranche,Kapitalgesellschaft
+6161,Privatpersonen,Privatperson
+6162,Andere private Auftraggeber,And. priv. Auftraggeber
+6163,"Internationale Organisationen, Botschaften",Intern. Organisation
+6211,Wasserversorgungsanlagen,Wasserversorgungsanlagen
+6212,Elektrizitätswerke und -netze,Elektrizitätswerk/-netz
+6213,"Gaswerke und -netze, chemische Anlagen",Gaswerke und -netze
+6214,Fernheizungsanlagen,Fernheizungsanlagen
+6219,Übrige Versorgungsanlagen,Übrige Versorgungsanlage
+6221,Wasserentsorgungsanlagen,Wasserentsorgungsanlagen
+6222,Kehrichtentsorgungsanlagen,Kehrichtentsorgungsanl.
+6223,Übrige Entsorgungsanlagen,Übrige Entsorgungsanl.
+6231,Nationalstrassen,Nationalstrassen
+6232,Kantonsstrassen,Kantonsstrassen
+6233,Gemeindestrassen,Gemeindestrassen
+6234,"Übriger Strassenbau, Parkplätze","Übriger Strassenbau, Parkplätze"
+6235,Parkhäuser,Parkhäuser
+6241,Bahnanlagen,Bahnanlagen
+6242,Bus- und Tramanlagen,Bus- und Tramanlagen
+6243,Schiffsverkehrsanlagen,Schiffsverkehrsanlagen
+6244,Flugverkehrsanlagen,Flugverkehrsanlagen
+6245,Kommunikationsanlagen,Kommunikationsanlagen
+6249,Übrige Verkehrsanlagen,Übrige Verkehrsanlagen
+6251,"Schulen, Bildungswesen (bis Maturastufe)","Schulen, Bildungswesen"
+6252,Höheres Bildungswesen und Forschung,Höheres Bildungswesen
+6253,"Akutspitäler, allgemeine Spitäler",Akut.- allg. Spitäler
+6254,"Heime mit Unterkunft, Pflegedienste und/oder Betreuung",Heime mit Pflege
+6255,Übriges spezialisiertes Gesundheitswesen,Übriges Gesundheitswesen
+6256,Freizeit- und Tourismusanlagen,Freizeit- Tourismusanl.
+6257,Kirchen und Sakralbauten,"Kirchen, Sakralbauten"
+6258,"Kulturbauten inkl. Museen, Bibliotheken und Denkmäler",Kulturbauten
+6259,Sporthallen und Sportplätze,Sporthallen/Sportplätze
+6261,"Uferverbauungen, Staudämme",Gewässerverbauung
+6262,Landesverteidigungsbauten,Landesverteidigung
+6269,Übrige Infrastruktur,Übrige Infrastruktur
+6271,Einfamilienhäuser freistehend,EFH Einfamilienhäuser
+6272,Einfamilienhäuser angebaut,EFH angebaut
+6273,Mehrfamilienhäuser (reine Wohngebäude),Mehrfamilienhäuser reine
+6274,Wohngebäude mit Nebennutzung (inkl. Bauernhäuser),Wohnhaus m. Nebennutzung
+6276,Wohnheime ohne Pflegedienste und/oder Betreuung,Wohnheime ohne Pflege
+6278,"Garagen, Parkplätze, Einstellhallen im Zus. mit Wohngebäuden","Garagen, Parkplätze"
+6279,Übrige Bauten im Zusammenhang mit Wohngebäuden,Übrige Bauten i.Z.Wohnen
+6281,Landwirtschaftsbauten,Landwirtschaftsbauten
+6282,Forstwirtschaftsbauten,Forstwirtschaftsbauten
+6283,Meliorationen,Meliorationen
+6291,"Werkstätten, Fabrikgebäude","Werkstätten, Fabriken"
+6292,"Lagerhallen, Depots, Silos, Zisternen",Lagerhallen/Depots/Silos
+6293,"Bürogebäude, Verwaltungsgebäude","Büro-, Verwaltungsgeb."
+6294,"Kaufhäuser, Geschäftsgebäude",Kaufhäuser/Geschäftsgeb.
+6295,"Hotels, Restaurants","Hotels, Restaurants"
+6296,Andere Beherbergungen,Andere Beherbergungen
+6299,Übrige Verwendung für wirtschafliche Zwecke,Übrige i.Z. Wirtschaft
+6700,Projekt annulliert,annulliert
+6701,"Gesuch eingereicht, aber noch nicht bewilligt",beantragt
+6702,"Bewilligung erteilt, aber noch nicht baubegonnen",bewilligt
+6703,Projekt baubegonnen,baubegonnen
+6704,Projekt  fertigerstellt,abgeschlossen
+6706,Projekt züruckgestellt,zurückgestellt
+7100,Keine Heizung,Keine Heizung
+7101,Einzelofenheizung,Einzelofenheizung
+7102,Etagenheizung,Etagenheizung
+7103,Zentralheizung für das Gebäude,Zentralheizung für Geb.
+7104,Zentralheizung für mehrere Gebäude,ZH für mehrere Gebäude
+7105,Öffentliche Fernwärmeversorgung,Fernwärmeversorgung
+7109,Andere Heizungsart,Andere Heizungsart
+7200,Kein Energieträger,keine Energieträger
+7201,Heizöl,Heizöl
+7202,Kohle,Kohle
+7203,Gas,Gas
+7204,Elektrizität,Elektrizität
+7205,Holz,Holz
+7206,Wärmepumpe,Wärmepumpe
+7207,Sonnenkollektor,Sonnenkollektor
+7208,Fernwärme,Fernwärme
+7209,Anderer Energieträger,Andere Energie
+7300,Weder Küche noch Kochnische,ohne Küche
+7301,Küche (mind. 4 m2),Küche
+7302,Kochnische (unter 4m2),Kochnische
+8011,Periode vor 1919,Vor 1919
+8012,Periode von 1919 bis 1945,1919-1945
+8013,Periode von 1946 bis 1960,1946-1960
+8014,Periode von 1961 bis 1970,1961-1970
+8015,Periode von 1971 bis 1980,1971-1980
+8016,Periode von 1981 bis 1985,1981-1985
+8017,Periode von 1986 bis 1990,1986-1990
+8018,Periode von 1991 bis 1995,1991-1995
+8019,Periode von 1996 bis 2000,1996-2000
+8020,Periode von 2001 bis 2005,2001-2005
+8021,Periode von 2006 bis 2010,2006-2010
+8022,Periode von 2011 bis 2015,2011-2015
+8023,Periode nach 2015,Nach 2015
+9801,Linienobjekt (Strasse o.ä.),Linienobjekt
+9802,Punktobjekt (Platz o.ä.),Punktobjekt (Platz o.ä.)
+9803,Flächenobjekt (Weiler o.ä.),Flächenobj.(Weiler o.ä.)
+9809,Keine Angabe zur Geometrie,Keine Angabe zur Geom.
+9830,Keine Nummern,Keine Nummern
+9832,"Beliebig (zufällig, gemeindeweise)",Beliebig (zufällig)
+9835,"Aufsteigend, ohne Angabe links/rechts",Aufsteigend o.A. li/re
+9836,"Aufsteigend, ungerade Nummern links","Aufsteig., ung. nr. li."
+9837,"Aufsteigend, ungerade Nummern rechts","Aufsteig., ung. nr. re."
+9839,Keine Angabe zur Nummerierung,Keine Angabe

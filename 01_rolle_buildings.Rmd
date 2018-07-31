@@ -1,0 +1,690 @@
+---
+title: "01 - Gebäudedaten Einlesen, Aufbereiten und Bereinigen"
+author: "Curdin Derungs"
+date: "July 2018"
+output:
+  html_document:
+      toc: true
+      toc_float: true
+---
+
+```{r setup, include=FALSE}
+
+#loading libraries
+library(sp)
+library(rgdal)
+library(leaflet)
+library(dplyr)
+library(plyr)
+library(dplyr)
+library(raster)
+library(rgeos)
+library(osmdata)
+library(sf)
+library(ggplot2)
+library(gridExtra)
+
+#empty workspace
+rm(list=ls())
+
+#working directory
+#should be changed if working on Windows
+dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
+```
+
+#Daten einlesen
+
+##Gebäude der Amtliche Vermessung (AV)
+Die Daten der Amtlichen Vermessung werden eingelesen. Die Daten wurden über [ASIT.vd](https://www.asitvd.ch/)
+bestellt.
+```{r reader av}
+#SHP lesen
+rolle_build<-readOGR(layer = "MOVD_CAD_TPR_BATHS_S", dsn = paste(dataPath,"11_Cadastre_AmtlVermessung/Cadastre_9719_NO66KX/Cadastre/",sep=""))
+
+#reprojection
+rolle_build<-spTransform(rolle_build,CRSobj = CRS("+init=epsg:21781"))
+
+#compute area
+areaPoly<-sapply(rolle_build@polygons,function(x){
+  x@Polygons[[1]]@area
+})
+
+#create id
+rolle_build$iid<-1:nrow(rolle_build)
+```
+
+In diesem Skript werden alle relevanten Gebäudedaten eingelesen und miteinander verschnitten. Die Gebäudegeometrien werden aus der amtlichen Vermessung und von Open Steet Map (OSM) bezogen. Gebäudeinformationen zu Heizung, Alter, etc. werden aus den GWR Punkten hinzugefügt.
+
+##GWR Punkte
+Ebenfalls die GWR Daten für Rolle und MS-Rolle wurden über [ASIT.vd](https://www.asitvd.ch/)
+bestellt.
+```{r readerGwr}
+##csv lesen
+rolle_gwr<-read.csv(paste(dataPath,"02_GWR/Rolle_GEB-02.csv",sep=""),sep = ";",encoding = "Latin-1")
+
+#only existing buildings
+rolle_gwr<-rolle_gwr[rolle_gwr$GSTAT==1004,]
+
+#only non-na's
+rolle_gwr<-rolle_gwr[!is.na(rolle_gwr$GKODX),]
+
+#no duplicates
+rolle_gwr<-rolle_gwr[!duplicated(rolle_gwr$EGID),]
+
+#unique, new id for internal use
+rolle_gwr$iid<-1:nrow(rolle_gwr)
+
+#change coordinates of two gwr points after visual analysis in qgis
+rolle_gwr[rolle_gwr$EGID==280080732,c("GKODX","GKODY")]<-c(2515260,1146491)
+rolle_gwr[rolle_gwr$EGID==280079954,c("GKODX","GKODY")]<-c(2515324,1146476)
+
+#transform gwr to spatial data
+coordinates(rolle_gwr)<-~GKODX+GKODY
+proj4string(rolle_gwr)<-CRS("+init=epsg:2056")
+
+#reprojection
+rolle_gwr<-spTransform(rolle_gwr,CRSobj = CRS("+init=epsg:21781"))
+
+#rolle_gwr<-rolle_gwr[is.na(rolle_gwr$GABBJ),]
+
+#filter/rename attributes
+rolle_gwr<-rolle_gwr[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")]
+
+
+##mont-sur-rolle
+ms_rolle_gwr<-readOGR(layer = "OIT_OIT_TPR_RCB_BATIMENT", dsn = paste(dataPath,"02_GWR/mont_sur_rolle_gwr_shp",sep=""))
+
+#only existing buildings
+ms_rolle_gwr<-ms_rolle_gwr[ms_rolle_gwr$STATUT_BAT==1004,]
+
+#filter/rename attributes
+ms_rolle_gwr<-ms_rolle_gwr[,c("EGID","STATUT_BAT","CATEGORIE","CLASSE","SURFACE","NB_NIV","CONS_ANNEE","NB_LOG","DEMOL_ANNE","CHAUFF_SYS","CHAUFF_AGT","EAU_CHD_AG")]
+names(ms_rolle_gwr)<-c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")
+
+#reprojection
+ms_rolle_gwr<-spTransform(ms_rolle_gwr,CRSobj = CRS("+init=epsg:21781"))
+
+#combining the two rolle-gwrs
+rolle_gwr<-rbind(rolle_gwr,ms_rolle_gwr)
+
+#removing mont-sur-rolle
+rm(list=c("ms_rolle_gwr"))
+```
+
+
+## Gebäude von OSM
+Hier werden die OSM Gebäudedaten eingelesen. Die Daten werden direkt über die OSM-API bezogen. Der Code ist auskommentiert und es werden aus Gründen der Performanz zwischengespeicherte Daten eingelesen.
+```{r readerOsm}
+# #...OSM gebaeude ueber die API direkt beziehen
+# 
+# #gebaeude von mont-sur-rolle
+# q1 <- getbb(place_name = "mont-sur-rolle, switzerland", format_out = "polygon") %>%
+#   opq() %>%
+#   add_osm_feature(key="building")
+# 
+# out <- osmdata_sp(q1)
+# m_s_rolle_build_osm <-  out$osm_polygons
+# 
+# dat<-m_s_rolle_build_osm@data
+# for(i in 1:ncol(dat)){attr(dat[,i], "ATT") <- NULL}
+# m_s_rolle_build_osm@data<-dat
+# 
+# #gebaeude von rolle
+# q1 <- getbb(place_name = "rolle, switzerland", format_out = "polygon") %>%
+#   opq() %>%
+#   add_osm_feature(key="building")
+# 
+# out <- osmdata_sp(q1)
+# rolle_build_osm <-  out$osm_polygons
+# 
+# dat<-rolle_build_osm@data
+# for(i in 1:ncol(dat)){attr(dat[,i], "ATT") <- NULL}
+# rolle_build_osm@data<-dat
+# 
+# #rolle und ms-rolle zusammenfuehren
+# rolle_build_dat<-rbind.fill(rolle_build_osm@data,m_s_rolle_build_osm@data)
+# 
+# rolle_build_osm@data<-data.frame(id=1:nrow(rolle_build_osm))
+# m_s_rolle_build_osm@data<-data.frame(id=1:nrow(m_s_rolle_build_osm))
+# 
+# rolle_build_osm<-rbind(rolle_build_osm,m_s_rolle_build_osm)
+# 
+# rolle_build_osm@data<-rolle_build_dat
+# 
+# #speichern
+# #create id
+# rolle_build_osm$iid<-1:nrow(rolle_build_osm)
+# 
+# #reprojection
+# rolle_build_osm<-spTransform(rolle_build_osm,CRSobj = CRS("+init=epsg:21781"))
+# 
+# save(rolle_build_osm,file = "data/osmBuildRolle.Rdata")
+
+#zwischengespeicherte Daten einlesen
+load("data/osmBuildRolle.Rdata")
+```
+
+
+#Geometrische Verschneidung
+
+##OSM Geäude die nicht in AV sind
+In einem ersten Analyseschritt werden alle OSM Gebäude identifiziert, welche nicht in den AV Daten enthalten sind. Gebäude gelten als OSM Gebäude wenn mehr als 90% ihrer Fläche ausserhalb von AV Gebäuden liegt. Wiederum wird aus Performanzgründen auf ein zwischengespeichertes Ergebnis zugegriffen.
+```{r filterOsm}
+# #getting some info on osm geometries, such as interneal id or area
+# rolle_build_osm$areaOrig<-rgeos::gArea(rolle_build_osm,byid=TRUE)
+# 
+# #earasing AV from OSM (computed using st -> much faster!!)
+# #might takes a while...
+# osm.st <- st_as_sf(rolle_build_osm[,"iid"])
+# av.st <- st_as_sf(rolle_build[,"iid"])
+# diff <- st_difference(osm.st, st_union(st_combine(av.st)))
+# 
+# #back to sp
+# diff.sp <- as(diff, "Spatial")
+# 
+# #making area explicit form cropped osm
+# diff.sp$areaCrop<-rgeos::gArea(diff.sp,byid=TRUE)
+# 
+# diff.df<-merge(diff.sp@data,rolle_build_osm@data[,c("iid","areaOrig")],by="iid")
+# diff.df$areaDiff<-diff.df$areaCrop/diff.df$areaOrig
+# 
+# diff.sp@data<-merge(diff.sp@data,diff.df,by="iid")
+# 
+# rolle_build_osm_excl<-diff.sp[diff.sp$areaDiff>0.9,]
+# 
+# rolle_build_osm_excl<-spTransform(rolle_build_osm_excl,CRSobj = CRS("+init=epsg:21781"))
+# 
+# save(rolle_build_osm_excl,file = "data/osmBuildRolle_excl.Rdata")
+load("data/osmBuildRolle_excl.Rdata")
+```
+
+
+##GWR und AV verscheiden
+Nun werden die AV Daten mit den GWR Daten verschnitten. Es handelt sich dabei um eine Verschneidung von Punktdaten (GWR) mit Polygondaten (AV). Dabei kann es zu Mehrdeutigkeiten kommen; ein GWR-Punkt kann auf mehreren Gebäuden liegen oder mehrere GWR-Punkte können auf einem Gebäude liegen.
+   
+Hier wird folgendermassen vorgegangen:
+* In einem ersten Schritt werden die Gebäude extrahiert, welche genau eine Verschneidung von GWR Punkt und AV Polygon haben.
+* Für die Fälle von "mehreren AV zu einem GWR"" oder "mehreren GWR zu einem AV"" wird jeweils die Kombination ausgewählt, welche übereinstimmende Angaben in Bezug auf die Gebäudefläche enthält (oder die übereinstimmensten, falls keine genaue Übereinstimmung besteht).  
+* Übrig bleiben die AV Gebäude ohne GWR Pendant und die GWR Punkte, welche keinem AV Gebäude zugeordnet werden konnten.
+```{r intersectionAV}
+#intersecting data
+
+#all data requires a unique identifier 
+rolle_build$iid<-1:nrow(rolle_build)
+rolle_gwr$iid<-1:nrow(rolle_gwr)
+
+#spatial intersection of osm with gwr
+#the resulting df contains a list element per osm building
+#for each building the intersecting gwr$iid's, if any, are known 
+ov<-sp::over(rolle_build[,"iid"],rolle_gwr[,"iid"], returnList = TRUE)
+
+#iterating through all lists and retrieve
+#osm without gwr buildings: osm_empty
+#osm that have one gwr building: osm_ok
+#osm that have multiple gwr buildings: osm_mult
+bld_empty<-numeric()
+bld_ok<-numeric()
+bld_mult<-numeric()
+
+#gwr that do not intersect with bld: gwr_empty
+#gwr that intersect with one bld: gwr_ok
+#gwr that intersect with multiple bld (can happen if bld polygons overlap): gwr_mult
+gwr_empty<-numeric()
+gwr_ok<-numeric()
+gwr_mult<-numeric()
+
+#the two types of intersection - one gwr on one bld & multiple gwr on one bld - are stored in one df with respective iid's
+gwr_on_bld_ok<-data.frame(iidbld=NA,iidgwr=NA)
+gwr_on_bld_multi<-data.frame(iidbld=NA,iidgwr=NA)
+
+#start iteration
+for(i in 1:length(ov)){
+  ov.i<-ov[[i]]
+  
+  #no gwr in bld
+  if(nrow(ov.i)==0){
+    
+    bld_empty<-c(bld_empty,i)
+    
+    #exactly one gwr in bld
+  }else if(nrow(ov.i)==1){
+    
+    bld_ok<-c(bld_ok,i)
+    gwr_ok<-c(gwr_ok,ov.i$iid)
+    
+    gwr_on_bld_ok<-rbind(gwr_on_bld_ok,data.frame(iidbld=i,iidgwr=ov.i$iid))
+    
+    #several gwr in one bld
+  }else if(nrow(ov.i)>1){
+    
+    bld_mult<-c(bld_mult,i)
+    gwr_mult<-c(gwr_mult,ov.i$iid)
+    
+    gwr_on_bld_multi<-rbind(gwr_on_bld_multi,data.frame(iidbld=rep(i,nrow(ov.i)),iidgwr=ov.i$iid))
+    
+  }
+}
+
+gwr_on_bld_ok<-gwr_on_bld_ok[-1,]
+gwr_on_bld_multi<-gwr_on_bld_multi[-1,]
+
+# gwr_on_bld_multi<-merge(gwr_on_bld_multi,rolle_gwr@data,by.x="iidgwr",by.y="iid")
+# gwr_on_bld_multi<-merge(gwr_on_bld_multi,rolle_build@data,by.x="iidbld",by.y="iid")
+
+# rolle_build[rolle_build$iid==12,]
+# rolle_gwr[rolle_gwr$iid==1456 | rolle_gwr$iid==1674,]
+
+#there are now still duplicates in terms of gwr points that intersect with multiple buildings
+#these duplicates are not resolved at the moment, 
+#however, they cause that the sum of empty+OK+multiple equals to more than the number of gwr buildings
+un<-unique(c(gwr_ok,gwr_mult))
+gwr_empty<-rolle_gwr@data[!rolle_gwr$iid%in%un,"iid"]
+
+#randomly removing osm or tlm that recieved multiple gwrs...
+#should not be an issue with the new building data
+gwr_on_bld_ok_clean<-gwr_on_bld_ok[!duplicated(gwr_on_bld_ok$iidgwr), ]
+gwr_on_bld_mult_clean<-gwr_on_bld_multi[!duplicated(gwr_on_bld_multi$iidgwr), ]
+
+#all ok bld polygons
+rolle_bld_gwr<-rolle_build[rolle_build$iid%in%gwr_on_bld_ok_clean$iidbld,]
+rolle_bld_gwr@data<-left_join(rolle_bld_gwr@data, gwr_on_bld_ok_clean, by = c('iid'='iidbld'))
+rolle_bld_gwr@data<-left_join(rolle_bld_gwr@data, rolle_gwr@data, by = c('iidgwr'='iid'))
+
+#and those gwr that did not match with a building
+rolle_gwr_empty<-rolle_gwr[rolle_gwr$iid%in%gwr_empty,]
+
+#all bld that have multiple gwr
+#note: faced problems with merge()...
+gwr_on_bld_mult_clean <- left_join(gwr_on_bld_mult_clean, rolle_gwr@data, by = c('iidgwr'='iid'))
+
+#resolving the one gwr per bld that has most similar area as stored in gwr
+gwr_on_bld_mult_clean$GAREA[is.na(gwr_on_bld_mult_clean$GAREA)]<-0
+gwr_on_bld_mult_clean$areaTemp<-as.numeric(gwr_on_bld_mult_clean$GAREA)+
+  rnorm(n = nrow(gwr_on_bld_mult_clean),mean = 0,sd=1)
+
+gwr_on_bld_mult_clean<-left_join(gwr_on_bld_mult_clean, rolle_build@data[,c("iid","SHAPE_AREA")], by = c('iidbld'='iid'))
+
+gwr_on_bld_mult_clean$areaDiff<-abs(as.numeric(gwr_on_bld_mult_clean$areaTemp)-gwr_on_bld_mult_clean$SHAPE_AREA)
+
+gwr_on_bld_mult_single<-gwr_on_bld_mult_clean %>%
+  group_by(iidbld) %>%
+  filter(areaDiff == min(areaDiff,na.rm=T))
+
+gwr_on_bld_mult_single$areaDiff<-NULL
+gwr_on_bld_mult_single$areaTemp<-NULL
+
+rolle_bld_gwr_mult<-rolle_build[rolle_build$iid%in%gwr_on_bld_mult_single$iidbld,]
+rolle_bld_gwr_mult@data<-left_join(rolle_bld_gwr_mult@data, gwr_on_bld_mult_single, by = c('iid'='iidbld'))
+
+rolle_build_av_excl<-rolle_build[!rolle_build$iid%in%gwr_on_bld_mult_single$iidbld,]
+rolle_build_av_excl<-rolle_build_av_excl[!rolle_build_av_excl$iid%in%gwr_on_bld_ok$iidbld,]
+rolle_build_av_excl<-rolle_build_av_excl[!rolle_build_av_excl$iid%in%gwr_on_bld_mult_single$iidbld,]
+```
+
+##(Restliche) GWR mit OSM (!=AV) verscheiden
+Die GWR Punkte welche im vorangegangenen Schritt nicht zugeordnet werden konnten, werden nun in gleicher Art und Weise wie oben mit den Gebäuden aus OSM verschnitten (resp. mit den Gebäuden aus OSM, welche nicht in der AV vorkommen).
+```{r intersectionOSM}
+#all data requires a unique identifier 
+rolle_build_osm_excl$iid<-1:nrow(rolle_build_osm_excl)
+rolle_gwr_empty$iid<-1:nrow(rolle_gwr_empty)
+
+#spatial intersection of osm with gwr
+ov<-sp::over(rolle_build_osm_excl[,"iid"],rolle_gwr_empty[,"iid"], returnList = TRUE)
+
+gwr_on_osm<-data.frame(iidosm=NA,iidgwr=NA)
+for(i in 1:length(ov)){
+  ov.i<-ov[[i]]
+  if(nrow(ov.i)==1){
+    gwr_on_osm<-rbind(gwr_on_osm,data.frame(iidosm=i,iidgwr=ov.i$iid))
+  }
+}
+gwr_on_osm<-gwr_on_osm[-1,]
+
+
+rolle_osm_gwr<-rolle_build_osm_excl[rolle_build_osm_excl$iid%in%gwr_on_osm$iidosm,]
+rolle_osm_gwr@data<-merge(rolle_osm_gwr@data,gwr_on_osm,by.x="iid",by.y="iidosm")
+rolle_osm_gwr@data<-merge(rolle_osm_gwr@data,rolle_gwr_empty@data,by.x="iidgwr",by.y="iid")
+
+rolle_build_osm_excl<-rolle_build_osm_excl[!rolle_build_osm_excl$iid%in%gwr_on_osm$iidosm,]
+
+rolle_gwr_empty<-rolle_gwr_empty[!rolle_gwr_empty$iid%in%gwr_on_osm$iidgwr,]
+```
+
+#Gebäudeinformation
+
+##Gebäude Details und manuelle Änderungen
+Die Codes aus den GWR Daten werden mit den zugehörigen ausformulierten Attributbeschreibungen ergänzt. Zusätzlich werden ein paar manuelle Änderungen hinzugefügt:  
+* das Migros Gebäude ist unterdessen neu gebaut worden (Kombination aus Wohnen und Einkaufen). Die neuen Geometrien mit den entsprechenden Informationen wurden separat im GIS erfasst und werden hier hinzugefügt.  
+* ein grosses Gebäude ist teilweise Restaurant und teilweise Industrie. Die beiden Nutzungen werden unterschieden.  
+* das Schloss wird manuell hinzugefügt.
+* alle AV Gebäude mit einer Fläche >150m2, welche nicht in GWR abgebildet sind werden hinzugenommen.  
+
+```{r explore, message=FALSE, warning=FALSE}
+#combine all build. data
+rolle_bld_gwr_out<-rolle_bld_gwr[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")]
+rolle_bld_gwr_mult_out<-rolle_bld_gwr_mult[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")]
+rolle_osm_gwr_out<-rolle_osm_gwr[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")]
+
+rolle_bld_gwr_out$source<-"AVs"
+rolle_bld_gwr_mult_out$source<-"AVm"
+rolle_osm_gwr_out$source<-"OSM"
+
+rolle_bld_out<-rbind(rolle_bld_gwr_out,rolle_bld_gwr_mult_out,rolle_osm_gwr_out)
+
+##spezielle gebäude
+#loading migros building
+rolle_migros<-readOGR("data/geom", "rolle_migros_wgs")
+rolle_migros<-spTransform(rolle_migros,CRSobj = CRS("+init=epsg:21781"))
+rolle_migros<-rolle_migros[,1:13]
+rolle_migros$source<-"manual"
+
+rolle_bld_out<-rolle_bld_out[rolle_bld_out$EGID!=280079171,]
+rolle_bld_out<-rbind(rolle_bld_out,rolle_migros)
+
+#loading restaurant building
+rolle_resti<-readOGR("data/geom", "rolle_resti01_wgs")
+rolle_resti<-spTransform(rolle_resti,CRSobj = CRS("+init=epsg:21781"))
+rolle_resti<-rolle_resti[,1:13]
+rolle_resti$source<-"manual"
+
+rolle_bld_out<-rolle_bld_out[rolle_bld_out$EGID!=280062591,]
+rolle_bld_out<-rbind(rolle_bld_out,rolle_resti)
+
+#loading restaurant building
+rolle_schloss<-readOGR("data/geom", "rolle_schloss_wgs")
+rolle_schloss<-spTransform(rolle_schloss,CRSobj = CRS("+init=epsg:21781"))
+rolle_schloss@data<-rolle_bld_out@data[1,]
+rolle_schloss@data[1,]<-c("9999999",rep(NA,3),round(rolle_schloss@polygons[[1]]@area,0),rep(NA,8))
+rolle_schloss$source<-"manual"
+rolle_bld_out<-rbind(rolle_bld_out,rolle_schloss)
+
+#adding AV (!=GWR)
+rolle_av_temp<-rolle_build_av_excl[rolle_build_av_excl$SHAPE_AREA>150,]
+rolle_av<-rolle_av_temp
+rolle_av@data<-rolle_bld_out@data[1:nrow(rolle_av),]
+for(i in 1:nrow(rolle_av)){
+  rolle_av@data[i,]<-c(paste("9999_ID",as.character(rolle_av_temp$ID[i]),sep=""),rep(NA,3),round(rolle_av@polygons[[i]]@area,0),rep(NA,8))
+}
+rolle_av$source<-"AVextra"
+rolle_bld_out<-rbind(rolle_bld_out,rolle_av)
+
+#add explicit attribute data...
+#but first solving some stange encoding problems (setting encoding in textwrangler to UTF-8 and then changing my settings and using explicit encoding while reading worked...)
+Sys.setlocale(category = "LC_ALL", locale = "en_US.UTF-8")
+gwrCodes<-read.csv("data/gwrCodes.csv",encoding="UTF-8")
+
+names(gwrCodes)[1]<-"id"
+rolle_bld_out$GKLAS<-as.numeric(rolle_bld_out$GKLAS)
+attrs<-left_join(rolle_bld_out@data, gwrCodes, by = c('GKLAS'='id'))
+attrs$fullText<-NULL
+names(attrs)[ncol(attrs)]<-"GKLAS_text"
+
+attrs$GHEIZ<-as.numeric(attrs$GHEIZ)
+attrs<-left_join(attrs, gwrCodes, by = c('GHEIZ'='id'))
+attrs$fullText<-NULL
+names(attrs)[ncol(attrs)]<-"GHEIZ_text"
+
+attrs$GENHZ<-as.numeric(attrs$GENHZ)
+attrs<-left_join(attrs, gwrCodes, by = c('GENHZ'='id'))
+attrs$fullText<-NULL
+names(attrs)[ncol(attrs)]<-"GENHZ_text"
+
+attrs$GENWW<-as.numeric(attrs$GENWW)
+attrs<-left_join(attrs, gwrCodes, by = c('GENWW'='id'))
+attrs$fullText<-NULL
+names(attrs)[ncol(attrs)]<-"GENWW_text"
+
+attrs$GKAT<-as.numeric(attrs$GKAT)
+attrs<-left_join(attrs, gwrCodes, by = c('GKAT'='id'))
+attrs$fullText<-NULL
+names(attrs)[ncol(attrs)]<-"GKAT_text"
+
+rolle_bld_out@data<-attrs
+```
+
+## Fehlende Werte von Nachbarn "borgen"
+Viele Gebäude haben keine Information zum Heizungstyp oder zum Energieträger. Eine visuelle Analyse hat ergeben, dass häufig die Information von Nachbargebäuden "ausgeliehen" werden kann und damit in den häufigsten Fällen kein grosser Fehler entsteht. Information wird nur geborgt, falls das nächste Nachbarsgebäude mit relevanter Information nicht weiter als 100m entfernt liegt. Damit soll die Siedlungsstuktur möglichst erhalten bleiben. In einem separaten Attribut wird gespeichert, ob die Information geborgt wurde oder bereits im GWR vorhanden war.
+
+```{r nachbarn, warning=FALSE, paged.print=FALSE}
+# #many attributes have missing values
+# #these will all seperatly borrow attributes from their nearest neighbour
+# #an attribute "borrowed" indicates where this has happened
+# rolle_bld_out$GKLAS_borrowed<-is.na(rolle_bld_out$GKLAS)
+# rolle_bld_out$GHEIZ_borrowed<-is.na(rolle_bld_out$GHEIZ)
+# rolle_bld_out$GENHZ_borrowed<-is.na(rolle_bld_out$GENHZ)
+# rolle_bld_out$GENWW_borrowed<-is.na(rolle_bld_out$GENWW)
+rolle_bld_out$GBAUJ_borrowed<-is.na(rolle_bld_out$GBAUJ)
+rolle_bld_out$GASTW_borrowed<-is.na(rolle_bld_out$GASTW)
+# 
+# #introducing a function that can retrieve attribute for na's from nearest neighbours that have info
+# #the function requires two spdf's (one with na's and one with a's) that only contain the one attribute of interest
+getAttrFromNearNeigh<-function(spdf.na, spdf.a){
+  #compte a distance matrix na*a
+  dists<-spDists(spdf.na,spdf.a,longlat = F)
+
+  #get index of nearest a to each na
+  min.ind<-apply(dists,1,which.min)
+
+  #only borrow information from neighbours within distance 100m
+  min.ind[diag(dists[,min.ind])>100]<-NA
+
+  #get the info from the nearest neighs
+  info.borrowed<-spdf.a@data[min.ind,1]
+
+  return(info.borrowed)
+}
+# 
+# ##GKLAS
+# #split na from a
+# #and only retain attribute of interest
+# spdf.na<-rolle_bld_out[is.na(rolle_bld_out$GKLAS_text),"GKLAS_text"]
+# spdf.a<-rolle_bld_out[!is.na(rolle_bld_out$GKLAS_text),"GKLAS_text"]
+# 
+# #use function
+# rolle_bld_out$GKLAS_text[is.na(rolle_bld_out$GKLAS_text)]<-getAttrFromNearNeigh(spdf.na,spdf.a)
+# 
+# #do it for all other four attributes (w/o too many comments)
+# spdf.na<-rolle_bld_out[is.na(rolle_bld_out$GHEIZ_text),"GHEIZ_text"]
+# spdf.a<-rolle_bld_out[!is.na(rolle_bld_out$GHEIZ_text),"GHEIZ_text"]
+# rolle_bld_out$GHEIZ_text[is.na(rolle_bld_out$GHEIZ_text)]<-getAttrFromNearNeigh(spdf.na,spdf.a)
+# 
+# spdf.na<-rolle_bld_out[is.na(rolle_bld_out$GENHZ_text),"GENHZ_text"]
+# spdf.a<-rolle_bld_out[!is.na(rolle_bld_out$GENHZ_text),"GENHZ_text"]
+# rolle_bld_out$GENHZ_text[is.na(rolle_bld_out$GENHZ_text)]<-getAttrFromNearNeigh(spdf.na,spdf.a)
+# 
+# spdf.na<-rolle_bld_out[is.na(rolle_bld_out$GENWW_text),"GENWW_text"]
+# spdf.a<-rolle_bld_out[!is.na(rolle_bld_out$GENWW_text),"GENWW_text"]
+# rolle_bld_out$GENWW_text[is.na(rolle_bld_out$GENWW_text)]<-getAttrFromNearNeigh(spdf.na,spdf.a)
+# 
+spdf.na<-rolle_bld_out[is.na(rolle_bld_out$GBAUJ),"GBAUJ"]
+spdf.a<-rolle_bld_out[!is.na(rolle_bld_out$GBAUJ),"GBAUJ"]
+rolle_bld_out$GBAUJ[is.na(rolle_bld_out$GBAUJ)]<-getAttrFromNearNeigh(spdf.na,spdf.a)
+
+spdf.na<-rolle_bld_out[is.na(rolle_bld_out$GASTW),"GASTW"]
+spdf.a<-rolle_bld_out[!is.na(rolle_bld_out$GASTW),"GASTW"]
+rolle_bld_out$GASTW[is.na(rolle_bld_out$GASTW)]<-getAttrFromNearNeigh(spdf.na,spdf.a)
+```
+
+
+#Visualisierung
+
+##Diagramme mit Summary Statistic
+
+```{r diag, fig.height=15, fig.width=20, warning=FALSE, paged.print=FALSE}
+p1<-ggplot(rolle_bld_out@data, aes(x=as.numeric(GAREA)))+
+  geom_density(alpha=0.5)+
+  theme_minimal()+
+  ggtitle(paste("Gebaeudeflaeche / n noData = ",sum(is.na(rolle_bld_out@data$GAREA))," von n Geb. ",nrow(rolle_bld_out),sep=""))+
+  xlim(c(0,3000))+
+  xlab("")
+
+p2<-ggplot(rolle_bld_out@data, aes(x=as.numeric(GBAUJ)))+
+  geom_density(alpha=0.5)+
+  theme_minimal()+
+  ggtitle(paste("Baujahr / n noData = ",sum(is.na(rolle_bld_out@data$GBAUJ))," von n Geb. ",nrow(rolle_bld_out),sep=""))+
+  xlim(c(1600,2018))+
+  xlab("")
+
+p3<-ggplot(rolle_bld_out@data, aes(x=as.numeric(GASTW)))+
+  geom_density(alpha=0.5)+
+  theme_minimal()+
+  ggtitle(paste("Stockwerke / n noData = ",sum(is.na(rolle_bld_out@data$GASTW))," von n Geb. ",nrow(rolle_bld_out),sep=""))+
+  xlab("")
+
+p4<-ggplot(rolle_bld_out@data, aes(x=as.numeric(GANZWHG)))+
+  geom_density(alpha=0.5)+
+  theme_minimal()+
+  ggtitle(paste("Anzahl Wohnungen / n noData = ",sum(is.na(rolle_bld_out@data$GANZWHG))," von n Geb. ",nrow(rolle_bld_out),sep=""))+
+  xlim(c(0,30))+
+  xlab("")
+
+p5<-ggplot(rolle_bld_out@data, aes(x=GKLAS_text))+
+  geom_bar()+
+  theme_minimal()+
+  ggtitle(paste("Gebaeudeklassen / n noData = ",sum(is.na(rolle_bld_out@data$GKLAS_text))," von n Geb. ",nrow(rolle_bld_out),sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=12))+
+  xlab("")
+
+p6<-ggplot(rolle_bld_out@data, aes(x=GKAT_text))+
+  geom_bar()+
+  theme_minimal()+
+  ggtitle(paste("Gebaeudeklassen / n noData = ",sum(is.na(rolle_bld_out@data$GKAT_text))," von n Geb. ",nrow(rolle_bld_out),sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=12))+
+  xlab("")
+
+p7<-ggplot(rolle_bld_out@data, aes(x=GHEIZ_text))+
+  geom_bar()+
+  theme_minimal()+
+  ggtitle(paste("Heiz / n noData = ",sum(is.na(rolle_bld_out@data$GHEIZ_text))," von n Geb. ",nrow(rolle_bld_out),sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=12))+
+  xlab("")
+
+p8<-ggplot(rolle_bld_out@data, aes(x=GENHZ_text))+
+  geom_bar()+
+  theme_minimal()+
+  ggtitle(paste("Heiz / n noData = ",sum(is.na(rolle_bld_out@data$GENHZ_text))," von n Geb. ",nrow(rolle_bld_out),sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=12))+
+  xlab("")
+
+p9<-ggplot(rolle_bld_out@data, aes(x=GENWW_text))+
+  geom_bar()+
+  theme_minimal()+
+  ggtitle(paste("Warm / n noData = ",sum(is.na(rolle_bld_out@data$GENWW_text))," von n Geb. ",nrow(rolle_bld_out),sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=12))+
+  xlab("")
+
+p.all<-grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,ncol=3)
+p.all
+```
+
+
+##Kartographie
+Es bleibt nur noch, die Gebäude in einer Karte darzustellen und anschliessend alle Gebäudedaten zu speichern.
+```{r geoviz, fig.width = 10, fig.height = 5.5}
+#erst alle daten in wgs projezieren fuer leaflet projektion
+rolle_build.wgs<-spTransform(rolle_build,CRSobj = CRS("+init=epsg:4326"))
+rolle_av.wgs<-spTransform(rolle_av,CRSobj = CRS("+init=epsg:4326"))
+
+rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+
+rolle_build_osm_excl.wgs<-spTransform(rolle_build_osm_excl,CRSobj = CRS("+init=epsg:4326"))
+rolle_build_av_excl.wgs<-spTransform(rolle_build_av_excl,CRSobj = CRS("+init=epsg:4326"))
+
+rolle_gwr.wgs<-spTransform(rolle_gwr,CRSobj = CRS("+init=epsg:4326"))
+rolle_gwr_empty.wgs<-spTransform(rolle_gwr_empty,CRSobj = CRS("+init=epsg:4326"))
+
+#visualisierung mit leaflet
+m <- leaflet() %>%
+  
+  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
+  addProviderTiles(providers$OpenStreetMap, group = "OSM") %>%
+  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
+  
+  addPolygons(data=rolle_build.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.4, 
+              color = "grey",
+              opacity = 1,
+              weight=1,
+              fillColor = "grey",
+              popup=rolle_build.wgs$areaPoly,
+              group = "Haeuser (AV)")%>%
+  
+  addPolygons(data=rolle_build_osm_excl.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.4, 
+              color = "orange",
+              opacity = 1,
+              weight=1,
+              fillColor = "orange",
+              group = "Haeuser (OSM, kein match)")%>%
+  
+    addPolygons(data=rolle_av.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.4, 
+              color = "yellow",
+              opacity = 1,
+              weight=1,
+              fillColor = "yellow",
+              popup=rolle_av$EGID,
+              group = "Haeuser (AV, kein match)")%>%
+  
+    addCircles(data=rolle_gwr.wgs,
+              color = "grey",
+              radius=5,
+              group = "GWR (Alle)",
+             popup = as.character(rolle_gwr.wgs$iid))%>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.4, 
+              color = "green",
+              opacity = 1,
+              weight=1,
+              fillColor = "green",
+              popup=rolle_bld_out.wgs$sia,
+              group = "Rolle Buildings")%>%
+
+    addCircles(data=rolle_gwr_empty.wgs,
+              color = "red",
+              radius=5,
+              group = "GWR (kein match)")%>%
+  
+  addLayersControl(
+    baseGroups = c("OSM (b/w)", "OSM","ESRI"),
+    overlayGroups = c("Haeuser (AV)",
+                      "Haeuser (OSM, kein match)",
+                      "Haeuser (AV, kein match)",
+                      "GWR (Alle)",
+                      "Rolle Buildings",
+                      "GWR (kein match)"),
+    options = layersControlOptions(collapsed = F)
+  )%>%
+  hideGroup(c("Haeuser (AV)",
+                      "Haeuser (OSM, kein match)",
+                      "GWR (Alle)",
+              "Rolle Buildings (no sia)"))
+
+#leaflet karte ausführen
+m
+```
+
+## Resultate speichern
+Alle wichtigen Informationen werden abschliessend gespeichert...
+```{r save}
+#html karte speichern
+wd<-getwd()
+htmlwidgets::saveWidget(m, file=paste(wd,"/output/01_output/map/01_map.html",sep=""),selfcontained = T)
+
+#buildings speichern
+save(rolle_bld_out,file="output/01_output/geom/01_rolle_bld_out.Rdata")
+save(rolle_build_av_excl,file="output/01_output/geom/01_rolle_bld_av_notGwr.Rdata")
+
+writeOGR(rolle_bld_out, "output/01_output/geom", "01_rolle_bld_out", driver="ESRI Shapefile",overwrite_layer = T)
+writeOGR(rolle_bld_out.wgs, "output/01_output/geom", "01_rolle_bld_out_wgs", driver="ESRI Shapefile",overwrite_layer = T)
+writeOGR(rolle_build_av_excl.wgs, "output/01_output/geom", "01_rolle_bld_av_notGwr_wgs", driver="ESRI Shapefile",overwrite_layer = T)
+
+#abbildungen speichern
+ggsave(p.all,filename = "output/01_output/viz/01_buildingPlots.png",dpi = 500,width = 22,height = 15)
+```
+

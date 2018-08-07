@@ -1,5 +1,5 @@
 ---
-title: "05 - Windpotential"
+title: "10 - Windpotential"
 author: "Curdin Derungs"
 date: "July 2018"
 output:
@@ -17,7 +17,6 @@ library(sp)
 library(rgdal)
 library(raster)
 library(leaflet)
-library(knitr)
 library(ggplot2)
 library(reshape2)
 
@@ -30,7 +29,7 @@ In diesem Skript wird eine Abschätzung des Windpotentials für Rolle und Mont-s
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen.
 ```{r reader av}
-load("output/04_output/geom/04_rolle_bld_out.Rdata")
+load("output/05_output/geom/05_rolle_bld_out.Rdata")
 rolleCRS<-proj4string(rolle_bld_out)
 
 #pfad für daten auf T laufwerk

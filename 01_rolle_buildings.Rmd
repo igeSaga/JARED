@@ -16,7 +16,6 @@ library(rgdal)
 library(leaflet)
 library(dplyr)
 library(plyr)
-library(dplyr)
 library(raster)
 library(rgeos)
 library(osmdata)
@@ -28,7 +27,7 @@ library(gridExtra)
 rm(list=ls())
 
 #working directory
-#should be changed if working on Windows
+#must be changed if working on Windows
 dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
 ```
 

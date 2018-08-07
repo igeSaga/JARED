@@ -1,5 +1,5 @@
 ---
-title: "06 - KBOB - Ökobilanz-Kennwerte"
+title: "05 - KBOB - Ökobilanz-Kennwerte"
 author: "Curdin Derungs"
 date: "August 2018"
 output:
@@ -190,6 +190,6 @@ wd<-getwd()
 htmlwidgets::saveWidget(m, file=paste(wd,"/output/05_output/map/mapPrimaerEnergie.html",sep=""),selfcontained = T)
 
 #buildings speichern
-save(rolle_bld_out,file="output/05_output/geom/06_rolle_bld_out.Rdata")
+save(rolle_bld_out,file="output/05_output/geom/05_rolle_bld_out.Rdata")
 ```
    

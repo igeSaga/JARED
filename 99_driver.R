@@ -1,11 +1,14 @@
 #simply a driver that runs all markdown files in the JARED folder (takes a few minutes)
+rm(list=ls())
 library(rmarkdown)
 
 temp <- list.files(path="../JARED/",pattern="*.Rmd")
 
-for(fileN in temp){
+i<-1
+for(i in 1:length(temp)){
+  fileN<-temp[i]
   print(paste("rendering:",fileN))
-  rmarkdown::render(fileN)
+  rmarkdown::render(fileN,encoding = "UTF-8")
 }
 
 

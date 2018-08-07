@@ -1,5 +1,5 @@
 ---
-title: "07 - Waldbestand in der Nähe von Rolle"
+title: "11 - Waldbestand in der Nähe von Rolle"
 author: "Curdin Derungs"
 date: "July 2018"
 output:
@@ -29,7 +29,7 @@ Der Waldbestand wird den beiden Layer Land-cover und Land-use der Arealstatistik
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommen die beiden Layer der Arealstatistik.
 ```{r reader av, message=FALSE, warning=FALSE}
-load("output/06_output/geom/06_rolle_bld_out.Rdata")
+load("output/05_output/geom/05_rolle_bld_out.Rdata")
 rolleCRS<-proj4string(rolle_bld_out)
 
 #pfad für daten auf T laufwerk

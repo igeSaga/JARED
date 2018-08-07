@@ -32,7 +32,7 @@ Als Rechungsgrundlage dienen ein Digitales Höhenmodell, DHM25 von Swisstopo ([L
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommen die beiden Layer der Arealstatistik.
 ```{r reader av, message=FALSE, warning=FALSE}
-load("output/06_output/geom/06_rolle_bld_out.Rdata")
+load("output/05_output/geom/05_rolle_bld_out.Rdata")
 rolleCRS<-proj4string(rolle_bld_out)
 
 #pfad für daten auf T laufwerk
@@ -97,5 +97,5 @@ p
 ggsave(p,filename = "output/12_output/viz/lakeDistance.png",dpi = 500,width = 15,height = 8)
 
 #buildings speichern
-save(rolle_bld_out,file="output/12_output/geom/08_rolle_bld_out.Rdata")
+save(rolle_bld_out,file="output/12_output/geom/12_rolle_bld_out.Rdata")
 ```

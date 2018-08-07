@@ -26,7 +26,9 @@ rm(list=ls())
 Sys.setlocale(category = "LC_ALL", locale = "en_US.UTF-8")
 ```
 
-In diesem Skript werden ...
+In diesem Skript wird die Nutzenergie pro Gebäude mit unterschiedlichen Methoden geschätzt. Zum einen wird eine Methode des AWEL verwendet. Zum anderen werden Berechnung von <Stefan Schneider> hinzugenommen.
+
+_Anmerkung: Von Stefan Schneider brauchen wir noch die Angaben zu Mont-sur-Roll und Informationen zu der Einheit der Berechnungen. Ein Mail wartet darauf, beantwortet zu werden. Zudem wird die AWEL Methode im Moment auf alle SIA Gebäudetypen in gleicher Art und Weise angewendet. Dies könnte in Zukunft noch verbessert werden._  
 
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Zusätzlich werden ein paar Werte pro Gebäude berechnet, welche für die spätere Visualisierung der SIA Klassifikation informativ sind.
@@ -37,16 +39,22 @@ load("output/02_output/geom/02_rolle_bld_out.Rdata")
 dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
 
 #wärmebedarf geschätzt von stefan
-energyDem_ss<-read.csv(paste(dataPath,"03_SteSchGenf/HeatDemand_Rolle.csv",sep=""),sep="\t")
+#für rolle
+energyDem_rolle_ss<-read.csv(paste(dataPath,"03_SteSchGenf/HeatDemand_Rolle.csv",sep=""),sep="\t")
+#und ms-rolle
+energyDem_msrolle_ss<-as.data.frame(fread(paste(dataPath,"03_SteSchGenf/HeatDemand_MontSurRolle.csv",sep=""),sep="\t",quote=""))
 
-#energieverbrauch von romande energie
-energyVerb_re<-fread(paste(dataPath,"08_Elektrizitaet_RE/Consommation_Rolle.csv",sep=""),encoding="UTF-8")
+#combine the rolle's
+energyDem_ss<-rbind(energyDem_msrolle_ss,energyDem_rolle_ss)
+
+# #energieverbrauch von romande energie
+# energyVerb_re<-fread(paste(dataPath,"08_Elektrizitaet_RE/Consommation_Rolle.csv",sep=""),encoding="UTF-8")
 ```
 
 
 #Energiebedarf pro Gebäude
 
-##Wärmebedarf Methode 1: Schätzen anhand von EBF und Alter
+##Wärmebedarf Methode 1: AWEL - Schätzen anhand von EBF und Alter
 In diesem Schritt wird anhand der Energiebedarfsfläche (Gebäudefläche * Anzahl Stockwerke) und dem Gebäudealter der jährliche Energieverbrauch geschätzt. Die Schätzung beruht auf Daten aus dem [Energieplanungsbereicht](https://www.zh.ch/internet/de/aktuell/news/medienmitteilungen/2014/energieplanungsbericht_zeigt_erfolge_und_herausforderungen/_jcr_content/contentPar/downloadlist/downloaditems/44_1389359316861.spooler.download.1389359268717.pdf/Energieplanungsbericht-2013.pdf) des Kantons Zürich aus dem Jahr 2013 (S.19, Abbildung 14). Das Szenario "thomas" beruht auf Annahmen welche im Energiekonzept der Gemeinde Wohlen gemacht wurden (S.19, Abbildung 12).
 
 ```{r energieFunk, warning=FALSE, paged.print=FALSE}
@@ -87,12 +95,12 @@ energyUse<-function(age,ebf,scenario="2011"){
 
 age<-as.numeric(rolle_bld_out$GBAUJ)
 ebf<-rolle_bld_out$ebf
-rolle_bld_out$enerBed_m1<-energyUse(age,ebf,scenario = "thomas")
+rolle_bld_out$enerBed_awel<-energyUse(age,ebf,scenario = "thomas")
 ```
 
-##Wärmebedarf Methode 2: Daten von <Stefan Schneider>
+##Wärmebedarf Methode 2: SS - Berechnungen von _Stefan Schneider_
 
-Anmerkung: Die Daten von Stefan Schneider liegen nur für Rolle vor. Ein Datensatz für MS-Rolle muss erst noch bestellt werden.
+_Anmerkung: Die Daten von Stefan Schneider liegen nur für Rolle vor. Ein Datensatz für MS-Rolle muss erst noch bestellt werden. Da bei Stefan unterschiedliche Dinge berechnet werden, muss noch eine sorgfälltige Auswahl und Umbenennung der Attribute vorgenommen werden._
 
 ```{r energieSS, warning=FALSE, paged.print=FALSE}
 energyDem_ss<-energyDem_ss[,c("GKODX",
@@ -103,19 +111,18 @@ energyDem_ss<-energyDem_ss[,c("GKODX",
                               "Ehww_Est",
                               "Ehww_Est_Net")]
 
-names(energyDem_ss)<-paste(names(energyDem_ss),"_ss",sep="")
-
-coordinates(energyDem_ss)<-~GKODX_ss+GKODY_ss
+coordinates(energyDem_ss)<-~GKODX+GKODY
 proj4string(energyDem_ss)<-CRS("+init=epsg:21781")
 
 ov<-over(rolle_bld_out,energyDem_ss)
 
-rolle_bld_out@data<-cbind(rolle_bld_out@data,ov)
+rolle_bld_out@data<-cbind(rolle_bld_out@data,data.frame(enerBed_ss=ov$Ehww_Est))
+rolle_bld_out$enerBed_ss<-rolle_bld_out$enerBed_ss/3.6*rolle_bld_out$ebf
 ```
 
 ##Stromverbrauch von Romande Energie
 
-Anmerkung: Hier fehlt es einerseits an einer Datengrundlage um die Strassenadressen räumlich zu Referenzieren. Ein solcher Datensatz wurde bestellt, ist aber noch bei der Gemeinde in Bearbeitung. Zum anderen verstehe ich die Daten von RE nicht. Es gibt beispielsweise zwei Messungen pro Gebäude. Welche soll benützt werden? ...
+_Anmerkung: Hier fehlt es einerseits an einer Datengrundlage um die Strassenadressen räumlich zu Referenzieren. Ein solcher Datensatz wurde bestellt, ist aber noch bei der Gemeinde in Bearbeitung. Zum anderen verstehe ich die Daten von RE nicht. Es gibt beispielsweise zwei Messungen pro Gebäude. Welche soll benützt werden?_
 
 ```{r energieRE, warning=FALSE, paged.print=FALSE}
 # #pro eindeutige adresse aggregieren
@@ -146,19 +153,25 @@ Anmerkung: Hier fehlt es einerseits an einer Datengrundlage um die Strassenadres
 
 #Visualisierung
 
-
-
 ```{r geoviz, fig.width = 10, fig.height = 5.5}
 
 rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
 
 qpal <- colorBin(
   palette = "YlGnBu",
-  domain = c(rolle_bld_out.wgs$enerBed_m1,rolle_bld_out.wgs$Ehww_Est_ss*1000),
-  bins=quantile(c(rolle_bld_out.wgs$enerBed_m1,rolle_bld_out.wgs$Ehww_Est_ss*1000),na.rm=T,seq(0,1,length.out = 5))
+  domain = rolle_bld_out.wgs$enerBed_awel,
+  bins=quantile(round(rolle_bld_out.wgs$enerBed_awel),na.rm=T,seq(0,1,length.out = 8))
 )
 
-rolle_bld_out.wgs$DemDiff<-rolle_bld_out.wgs$enerBed_m1-rolle_bld_out.wgs$Ehww_Est_ss*1000
+#in diesem teil des skripts würde eigentlich der unterschiedliche energiebedarf der beiden Methoden verglichen, da aber noch lücken in der berechnung bestehen, wird im Moment darauf verzichtet
+
+qpal <- colorBin(
+  palette = "YlGnBu",
+  domain = c(rolle_bld_out.wgs$enerBed_awel,rolle_bld_out.wgs$enerBed_ss),
+  bins=quantile(c(rolle_bld_out.wgs$enerBed_awel,rolle_bld_out.wgs$enerBed_ss),na.rm=T,seq(0,1,length.out = 5))
+)
+
+rolle_bld_out.wgs$DemDiff<-rolle_bld_out.wgs$enerBed_awel-rolle_bld_out.wgs$enerBed_ss
 
 rolle_bld_out.wgs.und<-rolle_bld_out.wgs[rolle_bld_out.wgs$DemDiff<0 & !is.na(rolle_bld_out.wgs$DemDiff),]
 qpal_under <- colorBin(
@@ -177,66 +190,62 @@ qpal_over<- colorBin(
 
 #visualisierung mit leaflet
 m <- leaflet() %>%
-    
+
   addProviderTiles(providers$OpenStreetMap, group = "normal") %>%
   addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
   addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
-  
+
   addPolygons(data=rolle_bld_out.wgs,
               stroke = TRUE,
-              fillOpacity = 0.8, 
-              color = ~qpal(rolle_bld_out.wgs$enerBed_m1),
+              fillOpacity = 0.8,
+              color = ~qpal(rolle_bld_out.wgs$enerBed_awel),
               weight=1,
-              popup=paste(sep=" / ",rolle_bld_out.wgs$sia,rolle_bld_out.wgs$GBAUJ,round(rolle_bld_out.wgs$ebf),rolle_bld_out.wgs$GENWW_text,round(rolle_bld_out.wgs$enerBed_m1)),
+              popup=paste(sep=" / ",rolle_bld_out.wgs$sia,rolle_bld_out.wgs$GBAUJ,round(rolle_bld_out.wgs$ebf),rolle_bld_out.wgs$GENWW_text,round(rolle_bld_out.wgs$enerBed_awel)),
               group = "Energiebedarf (AWEL)")%>%
-  
-    
+
   addPolygons(data=rolle_bld_out.wgs,
               stroke = TRUE,
-              fillOpacity = 0.8, 
-              color = ~qpal(rolle_bld_out.wgs$Ehww_Est_ss*1000),
+              fillOpacity = 0.8,
+              color = ~qpal(rolle_bld_out.wgs$enerBed_ss),
               weight=1,
-              popup=paste(sep=" / ",rolle_bld_out.wgs$sia,rolle_bld_out.wgs$GBAUJ,round(rolle_bld_out.wgs$ebf),rolle_bld_out.wgs$GENWW_text,round(rolle_bld_out.wgs$Ehww_Est_ss*1000)),
+              popup=paste(sep=" / ",rolle_bld_out.wgs$sia,rolle_bld_out.wgs$GBAUJ,round(rolle_bld_out.wgs$ebf),rolle_bld_out.wgs$GENWW_text,round(rolle_bld_out.wgs$enerBed_ss)),
               group = "Energiebedarf (S.Schneid.)")%>%
-  
+
   addPolygons(data=rolle_bld_out.wgs.ov,
               stroke = TRUE,
-              fillOpacity = 0.8, 
+              fillOpacity = 0.8,
               color = ~qpal_over(rolle_bld_out.wgs.ov$DemDiff),
               weight=1,
               popup = as.character(rolle_bld_out.wgs.ov$DemDiff),
-              group = "Energiebedarf (WBL > SS)")%>%
-  
+              group = "Energiebedarf (AWEL > SS)")%>%
+
     addPolygons(data=rolle_bld_out.wgs.und,
               stroke = TRUE,
-              fillOpacity = 0.8, 
+              fillOpacity = 0.8,
               color = ~qpal_under(rolle_bld_out.wgs.und$DemDiff),
               weight=1,
               popup = as.character(rolle_bld_out.wgs.und$DemDiff),
-              group = "Energiebedarf (WBL < SS)")%>%
+              group = "Energiebedarf (AWEL < SS)")%>%
   
   addLayersControl(
-    baseGroups = c("normal", "OSM (b/w)","ESRI"),
-    overlayGroups = c("Energiebedarf (AWEL)",
-                      "Energiebedarf (S.Schneid.)",
-                      "Energiebedarf (WBL > SS)",
-                      "Energiebedarf (WBL < SS)"),
+    baseGroups = c("OSM (b/w)","normal", "ESRI"),
+    overlayGroups = c("Energiebedarf (AWEL)","Energiebedarf (S.Schneid.)","Energiebedarf (AWEL > SS)","Energiebedarf (AWEL < SS)"),
     options = layersControlOptions(collapsed = F)
   )%>%
   addLegend(pal = qpal, 
-            values =c(rolle_bld_out.wgs$enerBed_m1,rolle_bld_out.wgs$Ehww_Est_ss*1000), 
+            values =rolle_bld_out.wgs$enerBed_awel, 
             opacity = 1,
-            title = "Bedarf: log10(kWh/a)",
+            title = "Energiebedarf AWEL: kWh/a",
             position = "bottomleft"
             )%>%
-  addLegend(pal = qpal_over, 
-            values =rolle_bld_out.wgs.ov$DemDiff, 
+  addLegend(pal = qpal_over,
+            values =rolle_bld_out.wgs.ov$DemDiff,
             opacity = 1,
             title = "WBL > SS: log10(kWh/a)",
             position = "bottomleft"
             )%>%
-  addLegend(pal = qpal_under, 
-            values =rolle_bld_out.wgs.und$DemDiff, 
+  addLegend(pal = qpal_under,
+            values =rolle_bld_out.wgs.und$DemDiff,
             opacity = 1,
             title = "WBL < SS: log10(kWh/a)",
             position = "bottomleft"

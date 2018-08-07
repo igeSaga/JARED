@@ -4,8 +4,10 @@ author: "Curdin Derungs"
 date: "July 2018"
 output:
   html_document:
-      toc: true
-      toc_float: true
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -23,10 +25,10 @@ library(reshape2)
 rm(list=ls())
 ```
 
-In diesem Skript werden ...
+In diesem Skript wird eine Abschätzung des Windpotentials für Rolle und Mont-sur-Rolle gemacht. Dabei wird nur die Zone hohen Windpotentials berücksichtigt. Alle Berechungen basieren auf den Angaben von https://wind-data.ch/.
 
 #Daten einlesen
-Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Zusätzlich werden ein paar Werte pro Gebäude berechnet, welche für die spätere Visualisierung der SIA Klassifikation informativ sind.
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen.
 ```{r reader av}
 load("output/04_output/geom/04_rolle_bld_out.Rdata")
 rolleCRS<-proj4string(rolle_bld_out)
@@ -136,7 +138,7 @@ windRolle_pot<-windRolle_raster*windPot_rolle
 
 ##Visualisierung Windatlas
 
-```{r geoviz, fig.width = 10, fig.height = 5.5}
+```{r geoviz, fig.width = 7, fig.height = 5.5}
 rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
 windRolle_pot.wgs<-projectRaster(windRolle_pot,crs = CRS("+init=epsg:4326"))
 
@@ -176,9 +178,9 @@ m
 * Die Gebiete mit hohem Energiepotential zeigen mittlere Windgeschwindigkeiten von zwischen 3.5 und 6 m/s. Im nachfolgenden wird darum der Energieertrag für 3.5, 5 und 6 m/s berechnet.
 * Die Gebiete liegen auf ca. 700MüM und haben daher eine Luftdichte von cs. 1.159 kg/m³.
 * Es werden Schätzung für drei Typen von Windturbinen gezeigt:
-** Leistungsstark: Firma: Alstom, Bezeichnung: ECO122 2700, Leistung: 2'700 kW, Rotordurchmesser: 122 m
-** Mittlere Leistung: Firma: Dewind, Bezeichnung: D8/80-2MW, Leistung: 2'000 kW, Rotordurchmesser: 80 m
-** Niedrige Leistung: Firma: Enercon, Bezeichnung: E-48, Leistung: 810 kW, Rotordurchmesser: 48 m
+    + Leistungsstark: Firma: Alstom, Bezeichnung: ECO122 2700, Leistung: 2'700 kW, Rotordurchmesser: 122 m
+    + Mittlere Leistung: Firma: Dewind, Bezeichnung: D8/80-2MW, Leistung: 2'000 kW, Rotordurchmesser: 80 m
+    + Niedrige Leistung: Firma: Enercon, Bezeichnung: E-48, Leistung: 810 kW, Rotordurchmesser: 48 m
 
 Alle Energieerträge wurden mit den Werkzeugen von Wind-Data.ch berechnet ([Link](https://wind-data.ch/tools/powercalc.php))
 
@@ -186,9 +188,14 @@ Alle Energieerträge wurden mit den Werkzeugen von Wind-Data.ch berechnet ([Link
 e.ertr<-data.frame(Typ=rep(c("Leistungsstark","Mittlere Leistung","Niedrige Leistung"),each=3),
                    Windgeschwindigkeit=rep(c(3.5,5,6),3),
                    Energieertrag=c(1981158,5340437,7774209,749749,2384090,3817937,361675,1027021,1606999))
-ggplot(e.ertr)+
+p<-ggplot(e.ertr)+
   geom_path(aes(x=Windgeschwindigkeit,y=Energieertrag, group=Typ, color=Typ))+
   geom_point(aes(x=Windgeschwindigkeit,y=Energieertrag, group=Typ, color=Typ),size=2)+
   theme_minimal()+
   ylab("Energieertrag (kWh/Jahr)")
+p
+```
+```{r save}
+#abbildung speichern
+ggsave(p,filename = "output/05_output/viz/windpotential.png",dpi = 500,width = 8,height = 4)
 ```

@@ -22,7 +22,9 @@ library(spatialEco)
 rm(list=ls())
 ```
 
-In diesem Skript werden die Gebäude anhand von Informationen aus dem GWR den SIA Gebäudetypen zugeordnet. Die Zuordnung erfolgt meist "händisch" und es werden ein paar Gebäudetypen verwendet, welche in der SIA nicht vorkommen
+In diesem Skript werden die Gebäude anhand von Informationen aus dem GWR den SIA Gebäudetypen zugeordnet.
+
+_Anmerkung: Es werden ein paar Gebäudetypen verwendet, welche in der SIA nicht vorkommen (z.B. Schloss oder Kirche)._
 
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Zusätzlich werden ein paar Werte pro Gebäude berechnet, welche für die spätere Visualisierung der SIA Klassifikation informativ sind.

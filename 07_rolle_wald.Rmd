@@ -1,0 +1,153 @@
+---
+title: "07 - Waldbestand in der Nähe von Rolle"
+author: "Curdin Derungs"
+date: "July 2018"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+
+#loading libraries
+library(sp)
+library(rgdal)
+library(leaflet)
+library(ggplot2)
+
+#empty workspace
+rm(list=ls())
+```
+
+In diesem Skript wird für ein Einzugsgebiet von 20km rund um Rolle der Zugang zum Waldbestand quantifiziert. Die 20km sind als sinnvolles Distanzmass dem Bericht des Kantons Wadt zur Nutzung von Holz zur Energiegewinnung entnommen ([Link](https://www.vd.ch/themes/environnement/energie/energies-renouvelables-bois-hydraulique-geothermie-profonde-energies-eolienne-et-solaire/bois-energie/)). Im Bericht wird auch das Interesse des Kantons betont, die Energiegewinnung aus Holz in Zukunft zu fördern.  
+
+Der Waldbestand wird den beiden Layer Land-cover und Land-use der Arealstatistik des BfS entnommen ([Link](https://www.bfs.admin.ch/bfs/de/home/statistiken/raum-umwelt/nomenklaturen/arealstatistik.html)). 
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommen die beiden Layer der Arealstatistik.
+```{r reader av, message=FALSE, warning=FALSE}
+load("output/06_output/geom/06_rolle_bld_out.Rdata")
+rolleCRS<-proj4string(rolle_bld_out)
+
+#pfad für daten auf T laufwerk
+dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
+
+rolle_for_lu<-readOGR(layer = "rolle20kmBuffer_txt", dsn = paste(dataPath,"15_holz/forestRolle",sep=""))
+rolle_for_lc<-readOGR(layer = "rolle20kmBuffer_lc_txt", dsn = paste(dataPath,"15_holz/forestRolle",sep=""))
+
+#resolve some encoding problems with "umlauten"
+levels(rolle_for_lu$Grundkateg)<-c("Aufforstung",
+                                "Holzschlag",
+                                "Waldbestand",
+                                "Waldschaden")
+
+levels(rolle_for_lc$arealsta_2)<-c("Aufgeloester Baumbestand",
+                                "Baumgruppen",
+                                "Geschlossener Baumbestand",
+                                "Linearer Baumbestand",
+                                "Waldecken",
+                                "Waldstreifen")
+```
+
+#Waldkarte
+```{r geoviz, fig.width = 7, fig.height = 5.5}
+rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+rolle_for_lu.wgs<-spTransform(rolle_for_lu,CRSobj = CRS("+init=epsg:4326"))
+
+#visualisierung mit leaflet
+m <- leaflet() %>%
+  
+  setView(lat = 46.45940, lng = 6.33887, zoom = 13) %>%
+  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
+
+  addProviderTiles(providers$OpenStreetMap, group = "normal") %>%
+  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              color = "grey30",
+              weight=1,
+              group = "Haeuser")%>%
+  
+    addCircles(data=rolle_for_lu.wgs,
+              radius = 1,
+              fillOpacity = 0.8, 
+              color = "green",
+              group = "Wald")%>%
+  
+  addLayersControl(
+    baseGroups = c("OSM (b/w)","normal","ESRI"),
+    overlayGroups = c("Haeuser","Wald"),
+    options = layersControlOptions(collapsed = F)
+  )
+
+#leaflet karte ausführen
+m
+```
+
+#Waldflächen in Abhängigkeit der Distanz
+
+```{r waldZugang, fig.height=4, fig.width=8, warning=FALSE, paged.print=FALSE}
+#distance to each forest-ha from rolle
+for_dist<-spDistsN1(rolle_for_lu,matrix(c(515754.53,146089.21),nrow = 1),longlat = F)
+
+#classify distances into 1km cuts
+for_dist_cut<-cut(for_dist,breaks=seq(0,25000,by = 1000),labels=paste(seq(0,24000,by = 1000),seq(1000,25000,by = 1000),sep="-"))
+
+dat<-data.frame(dist=for_dist_cut,type=rolle_for_lu$Grundkateg)
+
+p<-ggplot(dat, aes(x=dist))+
+  geom_bar()+
+  theme_minimal()+
+  ggtitle(paste("Wald im Einzugsgebiet von Rolle (max 20km)",sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=14))+
+  xlab("Distance (m)")+
+  ylab("Wald (ha)")
+p
+```
+  
+Die Verteilung des Waldes zeigt, dass in unmittelbarer Nähe von Rolle (z.B. <5km) nur wenig Holz zu finden ist. Der grosse Wald des Westschweizer Juras ist ca. 10km entfernt. In dieser Entfernung eröffnet sich ein grosser Waldbestand.
+
+#Waldnutzung in Abhängigkeit der Distanz
+
+```{r waldNutz, fig.height=6, fig.width=10, warning=FALSE, paged.print=FALSE}
+ggplot(dat, aes(x=dist))+
+  geom_bar()+
+  theme_minimal()+
+  facet_wrap(facets = "type",ncol = 1)+
+  ggtitle(paste("Waldnutzung im Einzugsgebiet von Rolle (max 20km)",sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=14))+
+  xlab("Distance (m)")+
+  ylab("Wald (ha)")
+```
+
+#Waldbedeckung in Abhängigkeit der Distanz
+
+```{r waldCover, fig.height=8, fig.width=10, warning=FALSE, paged.print=FALSE}
+#distance to each forest-ha from rolle
+for_dist_lc<-spDistsN1(rolle_for_lc,matrix(c(515754.53,146089.21),nrow = 1),longlat = F)
+
+#classify distances into 1km cuts
+for_dist_cut_lc<-cut(for_dist_lc,breaks=seq(0,25000,by = 1000),labels=paste(seq(0,24000,by = 1000),seq(1000,25000,by = 1000),sep="-"))
+
+dat_lc<-data.frame(dist=for_dist_cut_lc,type=rolle_for_lc$arealsta_2)
+
+ggplot(dat_lc, aes(x=dist))+
+  geom_bar()+
+  theme_minimal()+
+  facet_wrap(facets = "type",ncol = 1)+
+  ggtitle(paste("Waldtypen im Einzugsgebiet von Rolle (max 20km)",sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=14))+
+  xlab("Distance (m)")+
+  ylab("Wald (ha)")
+```
+
+##Save all Information
+```{r save}
+#abbildung speichern
+ggsave(p,filename = "output/07_output/viz/waldZugang.png",dpi = 500,width = 10,height = 6)
+```

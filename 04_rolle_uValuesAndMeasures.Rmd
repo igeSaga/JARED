@@ -84,34 +84,6 @@ rolle_bld_out$longitude<-centr@coords[,1]
 rolle_bld_out$latitude<-centr@coords[,2]
 ```
 
-
-#Fensterfläche
-Der Fensteranteil wird als Prozent der Wandfläche für unterschiedliche Bauperioden geschätzt, basierend auf einer Lookup-Table von Thomas Schluck (Quelle?). Die Fensterfläche wird sowohl in Prozent als auch als absolute Fläche angegeben.
-
-##Wandfläche berechnen
-Die Wandfläche wird aus dem Umfang des Gebäudes und der Stockwerkzahl gerechnet. Die Stockwerkhöhe von Wohngebäuden wird auf 3m bestimmt, bei nicht-Wohngebäuden sind es 5m.
-
-```{r wandFl, warning=FALSE, paged.print=FALSE}
-umfang<-polyPerimeter(rolle_bld_out)
-wandFl_wohnen<-umfang*(as.numeric(rolle_bld_out$GASTW)*3)
-wandFl_nichtWohnen<-umfang*(as.numeric(rolle_bld_out$GASTW)*5)
-```
-
-##Fensterfläche aus Wandfläche ableiten
-Anhand von Angaben von Thomas Schluck (Quelle?) wird aus der Wandfläche der Gebäude eine Fensterfläche geschätzt. Die realtive Fensterfläche variiert pro Alter der Gebäude.
-
-```{r fensterFl, warning=FALSE, paged.print=FALSE}
-rolle_bld_out$fPeriod<-cut(as.numeric(rolle_bld_out$GBAUJ),
-                           breaks=c(0,1950,1970,2000,2500),
-                           labels = c("0_1950","1950_1970","1970_2000","2000_2020"))
-
-rolle_bld_out@data<-merge(rolle_bld_out@data,fenstFl_lookup,by.x="fPeriod",by.y="periode",all.x=T)
-
-rolle_bld_out$fensterFl_wohnen<-wandFl_wohnen*rolle_bld_out$prozFl_wohnen
-rolle_bld_out$fensterFl_nichtWohnen<-wandFl_nichtWohnen*rolle_bld_out$prozFl_nichtWohnen
-```
-
-
 #Ausrichtung und Länge/Breite der Gebäude
 Für jedes Gebäude werden die Breite, Länge und die Ausrichtung berechnet. Die Ausrichtung wird für die längere Achse des Gebäudes in Grad angegeben. Die Ausrichtung nimmt nur Werte zwischen 0 und 90 Grad an: 0 = N-S (oder S-N) und 90 = E-W (oder W-E).
 
@@ -154,6 +126,45 @@ rolle_bld_out$area_breiteLaenge_ratio<-as.numeric(as.character(areaOrig$V2))/(ro
 rolle_bld_out$breite<-rolle_bld_out$breite*rolle_bld_out$area_breiteLaenge_ratio
 ```
 
+
+#Fensterfläche
+Der Fensteranteil wird als Prozent der Wandfläche für unterschiedliche Bauperioden geschätzt, basierend auf einer Lookup-Table von Thomas Schluck (Quelle?). Die Fensterfläche wird sowohl in Prozent als auch als absolute Fläche angegeben.
+
+##Wandfläche berechnen
+Die Wandfläche wird aus dem Umfang des Gebäudes und der Stockwerkzahl gerechnet. Die Stockwerkhöhe von Wohngebäuden wird auf 3m bestimmt, bei nicht-Wohngebäuden sind es 5m.
+
+```{r wandFl, warning=FALSE, paged.print=FALSE}
+umfang<-polyPerimeter(rolle_bld_out)
+wandFl_wohnen<-umfang*(as.numeric(rolle_bld_out$GASTW)*3)
+wandFl_nichtWohnen<-umfang*(as.numeric(rolle_bld_out$GASTW)*5)
+```
+
+##Fensterfläche aus Wandfläche ableiten
+Anhand von Angaben von Thomas Schluck (Quelle?) wird aus der Wandfläche der Gebäude eine Fensterfläche geschätzt. Die realtive Fensterfläche variiert pro Alter der Gebäude.
+
+```{r fensterFl, warning=FALSE, paged.print=FALSE}
+rolle_bld_out$fPeriod<-cut(as.numeric(rolle_bld_out$GBAUJ),
+                           breaks=c(0,1950,1970,2000,2500),
+                           labels = c("0_1950","1950_1970","1970_2000","2000_2020"))
+
+rolle_bld_out@data<-merge(rolle_bld_out@data,fenstFl_lookup,by.x="fPeriod",by.y="periode",all.x=T)
+
+rolle_bld_out$fensterFl_wohnen<-wandFl_wohnen*rolle_bld_out$prozFl_wohnen
+rolle_bld_out$fensterFl_nichtWohnen<-wandFl_nichtWohnen*rolle_bld_out$prozFl_nichtWohnen
+```
+
+##Fensterfläche pro Wand
+Die Berechnete Fensterfläche wird prozentual auf die oben geschätzte Breite und Länge des Gebäudes aufgeteilt.
+
+```{r fensterWand, warning=FALSE, paged.print=FALSE}
+prozLaenge<-rolle_bld_out$laenge/(rolle_bld_out$breite+rolle_bld_out$laenge)
+prozBreite<-rolle_bld_out$breite/(rolle_bld_out$breite+rolle_bld_out$laenge)
+
+rolle_bld_out$fensterFl_wohnen_breite<-rolle_bld_out$fensterFl_wohnen*prozBreite
+rolle_bld_out$fensterFl_nichtWohnen_breite<-rolle_bld_out$fensterFl_nichtWohnen*prozBreite
+rolle_bld_out$fensterFl_wohnen_laenge<-rolle_bld_out$fensterFl_wohnen*prozLaenge
+rolle_bld_out$fensterFl_nichtWohnen_laenge<-rolle_bld_out$fensterFl_nichtWohnen*prozLaenge
+```
 
 ##Save all Information
 ```{r save}

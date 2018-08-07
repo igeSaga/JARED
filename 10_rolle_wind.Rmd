@@ -1,0 +1,202 @@
+---
+title: "05 - Windpotential"
+author: "Curdin Derungs"
+date: "July 2018"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+
+#loading libraries
+library(sp)
+library(rgdal)
+library(raster)
+library(leaflet)
+library(knitr)
+library(ggplot2)
+library(reshape2)
+
+#empty workspace
+rm(list=ls())
+```
+
+In diesem Skript wird eine Abschätzung des Windpotentials für Rolle und Mont-sur-Rolle gemacht. Dabei werden nur die Zone hohen Windpotentials berücksichtigt: "Die Hauptpotenzialgebiete sind durch den Bund unter Berücksichtigung hoher Windenergieerträge (Basisdaten Windatlas Schweiz, www.windatlas.ch), der wichtigsten Bundesinteressen und einer ausreichenden räumlichen Konzentration ermittelt worden". Es wird daher davon ausgegangen, dass bloss diese Gebiete für eine erweiterte Analyse in Frage kommen. Alle Berechungen in diesem Skript basieren auf den Angaben von https://wind-data.ch/.
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen.
+```{r reader av}
+load("output/04_output/geom/04_rolle_bld_out.Rdata")
+rolleCRS<-proj4string(rolle_bld_out)
+
+#pfad für daten auf T laufwerk
+dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
+
+#untersuchungsgebiet
+bb<-rolle_bld_out@bbox
+coords = matrix(c(bb[,1],
+               bb[1,1],bb[2,2],
+               bb[,2],
+                bb[1,2],bb[2,1],
+               bb[,1]), 
+             ncol = 2, byrow = TRUE)
+
+ug_rolle <- Polygon(coords)
+ug_rolle <- SpatialPolygons(list(Polygons(list(ug_rolle), ID = "1")))
+proj4string(ug_rolle)<-proj4string(rolle_bld_out)
+ug_rolle<-buffer(ug_rolle,5000)
+```
+
+#Windprofil St-Prex
+
+Das Windprofil für Rolle besteht aus den Monatsmittelwerten für die Windgeschwindigkeit gemessen 10m über dem Boden. Da für Rolle keine Messungen vorliegen wurde die Messtation in St-Prex ([link](https://wind-data.ch/messdaten/aktuell.php?wmo=67060)).
+
+```{r windProf, fig.height=5, fig.width=9, warning=FALSE, paged.print=FALSE}
+# download.file("https://wind-data.ch/messdaten/c_monate.inc.php?action=csv&wmo=67060", "data/windDataRolle.csv", quiet = FALSE, mode = "w",
+#               cacheOK = TRUE,
+#               extra = getOption("download.file.extra"))
+
+windRolle_monatJahr<-read.csv("data/windDataRolle.csv",sep=";",skip = 6,header = T,na.strings = "-" )
+names(windRolle_monatJahr)[1]<-"jahr"
+windRolle_monatMittel<-data.frame(month=as.character(names(windRolle_monatJahr[1,2:(ncol(windRolle_monatJahr)-1)])),
+                                  value=t(windRolle_monatJahr[1,2:(ncol(windRolle_monatJahr)-1)]),
+                                  stringsAsFactors = F)
+names(windRolle_monatMittel)[2]<-"value"
+windRolle_monatMittel$month<-factor(windRolle_monatMittel$month,levels = row.names(windRolle_monatMittel))
+
+
+windRolle_monatJahr<-windRolle_monatJahr[-1,]
+
+windRolle_monatJahr.w<-melt(windRolle_monatJahr, id.vars=c("jahr"))
+
+ggplot()+
+  geom_path(data=windRolle_monatJahr.w[windRolle_monatJahr.w$variable!="Jahresmittel..m.s.",],
+            aes(x=jahr,y=value, color=variable))+
+  geom_path(data=subset(windRolle_monatJahr.w, variable=="Jahresmittel..m.s."),
+            aes(x=jahr,y=value), group=1,color="black",size=2)+
+  theme_minimal()+
+  ylab("Windgeschwindigkeit (m/s)")+
+  scale_color_discrete(h=c(200,360))+
+  ylim(c(2,6))
+
+ggplot(windRolle_monatMittel)+
+  geom_path(aes(x=month,y=value),group=1)+
+  theme_minimal()+
+  ylab("Windgeschwindigkeit (m/s)")+
+  ylim(c(2,6))
+```
+   
+Die Darstellung der Variation der Windgeschwindigkeit über die Jahre (mit dem Jahresdurchschnitt als dicke schwarze Linie) und über die Monate des Jahres zeigt folgendes:   
+* Der gemittelte Durschnitt über die Jahre zeigt wenig Variation
+* Der Mittelwert über die Monate zeigt ebenfalls wenig Variation
+* Die grösste Variation zeigt sich, wenn die mittlere Windgeschwindigkeit eines Monates über mehrere Jahre verfolgt wird.  
+
+Grundsätzlich zeigt die Windgeschwindigkeit keinen jahreszeitlichen Trend, noch zeigen sich grosse Unterschiede über die Jahre hinweg. Die Windgeschwindigkeit von St-Prex (und gleichfalls Rolle) kann daher mit nur wenig Unsicherheit zu einem oder wenigen Werten zusammengefasst werden.
+
+#Hauptpotenzialgebiete
+
+##Hauptpotenzialgebiete in und um Rolle
+Das Windpotential für die ganze Schweiz wurde von https://data.geo.admin.ch/ als GeoTiff heruntergeladen. Der Datensatz heisst ch.bfe.windenergie-potenzialgebiete.
+
+```{r windPot, warning=FALSE, paged.print=FALSE}
+#GDALinfo(paste(dataPath,"14_wind/Windpotenzialgebiete_v170530_BFE.tif",sep=""))
+windPot <- raster(x = paste(dataPath,"14_wind/Windpotenzialgebiete_v170530_BFE.tif",sep=""))
+#spplot(windPot)
+
+windPot_rolle<-crop(windPot, ug_rolle)
+```
+
+
+##Windgeschwindigkeiten in der Umgebung Rolle
+
+Der Windatlas der Schweiz zeigt die kontinuierliche Interpolation der mittleren Windgeschwindigkeit für eine Höhe von 75m ab Boden (auch andere Höhenwerte sind erhältlich). Die Daten wurden als GeoTiff von https://data.geo.admin.ch/ bezogen. Hier werden nur die Daten von Rolle geladen und in ein Raster konvertiert.  
+
+Die Windgeschwindigkeiten werden mit den Gebieten mit hohem Windpotential verschnitten.
+
+```{r windAtl, warning=FALSE, paged.print=FALSE}
+# #reading preprocessed wind shapefile (extract of swiss dataset)
+# windRolle<-readOGR(layer = "windRolle", dsn = paste(dataPath,"14_wind",sep=""))
+#
+# #rasterize wind data
+# r <- raster(ncol=100, nrow=100)
+# extent(r) <- extent(windRolle)
+# windRolle_raster <- rasterize(windRolle, r, 'V_MEAN')
+# save(windRolle_raster,file=paste(dataPath,"14_wind/windRolle_raster.Rdata",sep=""))
+
+load(paste(dataPath,"14_wind/windRolle_raster.Rdata",sep=""))
+
+windRolle_raster<-projectRaster(windRolle_raster,crs = rolleCRS)
+windPot_rolle<-projectRaster(windPot_rolle,crs = rolleCRS)
+
+windPot_rolle <- resample(windPot_rolle, windRolle_raster, method='bilinear')
+
+windRolle_pot<-windRolle_raster*windPot_rolle
+```
+
+##Visualisierung Windatlas
+
+```{r geoviz, fig.width = 7, fig.height = 5.5}
+rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+windRolle_pot.wgs<-projectRaster(windRolle_pot,crs = CRS("+init=epsg:4326"))
+
+pal <- colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(windRolle_pot.wgs),
+  na.color = "transparent",reverse = T)
+
+#visualisierung mit leaflet
+m <- leaflet() %>%
+    
+  addProviderTiles(providers$OpenStreetMap, group = "normal") %>%
+  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
+  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              color = "grey30",
+              weight=1,
+              group = "Haeuser")%>%
+  
+  addRasterImage(windRolle_pot.wgs, colors = pal, opacity = 0.8, group="Windatlas") %>%
+  
+  addLayersControl(
+    baseGroups = c("OSM (b/w)","normal","ESRI"),
+    overlayGroups = c("Haeuser","Windatlas"),
+    options = layersControlOptions(collapsed = F)
+  )%>%
+  addLegend(pal = pal, values = values(windRolle_pot.wgs),
+    title = "Windgeschwindigkeit (m/s)")
+
+#leaflet karte ausführen
+m
+```
+
+#Energieertrag aus Wind schätzen
+
+* Die Gebiete mit hohem Energiepotential zeigen mittlere Windgeschwindigkeiten von zwischen 3.5 und 6 m/s. Im nachfolgenden wird darum der Energieertrag für 3.5, 5 und 6 m/s berechnet.
+* Die Gebiete liegen auf ca. 700MüM und haben daher eine Luftdichte von cs. 1.159 kg/m³.
+* Es werden Schätzung für drei Typen von Windturbinen gezeigt:
+    + Leistungsstark: Firma: Alstom, Bezeichnung: ECO122 2700, Leistung: 2'700 kW, Rotordurchmesser: 122 m
+    + Mittlere Leistung: Firma: Dewind, Bezeichnung: D8/80-2MW, Leistung: 2'000 kW, Rotordurchmesser: 80 m
+    + Niedrige Leistung: Firma: Enercon, Bezeichnung: E-48, Leistung: 810 kW, Rotordurchmesser: 48 m
+
+Alle Energieerträge wurden mit den Werkzeugen von Wind-Data.ch berechnet ([Link](https://wind-data.ch/tools/powercalc.php))
+
+```{r leist, fig.height=5, fig.width=9}
+e.ertr<-data.frame(Typ=rep(c("Leistungsstark","Mittlere Leistung","Niedrige Leistung"),each=3),
+                   Windgeschwindigkeit=rep(c(3.5,5,6),3),
+                   Energieertrag=c(1981158,5340437,7774209,749749,2384090,3817937,361675,1027021,1606999))
+p<-ggplot(e.ertr)+
+  geom_path(aes(x=Windgeschwindigkeit,y=Energieertrag, group=Typ, color=Typ))+
+  geom_point(aes(x=Windgeschwindigkeit,y=Energieertrag, group=Typ, color=Typ),size=2)+
+  theme_minimal()+
+  ylab("Energieertrag (kWh/Jahr)")
+p
+```
+```{r save}
+#abbildung speichern
+ggsave(p,filename = "output/10_output/viz/windpotential.png",dpi = 500,width = 8,height = 4)
+```

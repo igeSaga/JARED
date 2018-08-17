@@ -1,0 +1,181 @@
+---
+title: "14 - Solarstrom in Rolle"
+author: "Curdin Derungs"
+date: "August 2018"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+#loading libraries
+library(sp)
+library(rgeos)
+library(rgdal)
+library(sf)
+library(dplyr)
+library(leaflet)
+
+#empty workspace
+rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
+```
+
+In diesem Skript wird...
+
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommt die Information des Solarkatasters der EPFL (Lionel Bloch). Da die Daten des Solarkatasters relativ gross sind (10min Auflösung für ein Jahr und ca. 7000 Dächer) ist hier der Code auskommentiert. Stattdessen werden die aggregierten Daten eingelesen. Dabei handelt es sich um die Jahressumme für alle 7000 Dächer.
+
+Im ersten Teil des Skripts geht es vor allem darum die Information pro Dach auf die darunterliegenden Gebäude zu übertragen. Dies ist daher aufwänding, da nicht nur mehrere Dächer auf einem Gebäude liegen können, sondern sich ebenfalls mehrere Gebäude ein Dach teilen können. Für diesen zweiten Fall wird das Potential des Daches auf die darunterliegenden Gebäude nach einem Flächenequivalent aufgeteilt (berechnet nach dem relativen Anteil Dach, das auf jedem der darunterliegenden Gebäude zu liegen kommt).
+
+__Anmerkung: Wie macht man aus W Messungen alle 10min kWh; *1/1000 *1/6?__
+
+```{r reader, message=FALSE, warning=FALSE}
+load("output/13_output/geom/13_rolle_bld_out.Rdata")
+rolleCRS<-proj4string(rolle_bld_out)
+
+# #reading pv profiles (might takes some minutes)
+# pv_prov<-as.matrix(read.csv(paste(dataPath,"09_Cadastre_solaire/pvPotential/pvProfiles.csv",sep=""),
+#                             sep=";", 
+#                             row.names = 1)
+#                    )
+
+#reading roof geometries
+dach<-readOGR(layer = "roofs", 
+              dsn = paste(dataPath,"09_Cadastre_solaire/pvPotential",sep=""))
+proj4string(dach)<-CRS("+init=epsg:2056")
+#gleiche prj wie bld
+dach<-spTransform(dach,CRSobj = rolleCRS)
+```
+
+#Daten Aufbereitung
+
+##PV Profile pro Jahr summieren
+Hier werden die bereits aufbereiteten Daten eingelesen, um Rechenzeit zu sparen.
+```{r agg, message=FALSE, warning=FALSE}
+# #yearly sum per roof for pv
+# pv_prov_jahr<-apply(pv_prov,2,sum)
+# pv_prov_jahr<-data.frame(roofID= as.numeric(gsub("ROOF_ID_","",colnames(pv_prov))),pvJahr=pv_prov_jahr)
+# save(pv_prov_jahr,file="output/14_output/data/pvProf_year.Rdata")
+
+load("output/14_output/data/pvProf_year.Rdata")
+```
+
+##Dach- und Gebäude-Geometrien verschneiden
+
+```{r inter, message=FALSE, warning=FALSE}
+#creating ids
+rolle_bld_out$iid_bld<-1:nrow(rolle_bld_out)
+dach$iid_dach<-1:nrow(dach)
+
+#spatial intersection of roof and bld geometries with sf -> fast!
+#one geometry for each unique roof-bld overlap is computed -> snippets
+#many bld can share one roof and many roofs can be on one bld (many2many)
+bld.st <- st_as_sf(rolle_bld_out[,"iid_bld"])
+dach.st <- st_as_sf(dach[,"iid_dach"])
+dach_bld_inter <- st_intersection(dach.st,bld.st)
+dach_bld_inter.sp<-as(dach_bld_inter, "Spatial")
+```
+
+
+##Flächenanteile von Dächern pro Gebäude berechnen
+```{r count, message=FALSE, warning=FALSE}
+#roof area of each unique roof-bld intersection
+dach_bld_inter.sp$area_inter<-sapply(dach_bld_inter.sp@polygons,function(x){x@area})
+
+#calculating the area of each roof from the intersected snippets
+#(does not sum to the original roof area, since parts of roofs that did not overlap with a bld were removed)
+test<-dach_bld_inter.sp@data
+test<-test%>%
+  group_by(iid_dach)%>%
+  summarise(area_dach_tot=sum(area_inter))
+dach_bld_inter.sp@data<-left_join(dach_bld_inter.sp@data, test, by = c('iid_dach'='iid_dach'))
+
+#calculating the relative amount of roof area for each snippet
+dach_bld_inter.sp$area_dach_proz<-dach_bld_inter.sp$area_inter/dach_bld_inter.sp$area_dach_tot
+
+#merge roof_id and egid
+dach_bld_inter.sp@data<-left_join(dach_bld_inter.sp@data, dach@data[,c("iid_dach","ROOF_ID")], by = c('iid_dach'='iid_dach'))
+dach_bld_inter.sp@data<-left_join(dach_bld_inter.sp@data, rolle_bld_out@data[,c("iid_bld","EGID")], by = c('iid_bld'='iid_bld'))
+
+#merge yearly pv values
+dach_bld_inter.sp@data<-left_join(dach_bld_inter.sp@data, pv_prov_jahr, by = c('ROOF_ID'='roofID'))
+names(dach_bld_inter.sp@data)[8]<-"pvJahr_dach_tot"
+
+#compute the relative pv value for each snippet, using the realtive share of roof area
+dach_bld_inter.sp$pvJahr_dach_proz<-dach_bld_inter.sp$pvJahr_dach_tot*dach_bld_inter.sp$area_dach_proz
+
+#df
+dach_bld_inter.tbl<-dach_bld_inter.sp@data
+
+#compute one yearly pv value for each bld
+dach_bld_inter.aggreg<-dach_bld_inter.tbl%>%
+  group_by(EGID)%>%
+  summarise(pvPotentialJahr=sum(pvJahr_dach_proz, na.rm=T)/6000)
+
+rolle_bld_out@data<-left_join(rolle_bld_out@data, dach_bld_inter.aggreg, by = c('EGID'='EGID'))
+```
+
+#Visualisierung Energie
+
+```{r geoviz, fig.width = 7, fig.height = 5.5}
+rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+#rolle_bld_out.wgs$pvPotentialJahr<-rnorm(nrow(rolle_bld_out))
+
+qpal_pv <- colorBin(
+  palette = "YlGnBu",
+  domain = rolle_bld_out.wgs$pvPotentialJahr,
+  bins=quantile(round(rolle_bld_out.wgs$pvPotentialJahr),na.rm=T,seq(0,1,length.out = 5))
+)
+
+
+#visualisierung mit leaflet
+m <- leaflet() %>%
+  
+  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
+  addProviderTiles(providers$OpenStreetMap, group = "normal") %>%
+  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              fillColor = ~qpal_pv(rolle_bld_out.wgs$pvPotentialJahr),
+              color = "black",
+              weight=1,
+              popup=paste("EGID: ", rolle_bld_out.wgs$EGID,
+                          " / EBF: ", round(rolle_bld_out.wgs$ebf),
+                          " / Energiebedarf: ",round(rolle_bld_out.wgs$enerBed_awel),
+                          " / PV Potential: ",round(rolle_bld_out.wgs$pvPotentialJahr)),
+              group = "PV Potential")%>%
+  
+  addLayersControl(
+    baseGroups = c("OSM (b/w)","normal","ESRI"),
+    overlayGroups = c("PV Potential"),
+    options = layersControlOptions(collapsed = F)
+  )%>%
+  
+  addLegend(pal = qpal_pv, values = rolle_bld_out.wgs$pvPotentialJahr,
+    title = "PV Potential (kWh/a)", position = "bottomleft")
+
+#leaflet karte ausführen
+m
+```
+
+##Save all Information
+```{r save}
+#html karte speichern
+wd<-getwd()
+htmlwidgets::saveWidget(m, file=paste(wd,"/output/14_output/map/mapPVPotential.html",sep=""),selfcontained = T)
+
+#buildings speichern
+save(rolle_bld_out,file="output/14_output/geom/14_rolle_bld_out.Rdata")
+writeOGR(dach_bld_inter.sp, "output/14_output/geom", "dach_bld_inter", driver="ESRI Shapefile",overwrite_layer = T)
+```
+
+

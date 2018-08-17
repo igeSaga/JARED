@@ -19,22 +19,23 @@ library(ggplot2)
 library(gridExtra)
 library(spatialEco)
 library(lakemorpho)
+library(dplyr)
 
 #empty workspace
 rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
 ```
 
 In diesem Skript wird eine Serie von relevanter Information pro Gebäude berechnet und geschätzt.
 
-_Anmerkungen: Einige der Lookup-Tabellen brauchen noch Quellenangaben. Die Richtigkeit der Längen- und Breiten-Berechnungen der Gebäude hängt stark von der Einfachheit der Gebäudegeometrie ab (Hilfsattribute zur Abschätzung der Unsicherheit wurden hinzugefügt)._
+__Anmerkungen: Einige der Lookup-Tabellen brauchen noch Quellenangaben. Die Richtigkeit der Längen- und Breiten-Berechnungen der Gebäude hängt stark von der Einfachheit der Gebäudegeometrie ab (Hilfsattribute zur Abschätzung der Unsicherheit wurden hinzugefügt).__
 
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Es handelt sich vor allem um Lookup-up Tabellen für U-Werte und Fensterflächen.
 ```{r reader av}
 load("output/03_output/geom/03_rolle_bld_out.Rdata")
-
-#pfad für daten auf T laufwerk
-dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
 
 #u-werte
 uValues_lookup<-read.csv(paste(dataPath,"12_uValues/uValues_lookup_wide.csv",sep=""))
@@ -54,7 +55,7 @@ rolle_bld_out$uPeriod<-cut(as.numeric(rolle_bld_out$GBAUJ),
                            labels = c("0_1945","1945_1960","1960_1970","1970_1980",
                                       "1980_1990","1990_2000","2000_2005","2005_2020"))
 
-rolle_bld_out@data<-merge(rolle_bld_out@data,uValues_lookup,by.x="uPeriod",by.y="period",all.x=T)
+rolle_bld_out@data<-left_join(rolle_bld_out@data, uValues_lookup, by = c('uPeriod'='period'))
 
 #sanierung
 rolle_bld_out$uVal_ground_saniert<-0.25
@@ -147,7 +148,7 @@ rolle_bld_out$fPeriod<-cut(as.numeric(rolle_bld_out$GBAUJ),
                            breaks=c(0,1950,1970,2000,2500),
                            labels = c("0_1950","1950_1970","1970_2000","2000_2020"))
 
-rolle_bld_out@data<-merge(rolle_bld_out@data,fenstFl_lookup,by.x="fPeriod",by.y="periode",all.x=T)
+rolle_bld_out@data<-left_join(rolle_bld_out@data, fenstFl_lookup, by = c('fPeriod'='periode'))
 
 rolle_bld_out$fensterFl_wohnen<-wandFl_wohnen*rolle_bld_out$prozFl_wohnen
 rolle_bld_out$fensterFl_nichtWohnen<-wandFl_nichtWohnen*rolle_bld_out$prozFl_nichtWohnen

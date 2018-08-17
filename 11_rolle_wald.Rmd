@@ -10,30 +10,36 @@ output:
     toc: yes
 ---
 
-```{r setup, include=FALSE}
-
+```{r setup,}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 #loading libraries
 library(sp)
 library(rgdal)
 library(leaflet)
 library(ggplot2)
+library(dplyr)
 
 #empty workspace
 rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
 ```
 
-In diesem Skript wird für ein Einzugsgebiet von 20km rund um Rolle der Zugang zum Waldbestand quantifiziert. Die 20km sind als sinnvolles Distanzmass dem Bericht des Kantons Wadt zur Nutzung von Holz zur Energiegewinnung entnommen ([Link](https://www.vd.ch/themes/environnement/energie/energies-renouvelables-bois-hydraulique-geothermie-profonde-energies-eolienne-et-solaire/bois-energie/)). Im Bericht wird auch das Interesse des Kantons betont, die Energiegewinnung aus Holz in Zukunft zu fördern.  
+In diesem Skript wird für ein Einzugsgebiet von rund 20km um Rolle der Zugang zum Waldbestand quantifiziert. Die 20km sind als sinnvolles Distanzmass dem Bericht des Kantons Waadt zur Nutzung von Holz zur Energiegewinnung entnommen ([Link](https://www.vd.ch/fileadmin/user_upload/themes/environnement/energie/fichiers_pdf/Rapport_potentiel_bois_energie_forets_VD.pdf)). Im Bericht wird auch das Interesse des Kantons betont, die Energiegewinnung aus Holz in Zukunft zu fördern.  
 
-Der Waldbestand wird den beiden Layer Land-cover und Land-use der Arealstatistik des BfS entnommen ([Link](https://www.bfs.admin.ch/bfs/de/home/statistiken/raum-umwelt/nomenklaturen/arealstatistik.html)). 
+Der Waldbestand wird den beiden Layer Land-cover und Land-use der Arealstatistik des BfS entnommen ([Link](https://www.bfs.admin.ch/bfs/de/home/statistiken/raum-umwelt/nomenklaturen/arealstatistik.html)).  
+
+Die Waldfläche in der Arealstatistik entspricht ziemlich genau der Waldfläche, welche in obigem Bericht des Kantons ausgewiesen wird, nämlich ca. 100'000ha. Der Bericht bietet auf S.9 einen Schlüssel, wie die Waldfläche von ha in m^3 Holz, welches jährlich, energetisch genutzt werden kann, umgerechnet wird. Zudem kann S.11 entnommen werden, wie die Waldfläche auf Nadel- und Laubhölzer verteilt ist. Dem Energiekonzept von Rolle aus dem Jahr 2016 kann auf S. 9 entnommen werden, wie viel Energie ein m^3 Nadel- oder Laubholz entspricht. Im Folgenden sind all diese Angaben zusammengetragen:   
+
+* Im Kantonsdurchschnitt kann aus 1 ha Wald pro Jahr 0.30 m^3 Holz zur Energiegewinnung gewonnen werden.   
+* 22% des Holzes ist Nadelholz, 78% Laubholz   
 
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommen die beiden Layer der Arealstatistik.
 ```{r reader av, message=FALSE, warning=FALSE}
 load("output/05_output/geom/05_rolle_bld_out.Rdata")
 rolleCRS<-proj4string(rolle_bld_out)
-
-#pfad für daten auf T laufwerk
-dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
 
 rolle_for_lu<-readOGR(layer = "rolle20kmBuffer_txt", dsn = paste(dataPath,"15_holz/forestRolle",sep=""))
 rolle_for_lc<-readOGR(layer = "rolle20kmBuffer_lc_txt", dsn = paste(dataPath,"15_holz/forestRolle",sep=""))
@@ -52,7 +58,7 @@ levels(rolle_for_lc$arealsta_2)<-c("Aufgeloester Baumbestand",
                                 "Waldstreifen")
 ```
 
-#Waldkarte
+#Waldkarte (im 20km Umkreis)
 ```{r geoviz, fig.width = 7, fig.height = 5.5}
 rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
 rolle_for_lu.wgs<-spTransform(rolle_for_lu,CRSobj = CRS("+init=epsg:4326"))
@@ -146,8 +152,39 @@ ggplot(dat_lc, aes(x=dist))+
   ylab("Wald (ha)")
 ```
 
+
+#Energetische Holznutzung
+
+```{r holz, fig.height=4, fig.width=8, warning=FALSE, paged.print=FALSE}
+forest.agg<-dat%>%
+  group_by(dist) %>%
+  summarise(sumHA = n())
+
+forest.agg$m3_wood<-forest.agg$sumHA*0.32
+forest.agg$m3_wood_laub<-forest.agg$m3_wood*0.78
+forest.agg$m3_wood_nadel<-forest.agg$m3_wood*0.22
+
+forest.agg$energie_nadel<-forest.agg$m3_wood_nadel*650
+forest.agg$energie_laub<-forest.agg$m3_wood_laub*1000
+
+forest.gg<-data.frame(dist=rep(forest.agg$dist,2),
+                      Holzart=rep(c("Nadelholz","Laubholz"),each=nrow(forest.agg)), 
+                      energie=c(forest.agg$energie_nadel,forest.agg$energie_laub))
+
+p2<-ggplot(forest.gg, aes(x=dist,y=energie/1000,fill=Holzart))+
+  geom_col()+
+  theme_minimal()+
+  ggtitle(paste("Energetische Nutzung von Holz im Einzugsgebiet von Rolle (max 20km)",sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=14))+
+  xlab("Distance (m)")+
+  ylab("Energie aus Holz (MWh/a)")
+p2
+```
+
+
 ##Save all Information
 ```{r save}
 #abbildung speichern
 ggsave(p,filename = "output/11_output/viz/waldZugang.png",dpi = 500,width = 10,height = 6)
+ggsave(p2,filename = "output/11_output/viz/holzEnergie.png",dpi = 500,width = 10,height = 6)
 ```

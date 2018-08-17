@@ -4,16 +4,24 @@ library(rmarkdown)
 
 temp <- list.files(path="../JARED/",pattern="*.Rmd")
 
-i<-1
 for(i in 1:length(temp)){
   fileN<-temp[i]
   print(paste("rendering:",fileN))
-  rmarkdown::render(fileN,encoding = "UTF-8")
+  rmarkdown::render(fileN, 
+                    encoding = "UTF-8",
+                    output_format = "html_document",
+                    clean = T, quiet = T, 
+                    envir=new.env())
 }
 
 
 #copy all scripts and results to the T directory (takes a few minutes)
-new_folder<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/07-Berechnungen/03_demand_potential/"
+source("999_helpers.R")
+new_folder<-paste(calcPath,"03_demand_potential/",sep="")
 current_folder <- "/Volumes/MacHD/Users/tbderung/Documents/projects/git/JARED/"
 
-file.copy(current_folder, new_folder,overwrite = T,recursive=T,copy.date=T)
+file.copy(current_folder, 
+          new_folder,
+          overwrite = T,
+          recursive=T,
+          copy.date=T)

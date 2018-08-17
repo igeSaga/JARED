@@ -20,11 +20,14 @@ library(spatialEco)
 
 #empty workspace
 rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
 ```
 
 In diesem Skript werden die Gebäude anhand von Informationen aus dem GWR den SIA Gebäudetypen zugeordnet.
 
-_Anmerkung: Es werden ein paar Gebäudetypen verwendet, welche in der SIA nicht vorkommen (z.B. Schloss oder Kirche)._
+__Anmerkung: Es werden ein paar Gebäudetypen verwendet, welche in der SIA nicht vorkommen (z.B. Schloss oder Kirche).__
 
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Zusätzlich werden ein paar Werte pro Gebäude berechnet, welche für die spätere Visualisierung der SIA Klassifikation informativ sind.
@@ -45,7 +48,7 @@ rolle_bld_out$ebf<-as.numeric(rolle_bld_out$GAREA)*as.numeric(rolle_bld_out$GAST
 
 
 #SIA Klassifikation
-Die Klassen und Typen von Gebäuden aus dem GWR werden SIA Gebäudetypen zugeordnet. Dies ist ein weitestgehend manueller Schritt, welcher viele Entscheidungen (teilweise partikulär für Rolle) beinhaltet.
+Die Klassen und Typen von Gebäuden aus dem GWR werden SIA Gebäudetypen zugeordnet. Dies ist ein weitestgehend manueller Schritt, welcher viele Entscheidungen umfasst. Es werden teilweise Bezeichnungen verwendet, welche in der SIA nicht vorkommen.
 ```{r sia, message=FALSE, warning=FALSE}
 rolle_bld_out$klasKat<-paste(rolle_bld_out$GKLAS,rolle_bld_out$GKAT,sep="_")
 rolle_bld_out$sia<-NA
@@ -265,14 +268,33 @@ rolle_bld_out_sia<-rbind(rolle_bld_out_sia,rolle_bld_out_temp)
 rolle_bld_out_noSia<-rolle_bld_out_noSia[!rolle_bld_out_noSia$EGID%in%rolle_bld_out_temp$EGID,]
 
 rolle_bld_out<-rolle_bld_out_sia
+```
 
-# test<-rolle_bld_out_noSia@data
-# test$GAREA<-as.numeric(test$GAREA)
-# table(test$GAREA>50)
-# 
-# rolle_bld_out_noSia$peri<-polyPerimeter(rolle_bld_out_noSia)
-# rolle_bld_noSia_wgs<-spTransform(rolle_bld_out_noSia,CRSobj = CRS("+init=epsg:4326"))
-# writeOGR(rolle_bld_noSia_wgs, "output/geom", "rolle_bld_noSia", driver="ESRI Shapefile",overwrite_layer = T)
+##SIA Nummern
+Hier wird versucht die obige, ausführliche Liste an Gebäudetypen eindeutig den SIA Klassen zuzuordnen. Es werden die 12 SIA Nummern von SIA 380, S. 43 verwendet. Mischnutzung bekommt die SIA Nummer 99 zugeteilt.
+```{r siaNr, message=FALSE, warning=FALSE}
+levels(factor(rolle_bld_out$sia))
+
+rolle_bld_out$siaNr<-99
+
+rolle_bld_out$siaNr[rolle_bld_out$sia=="mfh"|
+                      rolle_bld_out$sia=="hotel"]<-1
+rolle_bld_out$siaNr[rolle_bld_out$sia=="efh"]<-2
+rolle_bld_out$siaNr[rolle_bld_out$sia=="verwaltung"]<-3
+rolle_bld_out$siaNr[rolle_bld_out$sia=="schule"]<-4
+rolle_bld_out$siaNr[rolle_bld_out$sia=="verkauf"]<-5
+rolle_bld_out$siaNr[rolle_bld_out$sia=="restaurant"]<-6
+rolle_bld_out$siaNr[rolle_bld_out$sia=="versammlungslokal"|
+                      rolle_bld_out$sia=="kirche"|
+                      rolle_bld_out$sia=="schloss"]<-7
+rolle_bld_out$siaNr[rolle_bld_out$sia=="krankenhaus"|
+                      rolle_bld_out$sia=="altersheim"]<-8
+rolle_bld_out$siaNr[rolle_bld_out$sia=="industrie"|
+                      rolle_bld_out$sia=="leichte industrie"|
+                      rolle_bld_out$sia=="landwirtschaft"]<-9
+rolle_bld_out$siaNr[rolle_bld_out$sia=="garage"]<-10
+rolle_bld_out$siaNr[rolle_bld_out$sia=="sporthalle"]<-11
+rolle_bld_out$siaNr[rolle_bld_out$sia=="schwimmhalle"]<-12
 ```
 
 #Visualisierung
@@ -316,6 +338,7 @@ p3<-ggplot(rolle_bld_out@data, aes(x=nutzung,y=ebf))+
 p.all0<-grid.arrange(p1,p2,p3,ncol=1)
 p.all0
 ```
+
 
 ##SIA Gebäudetypen
 

@@ -22,6 +22,12 @@ library(reshape2)
 
 #empty workspace
 rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
+
+#encoding
+Sys.setlocale(category = "LC_ALL", locale = "en_US.UTF-8")
 ```
 
 In diesem Skript wird eine Abschätzung des Windpotentials für Rolle und Mont-sur-Rolle gemacht. Dabei werden nur die Zone hohen Windpotentials berücksichtigt: "Die Hauptpotenzialgebiete sind durch den Bund unter Berücksichtigung hoher Windenergieerträge (Basisdaten Windatlas Schweiz, www.windatlas.ch), der wichtigsten Bundesinteressen und einer ausreichenden räumlichen Konzentration ermittelt worden". Es wird daher davon ausgegangen, dass bloss diese Gebiete für eine erweiterte Analyse in Frage kommen. Alle Berechungen in diesem Skript basieren auf den Angaben von https://wind-data.ch/.
@@ -31,9 +37,6 @@ Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen.
 ```{r reader av}
 load("output/05_output/geom/05_rolle_bld_out.Rdata")
 rolleCRS<-proj4string(rolle_bld_out)
-
-#pfad für daten auf T laufwerk
-dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
 
 #untersuchungsgebiet
 bb<-rolle_bld_out@bbox
@@ -189,10 +192,10 @@ e.ertr<-data.frame(Typ=rep(c("Leistungsstark","Mittlere Leistung","Niedrige Leis
                    Windgeschwindigkeit=rep(c(3.5,5,6),3),
                    Energieertrag=c(1981158,5340437,7774209,749749,2384090,3817937,361675,1027021,1606999))
 p<-ggplot(e.ertr)+
-  geom_path(aes(x=Windgeschwindigkeit,y=Energieertrag, group=Typ, color=Typ))+
-  geom_point(aes(x=Windgeschwindigkeit,y=Energieertrag, group=Typ, color=Typ),size=2)+
+  geom_path(aes(x=Windgeschwindigkeit,y=Energieertrag/1000, group=Typ, color=Typ))+
+  geom_point(aes(x=Windgeschwindigkeit,y=Energieertrag/1000, group=Typ, color=Typ),size=2)+
   theme_minimal()+
-  ylab("Energieertrag (kWh/Jahr)")
+  ylab("Energieertrag (MWh/Jahr)")
 p
 ```
 ```{r save}

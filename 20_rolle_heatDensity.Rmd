@@ -1,0 +1,139 @@
+---
+title: "20 - Wärmedichte"
+author: "Curdin Derungs"
+date: "August 2018"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+library(sp)
+library(raster)
+library(sf)
+library(leaflet)
+library(rgeos)
+library(plyr)
+library(dplyr)
+
+
+#empty workspace
+rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
+```
+
+In diesem Skript wird für einen zufällig ausgerichteten Hektarraster der Energiebedarf aufsummiert. Das Resultat ist ein Raster der die Energiedichte wiedergibt.
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommen die beiden Layer der Arealstatistik.
+```{r reader, message=FALSE, warning=FALSE}
+load("output/14_output/geom/14_rolle_bld_out.Rdata")
+```
+
+#Energiegrid Berechnen
+```{r grid}
+
+pts<-gCentroid(rolle_bld_out,byid = T)
+rolle_bld_pts<-SpatialPointsDataFrame(pts,rolle_bld_out@data)
+
+
+e <- as(raster::extent(extent(rolle_bld_out)), "SpatialPolygons") %>% 
+  st_as_sf()
+
+grd.st <- st_make_grid(e, cellsize = c(100, 100)) %>%
+  st_set_crs(21781)
+
+grd.sp <- as(grd.st, "Spatial")
+
+proj4string(grd.sp)<-CRS("+init=epsg:21781")
+proj4string(rolle_bld_pts)<-CRS("+init=epsg:21781")
+
+ov<-over(rolle_bld_pts,grd.sp)
+
+ov<-data.frame(energ=rolle_bld_pts$enerBed_awel,ov=ov)
+
+ov<-ddply(ov,.(ov),summarise,sumEnergy=sum(energ))
+
+grd.spdf<-SpatialPolygonsDataFrame(grd.sp,data.frame(ID=paste("ID",1:length(grd.sp),sep=""),iid=1:length(grd.sp)),match.ID = "ID")
+
+dat<-left_join(grd.spdf@data, ov, by = c('iid'='ov'))
+grd.spdf@data<-dat
+```
+
+
+## Energiegrid Visualisieren
+...
+```{r geoviz}
+rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+grd.spdf.wgs<-spTransform(grd.spdf,CRSobj = CRS("+init=epsg:4326"))
+
+qpal <- colorBin(
+  palette = "YlGnBu",
+  domain = rolle_bld_out.wgs$enerBed_awel,
+  bins=quantile(rolle_bld_out.wgs$enerBed_awel,na.rm=T,seq(0,1,length.out = 10)),
+  na.color = "white"
+)
+
+qpal.grid <- colorBin(
+  palette = "YlGnBu",
+  domain = grd.spdf.wgs$sumEnergy,
+  bins=quantile(grd.spdf.wgs$sumEnergy,na.rm=T,seq(0,1,length.out = 10)),
+  na.color = "white"
+)
+
+m <- leaflet() %>%
+  
+  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
+  addProviderTiles(providers$OpenStreetMap, group = "normal") %>%
+  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              color = ~qpal(rolle_bld_out.wgs$enerBed_awel),
+              weight=1,
+              group = "Haeuser")%>%
+  
+  addPolygons(data=grd.spdf.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.6, 
+              color = ~qpal.grid(grd.spdf.wgs$sumEnergy),
+              weight=1,
+              group = "Grid")%>%
+  
+  addLayersControl(
+    baseGroups = c("OSM (b/w)","normal","ESRI"),
+    overlayGroups = c("Haeuser","Grid"),
+    options = layersControlOptions(collapsed = F)
+  )%>%
+  
+  addLegend(pal = qpal, 
+            values =rolle_bld_out.wgs$enerBed_awel, 
+            opacity = 1,
+            title = "Haeuser (AWEL) - kWh/a",
+            position = 'bottomright')%>%
+  
+  addLegend(pal = qpal.grid, 
+            values =grd.spdf.wgs$sumEnergy, 
+            opacity = 1,
+            title = "Grid (AWEL) - kWh/a",
+            position = 'bottomleft')
+
+m
+```
+
+
+##Save all Information
+```{r save}
+#html karte speichern
+wd<-getwd()
+htmlwidgets::saveWidget(m, file=paste(wd,"/output/20_output/map/mapEnergyGrid.html",sep=""),selfcontained = T)
+
+#grid speichern
+save(grd.spdf,file="output/20_output/geom/rolle_energygrid.Rdata")
+```

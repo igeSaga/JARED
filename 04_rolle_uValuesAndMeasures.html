@@ -227,24 +227,21 @@ div.tocify {
 
 
 <p>In diesem Skript wird eine Serie von relevanter Information pro Gebäude berechnet und geschätzt.</p>
-<p><em>Anmerkungen: Einige der Lookup-Tabellen brauchen noch Quellenangaben. Die Richtigkeit der Längen- und Breiten-Berechnungen der Gebäude hängt stark von der Einfachheit der Gebäudegeometrie ab (Hilfsattribute zur Abschätzung der Unsicherheit wurden hinzugefügt).</em></p>
+<p><strong>Anmerkungen: Einige der Lookup-Tabellen brauchen noch Quellenangaben. Die Richtigkeit der Längen- und Breiten-Berechnungen der Gebäude hängt stark von der Einfachheit der Gebäudegeometrie ab (Hilfsattribute zur Abschätzung der Unsicherheit wurden hinzugefügt).</strong></p>
 <div id="daten-einlesen" class="section level1">
 <h1>Daten einlesen</h1>
 <p>Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Es handelt sich vor allem um Lookup-up Tabellen für U-Werte und Fensterflächen.</p>
 <pre class="r"><code>load(&quot;output/03_output/geom/03_rolle_bld_out.Rdata&quot;)
-
-#pfad für daten auf T laufwerk
-dataPath&lt;-&quot;/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/&quot;
 
 #u-werte
 uValues_lookup&lt;-read.csv(paste(dataPath,&quot;12_uValues/uValues_lookup_wide.csv&quot;,sep=&quot;&quot;))
 
 #fensterflaeche
 fenstFl_lookup&lt;-read.csv(paste(dataPath,&quot;13_fenster/fensterflaeche.csv&quot;,sep=&quot;&quot;))</code></pre>
-<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote =
-## quote, : incomplete final line found by readTableHeader on '/Volumes/data$/
-## ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-
-## Daten/13_fenster/fensterflaeche.csv'</code></pre>
+<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote
+## = quote, : incomplete final line found by readTableHeader on '/Users/
+## tbderung/shares/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work
+## Packages/JA RED/06-Daten/13_fenster/fensterflaeche.csv'</code></pre>
 </div>
 <div id="u-werte-hinzufugen" class="section level1">
 <h1>U-Werte hinzufügen</h1>
@@ -254,7 +251,7 @@ fenstFl_lookup&lt;-read.csv(paste(dataPath,&quot;13_fenster/fensterflaeche.csv&q
                            labels = c(&quot;0_1945&quot;,&quot;1945_1960&quot;,&quot;1960_1970&quot;,&quot;1970_1980&quot;,
                                       &quot;1980_1990&quot;,&quot;1990_2000&quot;,&quot;2000_2005&quot;,&quot;2005_2020&quot;))
 
-rolle_bld_out@data&lt;-merge(rolle_bld_out@data,uValues_lookup,by.x=&quot;uPeriod&quot;,by.y=&quot;period&quot;,all.x=T)
+rolle_bld_out@data&lt;-left_join(rolle_bld_out@data, uValues_lookup, by = c('uPeriod'='period'))
 
 #sanierung
 rolle_bld_out$uVal_ground_saniert&lt;-0.25
@@ -333,7 +330,7 @@ wandFl_nichtWohnen&lt;-umfang*(as.numeric(rolle_bld_out$GASTW)*5)</code></pre>
                            breaks=c(0,1950,1970,2000,2500),
                            labels = c(&quot;0_1950&quot;,&quot;1950_1970&quot;,&quot;1970_2000&quot;,&quot;2000_2020&quot;))
 
-rolle_bld_out@data&lt;-merge(rolle_bld_out@data,fenstFl_lookup,by.x=&quot;fPeriod&quot;,by.y=&quot;periode&quot;,all.x=T)
+rolle_bld_out@data&lt;-left_join(rolle_bld_out@data, fenstFl_lookup, by = c('fPeriod'='periode'))
 
 rolle_bld_out$fensterFl_wohnen&lt;-wandFl_wohnen*rolle_bld_out$prozFl_wohnen
 rolle_bld_out$fensterFl_nichtWohnen&lt;-wandFl_nichtWohnen*rolle_bld_out$prozFl_nichtWohnen</code></pre>

@@ -1,5 +1,5 @@
 ---
-title: "08 - Zugang zum See"
+title: "12 - Zugang zum See"
 author: "Curdin Derungs"
 date: "July 2018"
 output:
@@ -23,20 +23,22 @@ library(RColorBrewer)
 
 #empty workspace
 rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
 ```
 
 In diesem Skript wird für jedes Gebäude in Rolle die Distanz und der Höhenunterschied zum See berechnet.  
 
-Als Rechungsgrundlage dienen ein Digitales Höhenmodell, DHM25 von Swisstopo ([Link](https://www.swisstopo.admin.ch/de/home/products/height/dhm25.html)), und ein aufbereiteter Raster Datensatz, welcher die kontinuierliche Distanz zum Lac du Leman als Rasterwerte enthält.
+Als Rechungsgrundlage dienen ein Digitales Höhenmodell, DHM25 von Swisstopo ([Link](https://www.swisstopo.admin.ch/de/home/products/height/dhm25.html)), und ein aufbereiteter Raster Datensatz, welcher die kontinuierliche Distanz zum Lac du Leman als Rasterwerte enthält.   
+
+__TODO: Allenfalls gibt es einen Bericht um die Seewassernutzung energetisch zu Quantifizieren.__
 
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommen die beiden Layer der Arealstatistik.
 ```{r reader av, message=FALSE, warning=FALSE}
 load("output/05_output/geom/05_rolle_bld_out.Rdata")
 rolleCRS<-proj4string(rolle_bld_out)
-
-#pfad für daten auf T laufwerk
-dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
 
 #dhm einlesen
 rolle_dhm<-raster(paste(dataPath,"17_see/dhm_rolle_asc.asc",sep=""))

@@ -1,0 +1,135 @@
+---
+title: "06 - Export Gebäudeinfos und Demand"
+author: "Curdin Derungs"
+date: "August 2018"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+library(rgdal)
+
+#empty workspace
+rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
+
+#encoding
+Sys.setlocale(category = "LC_ALL", locale = "en_US.UTF-8")
+```
+
+In diesem Skript werden die Informationen aus den vorangegangenen Skripten so aufbereitet, dass nur noch die zentralen Attribute vorhanden sind.
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen.
+```{r reader av}
+load("output/05_output/geom/05_rolle_bld_out.Rdata")
+```
+
+#Bereinigung
+
+##Klassifikation Wohnen / !Wohnen
+```{r wohn, fig.height=10, fig.width=6, warning=FALSE, paged.print=FALSE}
+rolle_bld_out$nutzung<-NA
+rolle_bld_out$nutzung[rolle_bld_out$sia=="efh"|
+                        rolle_bld_out$sia=="mfh"] <- "wohnen"
+
+rolle_bld_out$nutzung[rolle_bld_out$sia=="alterheim"|
+                        rolle_bld_out$sia=="mischnutzung"|
+                        rolle_bld_out$sia=="krankenhaus"|
+                        rolle_bld_out$sia=="hotel"|
+                        rolle_bld_out$sia=="restaurant"] <- "nichtWohnen"
+
+rolle_bld_out$nutzung[is.na(rolle_bld_out$nutzung)] <- "nichtWohnen"
+```
+
+##Fenster Attribute nach Nutzung zuweisen
+```{r wohnF, fig.height=10, fig.width=6, warning=FALSE, paged.print=FALSE}
+rolle_bld_out$fensterFl<-NA
+rolle_bld_out$fensterFl[rolle_bld_out$nutzung=="wohnen"]<-rolle_bld_out$fensterFl_wohnen[rolle_bld_out$nutzung=="wohnen"]
+rolle_bld_out$fensterFl[rolle_bld_out$nutzung=="nichtWohnen"]<-rolle_bld_out$fensterFl_nichtWohnen[rolle_bld_out$nutzung=="nichtWohnen"]
+
+rolle_bld_out$fensterFl_proz<-NA
+rolle_bld_out$fensterFl_proz[rolle_bld_out$nutzung=="wohnen"]<-rolle_bld_out$prozFl_wohnen[rolle_bld_out$nutzung=="wohnen"]
+rolle_bld_out$fensterFl_proz[rolle_bld_out$nutzung=="nichtWohnen"]<-rolle_bld_out$prozFl_nichtWohnen[rolle_bld_out$nutzung=="nichtWohnen"]
+
+rolle_bld_out$fensterFl_breite<-NA
+rolle_bld_out$fensterFl_breite[rolle_bld_out$nutzung=="wohnen"]<-rolle_bld_out$fensterFl_wohnen_breite[rolle_bld_out$nutzung=="wohnen"]
+rolle_bld_out$fensterFl_breite[rolle_bld_out$nutzung=="nichtWohnen"]<-rolle_bld_out$fensterFl_nichtWohnen_breite[rolle_bld_out$nutzung=="nichtWohnen"]
+
+rolle_bld_out$fensterFl_laenge<-NA
+rolle_bld_out$fensterFl_laenge[rolle_bld_out$nutzung=="wohnen"]<-rolle_bld_out$fensterFl_wohnen_laenge[rolle_bld_out$nutzung=="wohnen"]
+rolle_bld_out$fensterFl_laenge[rolle_bld_out$nutzung=="nichtWohnen"]<-rolle_bld_out$fensterFl_nichtWohnen_laenge[rolle_bld_out$nutzung=="nichtWohnen"]
+```
+
+##Klassifikation EFH / MFH
+```{r typ, fig.height=10, fig.width=6, warning=FALSE, paged.print=FALSE}
+rolle_bld_out$typ<-NA
+rolle_bld_out$typ[rolle_bld_out$sia=="efh"] <- "efh"
+
+rolle_bld_out$typ[rolle_bld_out$sia=="alterheim"|
+                        rolle_bld_out$sia=="mischnutzung"|
+                        rolle_bld_out$sia=="krankenhaus"|
+                        rolle_bld_out$sia=="hotel"|
+                        rolle_bld_out$sia=="restaurant"] <- "mfh"
+
+rolle_bld_out$typ[is.na(rolle_bld_out$typ)] <- "mfh"
+```
+
+##U-Werte nach Gebäudetyp zuweisen
+```{r g, fig.height=10, fig.width=6, warning=FALSE, paged.print=FALSE}
+rolle_bld_out$uVal_ground<-NA
+rolle_bld_out$uVal_roof<-NA
+rolle_bld_out$uVal_wall<-NA
+rolle_bld_out$uVal_window<-NA
+
+rolle_bld_out$uVal_ground[rolle_bld_out$typ=="efh"]<-rolle_bld_out$uVal_efh_ground[rolle_bld_out$typ=="efh"]
+rolle_bld_out$uVal_ground[rolle_bld_out$typ=="mfh"]<-rolle_bld_out$uVal_mfh_ground[rolle_bld_out$typ=="mfh"]
+
+rolle_bld_out$uVal_roof[rolle_bld_out$typ=="efh"]<-rolle_bld_out$uVal_efh_roof[rolle_bld_out$typ=="efh"]
+rolle_bld_out$uVal_roof[rolle_bld_out$typ=="mfh"]<-rolle_bld_out$uVal_mfh_roof[rolle_bld_out$typ=="mfh"]
+
+rolle_bld_out$uVal_wall[rolle_bld_out$typ=="efh"]<-rolle_bld_out$uVal_efh_wall[rolle_bld_out$typ=="efh"]
+rolle_bld_out$uVal_wall[rolle_bld_out$typ=="mfh"]<-rolle_bld_out$uVal_mfh_wall[rolle_bld_out$typ=="mfh"]
+
+rolle_bld_out$uVal_window[rolle_bld_out$typ=="efh"]<-rolle_bld_out$uVal_efh_window[rolle_bld_out$typ=="efh"]
+rolle_bld_out$uVal_window[rolle_bld_out$typ=="mfh"]<-rolle_bld_out$uVal_mfh_window[rolle_bld_out$typ=="mfh"]
+```
+
+##Sanierungswerte nur für alte Gebäude
+```{r saniert, fig.height=10, fig.width=6, warning=FALSE, paged.print=FALSE}
+rolle_bld_out$uVal_ground_saniert[rolle_bld_out$GBAUJ>2000]<-NA
+rolle_bld_out$uVal_roof_saniert[rolle_bld_out$GBAUJ>2000]<-NA
+rolle_bld_out$uVal_wall_saniert[rolle_bld_out$GBAUJ>2000]<-NA
+rolle_bld_out$uVal_window_saniert[rolle_bld_out$GBAUJ>2000]<-NA
+
+rolle_bld_out$gVal_saniert[rolle_bld_out$GBAUJ>2000]<-NA
+```
+
+##Attribute auswählen
+```{r wahl, fig.height=10, fig.width=6, warning=FALSE, paged.print=FALSE}
+rolle_bld_out@data<-rolle_bld_out@data[,c("EGID","GAREA","GASTW","ebf","GKLAS_text",
+                                          "GHEIZ_text","GENHZ_text","GENWW_text","GKAT_text",
+                                          "sia","siaNr","nutzung","typ",
+                                          "uVal_ground","uVal_roof","uVal_wall","uVal_window",
+                                          "uVal_ground_saniert","uVal_roof_saniert","uVal_wall_saniert","uVal_window_saniert",
+                                          "gVal","gVal_saniert",
+                                          "fensterFl","fensterFl_breite","fensterFl_laenge","fensterFl_proz",
+                                          "longitude","latitude","breite","laenge","ausricht",
+                                          "enerBed_awel","enerBed_ss","enerBed_vd")]
+rolle_bld_tbl<-rolle_bld_out@data
+```
+
+##Save all Information
+```{r save}
+writeOGR(rolle_bld_out, "output/06_output/geom", "06_rolle_bld_out", driver="ESRI Shapefile",overwrite_layer = T)
+
+#buildings speichern
+write.csv(rolle_bld_tbl,file="output/06_output/data/06_rolle_bld_out.csv")
+```
+   

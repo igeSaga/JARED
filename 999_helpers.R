@@ -1,7 +1,7 @@
 
 #path to the data on the network
-dataPath<-"/Users/tbderung/shares/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
-calcPath<-"/Users/tbderung/shares/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/07-Berechnungen/"
+dataPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-Daten/"
+calcPath<-"/Volumes/data$/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/07-Berechnungen/"
 
 #detach all loaded packages
 detachAllPackages <- function() {

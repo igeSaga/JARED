@@ -310,7 +310,7 @@ rolle_bld_out$nutzung[rolle_bld_out$sia=="alterheim"|
                         rolle_bld_out$sia=="mischnutzung"|
                         rolle_bld_out$sia=="krankenhaus"|
                         rolle_bld_out$sia=="hotel"|
-                        rolle_bld_out$sia=="restaurant"] <- "mischnutzung"
+                        rolle_bld_out$sia=="restaurant"] <- "nichtWohnen"
 
 rolle_bld_out$nutzung[is.na(rolle_bld_out$nutzung)] <- "nichtWohnen"
 

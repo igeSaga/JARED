@@ -74,7 +74,7 @@ Gas und Heizöl domninieren als Energieträger in Rolle und MS-Rolle. Für eine 
 
 Die Nutzenergie wurde im Skript 03_rolle_energyDemand berechnet. Die Nutzenergie wird anhand von Nutzungsgraden (bzw. Arbeitszahlen, im Falle von Wärmepumpen) in Endenergie transformiert. Der Nutzungsgrad von unterschiedlichen Energieträgern wird der SIA 2040 (S. 16) entnommen.  
   
-_Anmerkung: ist es wirklich so, dass bei Wärmepumpen die Endenergie kleiner ist als die Nutzenergie (bzw. halb so gross)? Die Liste der Nutzungsgrade sollte vielleicht noch sorgfälltig geprüft werden. Zudem wird hier nur die Energie basierend auf der AWEL Methode (siehe Skript 03) berechnet. Sobald Details zu Stefan Schneider Methode bekannt sind, müssen auch seine Werte hier tranformiert werden._
+_Anmerkung: ist es wirklich so, dass bei Wärmepumpen die Endenergie kleiner ist als die Nutzenergie (bzw. halb so gross)? Die Liste der Nutzungsgrade sollte vielleicht noch sorgfälltig geprüft werden. Zudem wird hier nur die Energie basierend auf der AWEL Methode (siehe Skript 03) berechnet._
 
 ```{r nutzenergie, warning=FALSE, paged.print=FALSE}
 rolle_dat<-rolle_bld_out@data
@@ -158,7 +158,7 @@ m <- leaflet() %>%
       addPolygons(data=rolle_bld_out.wgs,
               stroke = TRUE,
               fillOpacity = 0.8, 
-              color = ~qpal_prim(rolle_bld_out.wgs$primaerEnergie_awel),
+              color = ~qpal_prim(round(rolle_bld_out.wgs$primaerEnergie_awel)),
               weight=1,
               popup=paste("SIA: ", rolle_bld_out.wgs$sia,
                           " / Alter: ",rolle_bld_out.wgs$GBAUJ,

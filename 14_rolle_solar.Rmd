@@ -93,8 +93,8 @@ dach_bld_inter.sp$area_inter<-sapply(dach_bld_inter.sp@polygons,function(x){x@ar
 #(does not sum to the original roof area, since parts of roofs that did not overlap with a bld were removed)
 test<-dach_bld_inter.sp@data
 test<-test%>%
-  group_by(iid_dach)%>%
-  summarise(area_dach_tot=sum(area_inter))
+  dplyr::group_by(iid_dach)%>%
+  dplyr::summarise(area_dach_tot=sum(area_inter))
 dach_bld_inter.sp@data<-left_join(dach_bld_inter.sp@data, test, by = c('iid_dach'='iid_dach'))
 
 #calculating the relative amount of roof area for each snippet
@@ -116,8 +116,8 @@ dach_bld_inter.tbl<-dach_bld_inter.sp@data
 
 #compute one yearly pv value for each bld
 dach_bld_inter.aggreg<-dach_bld_inter.tbl%>%
-  group_by(EGID)%>%
-  summarise(pvPotentialJahr=sum(pvJahr_dach_proz, na.rm=T)/6000)
+  dplyr::group_by(EGID)%>%
+  dplyr::summarise(pvPotentialJahr=sum(pvJahr_dach_proz, na.rm=T)/6000)
 
 rolle_bld_out@data<-left_join(rolle_bld_out@data, dach_bld_inter.aggreg, by = c('EGID'='EGID'))
 ```
@@ -175,7 +175,8 @@ htmlwidgets::saveWidget(m, file=paste(wd,"/output/14_output/map/mapPVPotential.h
 
 #buildings speichern
 save(rolle_bld_out,file="output/14_output/geom/14_rolle_bld_out.Rdata")
-writeOGR(dach_bld_inter.sp, "output/14_output/geom", "dach_bld_inter", driver="ESRI Shapefile",overwrite_layer = T)
+writeOGR(dach_bld_inter.sp, "output/14_output/geom", "dach_bld_intersect", driver="ESRI Shapefile",overwrite_layer = T)
+write.csv(rolle_bld_out@data,file="output/14_output/geom/14_rolle_bld_out.csv")
 ```
 
 

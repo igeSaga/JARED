@@ -238,14 +238,14 @@ uValues_lookup&lt;-read.csv(paste(dataPath,&quot;12_uValues/uValues_lookup_wide.
 
 #fensterflaeche
 fenstFl_lookup&lt;-read.csv(paste(dataPath,&quot;13_fenster/fensterflaeche.csv&quot;,sep=&quot;&quot;))</code></pre>
-<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote
-## = quote, : incomplete final line found by readTableHeader on '/Users/
-## tbderung/shares/ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work
-## Packages/JA RED/06-Daten/13_fenster/fensterflaeche.csv'</code></pre>
+<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote =
+## quote, : incomplete final line found by readTableHeader on '/Volumes/data$/
+## ta/60 FuE/6096 SCCER/609635 FEEBD-II/60963505 Work Packages/JA RED/06-
+## Daten/13_fenster/fensterflaeche.csv'</code></pre>
 </div>
 <div id="u-werte-hinzufugen" class="section level1">
 <h1>U-Werte hinzufügen</h1>
-<p>U-Werte werden aufgrund des Alters des Gebäudes, separat für EFH und MFH, anhand einer Liste von Stefan Mennel (Quelle?) geschätzt. Zusätzlich werden noch die U-Werte bei der Annahme von idealer Sanierung angegeben. Diese Informationen stammen von folgendem <a href="https://www.endk.ch/de/ablage/grundhaltung-der-endk/muken2014-d20150109-2.pdf">Link</a>.</p>
+<p>U-Werte werden aufgrund des Alters des Gebäudes, separat für EFH und MFH, anhand einer Liste von Stefan Mennel (Quelle?) geschätzt. Zusätzlich werden noch die U-Werte bei der Annahme von idealer Sanierung angegeben. Diese Informationen stammen von folgendem <a href="https://www.endk.ch/de/ablage/grundhaltung-der-endk/muken2014-d20150109-2.pdf">Link</a>(S. ).</p>
 <pre class="r"><code>rolle_bld_out$uPeriod&lt;-cut(as.numeric(rolle_bld_out$GBAUJ),
                            breaks=c(0,1945,1960,1970,1980,1990,2000,2005,2500),
                            labels = c(&quot;0_1945&quot;,&quot;1945_1960&quot;,&quot;1960_1970&quot;,&quot;1970_1980&quot;,
@@ -261,11 +261,12 @@ rolle_bld_out$uVal_window_saniert&lt;-1</code></pre>
 </div>
 <div id="g-werte-hinzufugen" class="section level1">
 <h1>G-Werte hinzufügen</h1>
-<p>G-Werte werden aufgrund des Alters des Gebäudes geschätzt. Als Grundlage dienen Angaben von <a href="www.energie.ch/fenster">energie.ch</a>.</p>
+<p>G-Werte werden aufgrund des Alters des Gebäudes geschätzt. Als Grundlage dienen Angaben von folgendem <a href="https://passipedia.de/planung/waermeschutz/fenster/verglasungen_und_ihre_kennwerte">Link</a>.</p>
 <pre class="r"><code>rolle_bld_out$gVal&lt;-cut(as.numeric(rolle_bld_out$GBAUJ),
                            breaks=c(0,1950,1980,1990,2500),
                            labels = c(0.92,0.8,0.62,0.48))
-rolle_bld_out$gVal&lt;-as.numeric(as.character(rolle_bld_out$gVal))</code></pre>
+rolle_bld_out$gVal&lt;-as.numeric(as.character(rolle_bld_out$gVal))
+rolle_bld_out$gVal_saniert&lt;-0.55</code></pre>
 </div>
 <div id="geographische-koordinaten" class="section level1">
 <h1>Geographische Koordinaten</h1>
@@ -318,10 +319,10 @@ rolle_bld_out$breite&lt;-rolle_bld_out$breite*rolle_bld_out$area_breiteLaenge_ra
 <p>Der Fensteranteil wird als Prozent der Wandfläche für unterschiedliche Bauperioden geschätzt, basierend auf einer Lookup-Table von Thomas Schluck (Quelle?). Die Fensterfläche wird sowohl in Prozent als auch als absolute Fläche angegeben.</p>
 <div id="wandflache-berechnen" class="section level2">
 <h2>Wandfläche berechnen</h2>
-<p>Die Wandfläche wird aus dem Umfang des Gebäudes und der Stockwerkzahl gerechnet. Die Stockwerkhöhe von Wohngebäuden wird auf 3m bestimmt, bei nicht-Wohngebäuden sind es 5m.</p>
+<p>Die Wandfläche wird aus dem Umfang des Gebäudes und der Stockwerkzahl gerechnet. Die Stockwerkhöhe wird auf 3m bestimmt.</p>
 <pre class="r"><code>umfang&lt;-polyPerimeter(rolle_bld_out)
 wandFl_wohnen&lt;-umfang*(as.numeric(rolle_bld_out$GASTW)*3)
-wandFl_nichtWohnen&lt;-umfang*(as.numeric(rolle_bld_out$GASTW)*5)</code></pre>
+wandFl_nichtWohnen&lt;-umfang*(as.numeric(rolle_bld_out$GASTW)*3)</code></pre>
 </div>
 <div id="fensterflache-aus-wandflache-ableiten" class="section level2">
 <h2>Fensterfläche aus Wandfläche ableiten</h2>

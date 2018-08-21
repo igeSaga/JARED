@@ -3,8 +3,8 @@ rm(list=ls())
 library(rmarkdown)
 
 temp <- list.files(path="../JARED/",pattern="*.Rmd")
-
-for(i in 1:length(temp)){
+i<-5
+for(i in 11:length(temp)){
   fileN<-temp[i]
   print(paste("rendering:",fileN))
   rmarkdown::render(fileN, 

@@ -157,8 +157,8 @@ ggplot(dat_lc, aes(x=dist))+
 
 ```{r holz, fig.height=4, fig.width=8, warning=FALSE, paged.print=FALSE}
 forest.agg<-dat%>%
-  group_by(dist) %>%
-  summarise(sumHA = n())
+  dplyr::group_by(dist) %>%
+  dplyr::summarise(sumHA = n())
 
 forest.agg$m3_wood<-forest.agg$sumHA*0.32
 forest.agg$m3_wood_laub<-forest.agg$m3_wood*0.78

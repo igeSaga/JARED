@@ -26,7 +26,7 @@ rm(list=ls())
 source("999_helpers.R")
 ```
 
-In diesem Skript wird...
+In diesem Skript werden die PV Poteniale von Lionel Bloch eingelesen und den Gebäuden zugewiesen.   
 
 
 #Daten einlesen

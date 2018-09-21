@@ -19,6 +19,8 @@ library(rgeos)
 library(rgdal)
 library(leaflet)
 library(dplyr)
+library(raster)
+library(sf)
 
 #empty workspace
 rm(list=ls())
@@ -29,7 +31,6 @@ source("999_helpers.R")
 
 In diesem Skript wird das Potential der Geothermie abgeschätzt. In einer relativ kleinen Zone ist der Nutzen von Geothermie nicht erlaubt. Im Rest der Gemeinde, bezeichnet mit den Zonen "Limitation" und "Autorisation", darf grundsätzlich bis zu 300m tief gebohrt werden. Eine Bewilligung ist natürlich in jedem Fall nötig.
 
-__TODO: Die Daten von Mont-sur-Rolle fehlen noch. Wie mit Warmwasser vs. Heizbedarf umgehen? Die Jahresbetriebszeiten sind im Moment so gewählt, dass nur der Heizbedarf gedeckt wird...__
 
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommt die Information zur Geothermie vom Kanton Waadt.  
@@ -37,12 +38,100 @@ Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommt d
 load("output/12_output/geom/12_rolle_bld_out.Rdata")
 rolleCRS<-proj4string(rolle_bld_out)
 
-#conductivity 300m below surface (mximum)
+##conductivity
+#conductivity 50m below surface
+#for rolle
+geoth_50<-readOGR(layer = "MN95_DGE_TPR_GEOTH_BT_COND_50_rolle", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_50<-spTransform(geoth_50,CRSobj = rolleCRS)
+geoth_50<-geoth_50[,-c(2,3)]
+
+#and ms-rolle
+geoth_50_ms<-readOGR(layer = "ms_rolle_GEOTH_BT_COND_50", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_50_ms<-spTransform(geoth_50_ms,CRSobj = rolleCRS)
+geoth_50_ms<-geoth_50_ms[,-c(1,3,4)]
+
+#conductivity 100m below surface
+#for rolle
+geoth_100<-readOGR(layer = "MN95_DGE_TPR_GEOTH_BT_COND_100_rolle", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_100<-spTransform(geoth_100,CRSobj = rolleCRS)
+geoth_100<-geoth_100[,-c(2,3)]
+
+#and ms-rolle
+geoth_100_ms<-readOGR(layer = "ms_rolle_GEOTH_BT_COND_100", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_100_ms<-spTransform(geoth_100_ms,CRSobj = rolleCRS)
+geoth_100_ms<-geoth_100_ms[,-c(1,3,4)]
+
+#conductivity 200m below surface
+#for rolle
+geoth_200<-readOGR(layer = "MN95_DGE_TPR_GEOTH_BT_COND_200_rolle", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_200<-spTransform(geoth_200,CRSobj = rolleCRS)
+geoth_200<-geoth_200[,-c(2,3)]
+
+#and ms-rolle
+geoth_200_ms<-readOGR(layer = "ms_rolle_GEOTH_BT_COND_200", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_200_ms<-spTransform(geoth_200_ms,CRSobj = rolleCRS)
+geoth_200_ms<-geoth_200_ms[,-c(1,3,4)]
+
+#conductivity 300m below surface
+#for rolle
 geoth_300<-readOGR(layer = "MN95_DGE_TPR_GEOTH_BT_COND_300_rolle", dsn = paste(dataPath,"10_Rolle",sep=""))
 #change projection
 geoth_300<-spTransform(geoth_300,CRSobj = rolleCRS)
+geoth_300<-geoth_300[,-c(2,3)]
 
-#convert conduction text into numeric values
+#and ms-rolle
+geoth_300_ms<-readOGR(layer = "ms_rolle_GEOTH_BT_COND_300", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_300_ms<-spTransform(geoth_300_ms,CRSobj = rolleCRS)
+geoth_300_ms<-geoth_300_ms[,-c(1,3,4)]
+
+#combine the rolles
+geoth_50<-rbind(geoth_50_ms,geoth_50)
+geoth_100<-rbind(geoth_100_ms,geoth_100)
+geoth_200<-rbind(geoth_200_ms,geoth_200)
+geoth_300<-rbind(geoth_300_ms,geoth_300)
+
+##convert conduction text into numeric values
+#50
+cond_nr<-as.character(geoth_50$CONDUCT)
+cond_nr<-gsub(" W/mK","",cond_nr)
+cond_nr<-strsplit(cond_nr,split = " - ")
+
+cond_min<-sapply(cond_nr,function(x) x[1])
+cond_max<-sapply(cond_nr,function(x) x[2])
+
+geoth_50$cond_min<-as.numeric(cond_min)
+geoth_50$cond_max<-as.numeric(cond_max)
+
+#100
+cond_nr<-as.character(geoth_100$CONDUCT)
+cond_nr<-gsub(" W/mK","",cond_nr)
+cond_nr<-strsplit(cond_nr,split = " - ")
+
+cond_min<-sapply(cond_nr,function(x) x[1])
+cond_max<-sapply(cond_nr,function(x) x[2])
+
+geoth_100$cond_min<-as.numeric(cond_min)
+geoth_100$cond_max<-as.numeric(cond_max)
+
+#200
+cond_nr<-as.character(geoth_200$CONDUCT)
+cond_nr<-gsub(" W/mK","",cond_nr)
+cond_nr<-strsplit(cond_nr,split = " - ")
+
+cond_min<-sapply(cond_nr,function(x) x[1])
+cond_max<-sapply(cond_nr,function(x) x[2])
+
+geoth_200$cond_min<-as.numeric(cond_min)
+geoth_200$cond_max<-as.numeric(cond_max)
+
+#300
 cond_nr<-as.character(geoth_300$CONDUCT)
 cond_nr<-gsub(" W/mK","",cond_nr)
 cond_nr<-strsplit(cond_nr,split = " - ")
@@ -57,81 +146,203 @@ geoth_300$cond_max<-as.numeric(cond_max)
 #Autorisation = allowed but an autorisation is required
 #Limitation = allowed but to a limited degree, limitation concerns a maximum depth
 #Interdiction = not allowed
+#...rolle
 geoth_adm<-readOGR(layer = "MN95_DGE_TPR_GEOTH_BT_ADM_SGV_Rolle", dsn = paste(dataPath,"10_Rolle",sep=""))
 #change projection
 geoth_adm<-spTransform(geoth_adm,CRSobj = rolleCRS)
+
+#...ms-rolle
+geoth_adm_ms<-readOGR(layer = "ms_rolle_geoth_adm", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_adm_ms<-spTransform(geoth_adm_ms,CRSobj = rolleCRS)
+
+geoth_adm_ms<-geoth_adm_ms[,-c(1,3,4,5)]
+geoth_adm<-geoth_adm[,-c(2,3,4)]
+names(geoth_adm)<-"TYPE"
+
+#combine rolles
+geoth_adm<-rbind(geoth_adm,geoth_adm_ms)
+
+#parzellen rolle
+parz<-readOGR(layer = "MOVD_CAD_TPR_PARV_S", dsn = paste(dataPath,"11_Cadastre_AmtlVermessung/Cadastre_9719_NO66KX/Cadastre",sep=""))
+#change projection
+parz<-spTransform(parz,CRSobj = rolleCRS)
 ```
 
-#Berechtigung pro Gebäude
-Es gibt die drei Zonen "Limitation", "Autorisation" und "Interdiction". Nur in letzterer ist der Nutzen der Geothermie untersagt.   
-
-```{r intersect, message=FALSE, warning=FALSE}
+#Nur Parzellen mit Häusern auswählen
+Nur Parzellen mit Häusern auswählen und die Summe des Energiebedarfs übertragen. Dann die Häuser explizit ausschneien.
+```{r bld, message=FALSE, warning=FALSE}
+##nur parzellen mit gebaeuden
 #build to points
 rolle_bld_pts <- gCentroid(rolle_bld_out,byid=TRUE)
 
-#intersection with admission zones
-ov<-over(rolle_bld_pts,geoth_adm[,2])
-ov$TYPE_TXT<-as.character(ov$TYPE_TXT)
-ov$TYPE_TXT[is.na(ov$TYPE_TXT)]<-"noInfo"
+ov<-over(rolle_bld_pts,parz)
 
-rolle_bld_out$geotherm_berechtigung<-ov$TYPE_TXT
+ov$enerBed_awel<-rolle_bld_out$enerBed_awel
+ov$EGID<-rolle_bld_out$EGID
+
+ov.agg<-ov%>%
+  group_by(IDEX2000)%>%
+  dplyr::summarise(enerBed_awel_parz=sum(enerBed_awel,na.rm=T),
+                   egids=paste(EGID,collapse = "/"),
+                   nEgids=n())
+
+parz_bld<-left_join(ov.agg,parz@data,"IDEX2000")
+parz_bld<-left_join(parz@data,parz_bld[,1:3],"IDEX2000")
+
+parz@data<-parz_bld
+parz_bld<-parz[!is.na(parz$enerBed_awel_parz),]
+
 ```
 
-#Geothermie-Potential für "Autorisation" & "Limitation"
-Für die Bewilligungsstufe "Autrisation" wird die maximale Sondenlänge von 300m angenommen. Es wird darum auch nur die Wärmeleitfähigeit dieser Bodentiefe berücksichtigt.   
-Als Berechungsgrundlage dient die SIA 384 und insbesondere Figur 7 - zur Übersetzung von Wärmeleitfähigkeit in Leistung pro Meter Sonde - und Figur 10 - zur Abschätzung der Jahresbetriebszeit in Stunden.   
+#Grenzabstand und Gebäude-Grundflächen von Parzellen abziehen
 
-__ANMERKUNG: Wie mit Warmwasser vs. Heizbedarf umgehen? Die Jahresbetriebszeiten sind im Moment so gewählt, dass nur der Heizbedarf gedeckt wird. Zudem ist das Potential hier für eine Bohrung pro Haus berechnet. Es könnten aufgrund der Gebäudefläche Annahmen zu Mehrfachbohrungen (inkl. entsprechendem Potentialverlust) gemacht werden.__   
+```{r grenz, message=FALSE, warning=FALSE}
+
+##grenzabstand
+grenzabstand<-5 #in meter
+parz_bld_ga<-gBuffer(spgeom = parz_bld,width = -grenzabstand,byid = T)
+
+##gebaeude aussschneiden
+parz.st <- st_as_sf(parz_bld_ga[,"IDEX2000"])
+bld.st <- st_as_sf(rolle_bld_out[,"EGID"])
+parz.diff <- st_difference(parz.st, st_union(st_combine(bld.st)))
+
+parz_bld_ga_clip <- as(parz.diff, "Spatial")
+parz_bld<-left_join(parz_bld_ga_clip@data,parz_bld_ga@data,"IDEX2000")
+parz_bld_ga_clip@data<-parz_bld
+
+```
+
+#Gebiete ohne Geothermie-Erlaubnis abziehen
+
+```{r allowed, message=FALSE, warning=FALSE}
+##remove zones where geotherm. is not allowed
+parz.st <- st_as_sf(parz_bld_ga_clip[,"IDEX2000"])
+geoth.st <- st_as_sf(geoth_adm[geoth_adm$TYPE=="3",])
+parz.diff <- st_difference(parz.st, st_union(st_combine(geoth.st)))
+
+parz_bld_ga_clip_clip <- as(parz.diff, "Spatial")
+parz_bld<-left_join(parz_bld_ga_clip_clip@data,parz_bld_ga_clip@data,"IDEX2000")
+parz_bld_ga_clip_clip@data<-parz_bld
+
+#add area as an attribute
+parz_bld_ga_clip_clip$parzArea<-sapply(parz_bld_ga_clip_clip@polygons,function(x){x@area})
+
+#spplot(parz_bld_ga_clip_clip,"NUMERO")
+```
+
+#Parzellen-Info an Gebäude übergeben
+```{r trans, message=FALSE, warning=FALSE}
+ov<-left_join(ov[,c(2,14,15)],ov.agg,by="IDEX2000")
+ov<-left_join(ov,parz_bld_ga_clip_clip@data[,c(1,16)],by="IDEX2000")  
+
+rolle_bld_out@data<-cbind(rolle_bld_out@data,ov[,c(6,7)])
+```
+
+
+#Geothermie-Potential pro Haus und Sonde berechnen (Leistung)
+Für jedes Haus wird das Geothermiepotential für 50, 100, 200 und 300m Bohrungen berechnet. Die Berechnungen gründen auf der SIA 384-6 (Abb. 7).
 
 ```{r aut, message=FALSE, warning=FALSE}
+#create a lookup table to translate conductivity to "leistung pro m sondenlänge"
+#the translation is based on figure 7, p.43 of SIA 384
+cond_unique<-unique(c(as.numeric(geoth_50$cond_min),as.numeric(geoth_50$cond_max),
+                      as.numeric(geoth_100$cond_min),as.numeric(geoth_100$cond_max),
+                      as.numeric(geoth_200$cond_min),as.numeric(geoth_200$cond_max),
+                      as.numeric(geoth_300$cond_min),as.numeric(geoth_300$cond_max)))
+cond2leistPm<-data.frame(cond=cond_unique,
+                         leistPm=c(17,30,34.5,37,32.5,38.5))
+
 #convert bld to points
 rolle_bld_out_pts<-gCentroid(rolle_bld_out,byid=TRUE)
 
-#get conduction at 300m depth for each building
-ov<-over(rolle_bld_out_pts,geoth_300[,4:5])
+#get conduction for each building
+names(geoth_50)[2:3]<-paste(names(geoth_50)[2:3],"50",sep="_")
+ov50<-over(rolle_bld_out_pts,geoth_50[,2:3])
+names(geoth_100)[2:3]<-paste(names(geoth_100)[2:3],"100",sep="_")
+ov100<-over(rolle_bld_out_pts,geoth_100[,2:3])
+names(geoth_200)[2:3]<-paste(names(geoth_200)[2:3],"200",sep="_")
+ov200<-over(rolle_bld_out_pts,geoth_200[,2:3])
+names(geoth_300)[2:3]<-paste(names(geoth_300)[2:3],"300",sep="_")
+ov300<-over(rolle_bld_out_pts,geoth_300[,2:3])
 
-#create a lookup table to translate conductivity to "leistung pro m sondenlänge"
-#the translation is based on figure 7, p.43 of SIA 384
-cond_unique<-unique(c(as.numeric(cond_min),as.numeric(cond_max)))
-cond2leistPm<-data.frame(cond=cond_unique,leistPm=c(34.5,37,32.5,38.5))
-
-#translate conductivity to "leistung"
-ov<-left_join(ov,cond2leistPm,by=c("cond_min"="cond"))
-ov$leistPm_min<-ov$leistPm
-ov$leistPm<-NULL
-ov<-left_join(ov,cond2leistPm,by=c("cond_max"="cond"))
-ov$leistPm_max<-ov$leistPm
-ov$leistPm<-NULL
+##translate conductivity to "leistung"
+#50
+ov50<-left_join(ov50,cond2leistPm,by=c("cond_min_50"="cond"))
+ov50$leistProMeter_min_50<-ov50$leistPm
+ov50$leistPm<-NULL
+ov50<-left_join(ov50,cond2leistPm,by=c("cond_max_50"="cond"))
+ov50$leistProMeter_max_50<-ov50$leistPm
+ov50$leistPm<-NULL
+#100
+ov100<-left_join(ov100,cond2leistPm,by=c("cond_min_100"="cond"))
+ov100$leistProMeter_min_100<-ov100$leistPm
+ov100$leistPm<-NULL
+ov100<-left_join(ov100,cond2leistPm,by=c("cond_max_100"="cond"))
+ov100$leistProMeter_max_100<-ov100$leistPm
+ov100$leistPm<-NULL
+#200
+ov200<-left_join(ov200,cond2leistPm,by=c("cond_min_200"="cond"))
+ov200$leistProMeter_min_200<-ov200$leistPm
+ov200$leistPm<-NULL
+ov200<-left_join(ov200,cond2leistPm,by=c("cond_max_200"="cond"))
+ov200$leistProMeter_max_200<-ov200$leistPm
+ov200$leistPm<-NULL
+#300
+ov300<-left_join(ov300,cond2leistPm,by=c("cond_min_300"="cond"))
+ov300$leistProMeter_min_300<-ov300$leistPm
+ov300$leistPm<-NULL
+ov300<-left_join(ov300,cond2leistPm,by=c("cond_max_300"="cond"))
+ov300$leistProMeter_max_300<-ov300$leistPm
+ov300$leistPm<-NULL
 
 #multiply the length of the "erdsonde""
-ov$leist_max<-ov$leistPm_max*300
-ov$leist_min<-ov$leistPm_min*300
+ov300$leist_max_proSonde_300<-ov300$leistProMeter_max_300*300
+ov300$leist_min_proSonde_300<-ov300$leistProMeter_min_300*300
+ov200$leist_max_proSonde_200<-ov200$leistProMeter_max_200*200
+ov200$leist_min_proSonde_200<-ov200$leistProMeter_min_200*200
+ov100$leist_max_proSonde_100<-ov100$leistProMeter_max_100*100
+ov100$leist_min_proSonde_100<-ov100$leistProMeter_min_100*100
+ov50$leist_max_proSonde_50<-ov50$leistProMeter_max_50*50
+ov50$leist_min_proSonde_50<-ov50$leistProMeter_min_50*50
 
-#multiply the "jahresbetriebszeit"
-#according to figure 10, p.45 of SIA 384 the Jahresbetriebszeit is 1800h on 300-400 MüM
-ov$energie_max<-ov$leist_max*1800
-ov$energie_min<-ov$leist_min*1800
 
-rolle_bld_out$geotherm_energie_min<-ov$energie_min/1000
-rolle_bld_out$geotherm_energie_max<-ov$energie_max/1000
+rolle_bld_out@data<-cbind(rolle_bld_out@data,
+                          ov50[,c(5,6)],
+                          ov100[,c(5,6)],
+                          ov200[,c(5,6)],
+                          ov300[,c(5,6)])
 
-#set to 0 where it is not allowed
-rolle_bld_out$geotherm_energie_min[rolle_bld_out$geotherm_berechtigung=="Interdiction"]<-0
-rolle_bld_out$geotherm_energie_max[rolle_bld_out$geotherm_berechtigung=="Interdiction"]<-0
-
-rolle_bld_out$geotherm_energie_min[rolle_bld_out$geotherm_berechtigung=="noInfo"]<-NA
-rolle_bld_out$geotherm_energie_max[rolle_bld_out$geotherm_berechtigung=="noInfo"]<-NA
 ```
 
+#Anzahl Sonden pro Gebäude
+```{r sonden, message=FALSE, warning=FALSE}
+abstand<-10
+fl<-(10^2)*3.14
 
-#Visualisierung des Potentials und der Berechtigung
+rolle_bld_out$anzahl_sonden_parzelle<-floor(rolle_bld_out$parzArea/fl)
+rolle_bld_out$anzahl_sonden_gebaeude<-floor(rolle_bld_out$anzahl_sonden_parzelle/rolle_bld_out$nEgids)+1
+
+rolle_leist<-rolle_bld_out@data[,72:79]*rolle_bld_out@data[,81]
+names(rolle_leist)<-gsub("_proSonde_","_proGebaeude_",names(rolle_leist))
+rolle_bld_out@data<-cbind(rolle_bld_out@data,rolle_leist)
+```
+
+#Visualisierung der geothermischen Leistung und der Berechtigung
 ```{r viz1, message=FALSE, warning=FALSE}
 #erst alle daten in wgs projezieren fuer leaflet projektion
 rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
 geoth_adm.wgs<-spTransform(geoth_adm,CRSobj = CRS("+init=epsg:4326"))
+parz_bld.wgs<-spTransform(parz_bld_ga_clip_clip,CRSobj = CRS("+init=epsg:4326"))
+parz.wgs<-spTransform(parz,CRSobj = CRS("+init=epsg:4326"))
 
-pal <- colorFactor(palette=c("green","red","blue","grey"), rolle_bld_out.wgs$geotherm_berechtigung)
-pal_pot <- colorNumeric(palette="YlGnBu", rolle_bld_out.wgs$geotherm_energie_max)
+
+pal <- colorFactor(palette=c("green","red","blue","grey"), geoth_adm.wgs$TYPE)
+pal_leist <- colorNumeric(palette="YlGnBu",
+                          c(rolle_bld_out.wgs$leist_min_proGebaeude_50,
+                            rolle_bld_out.wgs$leist_max_proGebaeude_300))
+pal_parz <- colorNumeric(palette="YlGnBu", parz_bld.wgs$parzArea)
 
 #visualisierung mit leaflet
 m <- leaflet() %>%
@@ -143,41 +354,60 @@ m <- leaflet() %>%
   addPolygons(data=rolle_bld_out.wgs,
               stroke = TRUE,
               fillOpacity = 1, 
-              color = ~pal_pot(rolle_bld_out.wgs$geotherm_energie_max),
+              color = "black",
               opacity = 1,
               weight=1,
-              fillColor = ~pal_pot(rolle_bld_out.wgs$geotherm_energie_max),
-              popup=as.character(rolle_bld_out.wgs$geotherm_energie_max),
-              group = "Gebaeude (Potential)")%>%
+              fillColor = ~pal_leist(rolle_bld_out.wgs$leist_min_proGebaeude_50),
+              popup=as.character(rolle_bld_out.wgs$leist_min_proGebaeude_50),
+              group = "Leistung: min 50m")%>%
   
-  addPolygons(data=rolle_bld_out.wgs,
+    addPolygons(data=rolle_bld_out.wgs,
               stroke = TRUE,
               fillOpacity = 1, 
-              color = ~pal(rolle_bld_out.wgs$geotherm_berechtigung),
+              color = "black",
               opacity = 1,
               weight=1,
-              fillColor = ~pal(rolle_bld_out.wgs$geotherm_berechtigung),
-              popup=rolle_bld_out.wgs$geotherm_berechtigung,
-              group = "Gebaeude (Berecht.)")%>%
+              fillColor = ~pal_leist(rolle_bld_out.wgs$leist_max_proGebaeude_300),
+              popup=as.character(rolle_bld_out.wgs$leist_max_proGebaeude_300),
+              group = "Leistung: max 300m")%>%
+  
+  addPolygons(data=parz_bld.wgs,
+              stroke = TRUE,
+              fillOpacity = 1, 
+              color = "black",
+              opacity = 1,
+              weight=1,
+              fillColor = NULL,
+              popup=as.character(parz_bld.wgs$parzArea),
+              group = "Parzellen (bearbeitet)")%>%
+  
+    addPolygons(data=parz.wgs,
+              stroke = TRUE,
+              color = "black",
+              weight=4,
+              fillOpacity = 0.1,
+              fillColor = "grey10",
+              popup=parz_bld.wgs$parzArea,
+              group = "Parzellen (original)")%>%
     
   addPolygons(data=geoth_adm.wgs,
               stroke = TRUE,
               fillOpacity = 0.5, 
-              color = ~pal(geoth_adm.wgs$TYPE_TXT),
+              color = ~pal(geoth_adm.wgs$TYPE),
               opacity = 0.5,
               weight=1,
-              fillColor = ~pal(geoth_adm.wgs$TYPE_TXT),
-              popup=geoth_adm.wgs$TYPE_TXT,
+              fillColor = ~pal(geoth_adm.wgs$TYPE),
+              popup=geoth_adm.wgs$TYPE,
               group = "Zonen")%>%
 
   addLayersControl(
     baseGroups = c("OSM (b/w)", "OSM","ESRI"),
-    overlayGroups = c("Gebaeude (Potential)","Gebaeude (Berecht.)","Zonen"),
+    overlayGroups = c("Leistung: min 50m","Leistung: max 300m","Parzellen (bearbeitet)", "Parzellen (original)","Zonen"),
     options = layersControlOptions(collapsed = F)
   )%>%
-  hideGroup(c("Gebaeude (Berecht.)"))%>%
-  addLegend(title = "Berechtigung", pal = pal, values = rolle_bld_out.wgs$geotherm_berechtigung, opacity = 1,position = "bottomright")%>%
-  addLegend(title = "Potential", pal = pal_pot, values = rolle_bld_out.wgs$geotherm_energie_max, opacity = 1,position = "bottomright")
+  hideGroup(c("Leistung: min 50m","Parzellen (bearbeitet)", "Parzellen (original)","Zonen"))%>%
+  addLegend(title = "Berechtigung", pal = pal, values = geoth_adm.wgs$TYPE, opacity = 1,position = "bottomright")%>%
+  addLegend(title = "Leistung (kW/a)", pal = pal_leist, values = rolle_bld_out.wgs$leist_max_proGebaeude_300, opacity = 1,position = "bottomright")
 
 #leaflet karte ausführen
 m

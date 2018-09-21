@@ -30,15 +30,16 @@ source("999_helpers.R")
 Sys.setlocale(category = "LC_ALL", locale = "en_US.UTF-8")
 ```
 
-In diesem Skript wird die in 03_rolle_energyDemand geschätzte Nutzenergie über den Nutzungsgrad in Endenergie, und folglich anhad des KBOB Faktors in Primärenergie umgewandelt.  
+In diesem Skript Nutzungsgrade und KBOB Werte entsprechend dem Energieträger den einzelnen Gebäuden zugewiesen.
 
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen.
 ```{r reader av}
 load("output/04_output/geom/04_rolle_bld_out.Rdata")
 
-ng<-as.data.frame(fread(paste(dataPath,"16_kbob/nutzungsgrad.csv",sep=""),encoding="UTF-8"))
-kbob<-as.data.frame(fread(paste(dataPath,"16_kbob/kbob.csv",sep=""),encoding="UTF-8"))
+ng<-as.data.frame(fread(paste(dataPath,"16_kbob/nutzungsgrad.csv",sep=""),encoding="Latin-1"))
+kbob<-as.data.frame(fread(paste(dataPath,"16_kbob/kbob.csv",sep=""),encoding="Latin-1"))
+bestand<-as.data.frame(fread(paste(dataPath,"16_kbob/SIA2024_2015_Bestand.csv",sep=""),encoding="Latin-1"))
 ```
 
 #Verteilung Energieträger
@@ -70,128 +71,38 @@ p.all
   
 Gas und Heizöl domninieren als Energieträger in Rolle und MS-Rolle. Für eine nicht zu vernachlässigbare Anzahl Gebäude ist der Energieträger nicht bekannt (NA). Es handelt sich wahrscheinlich um nicht beheizte Lagerhallen (müsste überprüft werden!).
 
-#Nutzenergie zu Endenergie
+#Nutzungsgrad
 
-Die Nutzenergie wurde im Skript 03_rolle_energyDemand berechnet. Die Nutzenergie wird anhand von Nutzungsgraden (bzw. Arbeitszahlen, im Falle von Wärmepumpen) in Endenergie transformiert. Der Nutzungsgrad von unterschiedlichen Energieträgern wird der SIA 2040 (S. 16) entnommen.  
-  
-_Anmerkung: ist es wirklich so, dass bei Wärmepumpen die Endenergie kleiner ist als die Nutzenergie (bzw. halb so gross)? Die Liste der Nutzungsgrade sollte vielleicht noch sorgfälltig geprüft werden. Zudem wird hier nur die Energie basierend auf der AWEL Methode (siehe Skript 03) berechnet._
+Nutzungsgrade um von der Endenergie, wie beispielsweise durch die AWEL-Methode geschätzt, auf die Nutzenergie zu schliessen werden entsprechend der SIA 380.
 
-```{r nutzenergie, warning=FALSE, paged.print=FALSE}
+```{r nutzungsgrad, warning=FALSE, paged.print=FALSE}
 rolle_dat<-rolle_bld_out@data
 rolle_dat<-left_join(rolle_dat, ng, by = c('GENHZ_text'='energietraeger'))
-
-#for method 1 to compute energy demand, which is borrowed from AWEL or SIA?
-rolle_dat$endEnergie_awel <- rolle_dat$enerBed_awel/rolle_dat$nutzungsgrad
 ```
 
-#Endenergie zu Primärenergie
+#KBOB Faktoren
 
-Die KBOB Faktoren stammen von diesem [Link](https://www.kbob.admin.ch/dam/kbob/de/dokumente/Publikationen/Nachhaltiges%20Bauen/Archiv_2005-2009/Liste%20Oekobilanzdaten%20im%20Baubereich%202009-1-2016-gerundet-kWh.zip.download.zip/Liste%20Oekobilanzdaten%20im%20Baubereich%202009-1-2016-gerundet-kWh.zip). 
-  
-_Anmerkung: Es sollte sorgfälltig geprüft werden, ob die Werte welche ich aus der obigen Tabelle entnommen habe so stimmen. Es sind immer die Werte für "nicht erneuerbar" und für Elektrizität wurde beispielsweise der Wert für "CH-Verbrauchermix" benützt. Ist es richtig, die KBOB Werte mit der Endenergie zu multiplizieren? Es muss auch noch der Energieträger des Migros Gebäudes bestimmt werden, im Moment sind die betreffenden Schätzungen zu gross oder nicht vorhanden._
+Die KBOB Faktoren stammen von folgendem Link [Link](https://www.kbob.admin.ch/dam/kbob/de/dokumente/Publikationen/Nachhaltiges%20Bauen/Archiv_2005-2009/Liste%20Oekobilanzdaten%20im%20Baubereich%202009-1-2016-gerundet-kWh.zip.download.zip/Liste%20Oekobilanzdaten%20im%20Baubereich%202009-1-2016-gerundet-kWh.zip). 
 
-```{r endenergie, warning=FALSE, paged.print=FALSE}
+```{r kbob, warning=FALSE, paged.print=FALSE}
 rolle_dat<-left_join(rolle_dat, kbob, by = c('GENWW_text'='energietraeger'))
 
-#for method 1 to compute energy demand, which is borrowed from AWEL or SIA?
-rolle_dat$primaerEnergie_awel <- rolle_dat$endEnergie_awel*rolle_dat$kbob
 
 rolle_bld_out@data<-rolle_dat
 ```
 
-#Visualisierung Energie
+#Energiebedarf unterschiedlicher Verbraucher
 
-```{r geoviz, fig.width = 7, fig.height = 5.5}
-rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+```{r bestand, warning=FALSE, paged.print=FALSE}
+bestand$siaLabel<-NULL
+names(bestand)<-paste("bestand_",names(bestand),sep="")
+rolle_dat<-left_join(rolle_dat, bestand, by = c('siaNr'='bestand_siaNr'))
 
-qpal_nutz <- colorBin(
-  palette = "YlGnBu",
-  domain = rolle_bld_out.wgs$enerBed_awel,
-  bins=quantile(round(rolle_bld_out.wgs$enerBed_awel),na.rm=T,seq(0,1,length.out = 5))
-)
-
-qpal_end <- colorBin(
-  palette = "YlGnBu",
-  domain = rolle_bld_out.wgs$endEnergie_awel,
-  bins=quantile(round(rolle_bld_out.wgs$endEnergie_awel),na.rm=T,seq(0,1,length.out = 5))
-)
-
-qpal_prim <- colorBin(
-  palette = "YlGnBu",
-  domain = rolle_bld_out.wgs$primaerEnergie_awel,
-  bins=quantile(round(rolle_bld_out.wgs$primaerEnergie_awel),na.rm=T,seq(0,1,length.out = 5))
-)
-
-
-#visualisierung mit leaflet
-m <- leaflet() %>%
-  
-  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
-  addProviderTiles(providers$OpenStreetMap, group = "normal") %>%
-  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
-  
-  addPolygons(data=rolle_bld_out.wgs,
-              stroke = TRUE,
-              fillOpacity = 0.8, 
-              color = ~qpal_nutz(rolle_bld_out.wgs$enerBed_awel),
-              weight=1,
-              popup=paste("SIA: ", rolle_bld_out.wgs$sia,
-                          " / Alter: ",rolle_bld_out.wgs$GBAUJ,
-                          " / EBF: ", round(rolle_bld_out.wgs$ebf),
-                          " / Energietrager: ",rolle_bld_out.wgs$GENHZ_text,
-                          " / Energiebedarf: ",round(rolle_bld_out.wgs$enerBed_awel)),
-              group = "Energiebedarf (AWEL)")%>%
-  
-    addPolygons(data=rolle_bld_out.wgs,
-              stroke = TRUE,
-              fillOpacity = 0.8, 
-              color = ~qpal_end(rolle_bld_out.wgs$endEnergie_awel),
-              weight=1,
-              popup=paste("SIA: ", rolle_bld_out.wgs$sia,
-                          " / Alter: ",rolle_bld_out.wgs$GBAUJ,
-                          " / EBF: ", round(rolle_bld_out.wgs$ebf),
-                          " / Energietrager: ",rolle_bld_out.wgs$GENHZ_text,
-                          " / Energiebedarf: ",round(rolle_bld_out.wgs$enerBed_awel),
-                          " / Endenergie: ",round(rolle_bld_out.wgs$endEnergie_awel)),
-              group = "Endenergie (AWEL)")%>%
-  
-      addPolygons(data=rolle_bld_out.wgs,
-              stroke = TRUE,
-              fillOpacity = 0.8, 
-              color = ~qpal_prim(round(rolle_bld_out.wgs$primaerEnergie_awel)),
-              weight=1,
-              popup=paste("SIA: ", rolle_bld_out.wgs$sia,
-                          " / Alter: ",rolle_bld_out.wgs$GBAUJ,
-                          " / EBF: ", round(rolle_bld_out.wgs$ebf),
-                          " / Energietrager: ",rolle_bld_out.wgs$GENWW_text,
-                          " / Energiebedarf: ",round(rolle_bld_out.wgs$enerBed_awel),
-                          " / Endenergie: ",round(rolle_bld_out.wgs$endEnergie_awel),
-                          " / Primaerenergie: ",round(rolle_bld_out.wgs$primaerEnergie_awel)),
-              group = "Primaerenergie (AWEL)")%>%
-
-  addLayersControl(
-    baseGroups = c("OSM (b/w)","normal","ESRI"),
-    overlayGroups = c("Energiebedarf (AWEL)", "Endenergie (AWEL)","Primaerenergie (AWEL)"),
-    options = layersControlOptions(collapsed = F)
-  )%>%
-  addLegend(pal = qpal_nutz, values = rolle_bld_out.wgs$enerBed_awel,
-    title = "Energiebedarf (kWh/a)", position = "bottomleft")%>%
-  addLegend(pal = qpal_end, values = rolle_bld_out.wgs$endEnergie_awel,
-    title = "Endenergie (kWh/a)", position = "bottomleft")%>%
-  addLegend(pal = qpal_prim, values = rolle_bld_out.wgs$primaerEnergie_awel,
-    title = "Primaerenergie (kWh/a)", position = "bottomleft")%>%
-  hideGroup(c("Energiebedarf (AWEL)", "Endenergie (AWEL)"))
-
-#leaflet karte ausführen
-m
+rolle_bld_out@data<-rolle_dat
 ```
 
 ##Save all Information
 ```{r save}
-#html karte speichern
-wd<-getwd()
-htmlwidgets::saveWidget(m, file=paste(wd,"/output/05_output/map/mapPrimaerEnergie.html",sep=""),selfcontained = T)
-
 #buildings speichern
 save(rolle_bld_out,file="output/05_output/geom/05_rolle_bld_out.Rdata")
 ```

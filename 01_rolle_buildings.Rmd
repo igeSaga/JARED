@@ -60,6 +60,7 @@ bestellt.
 ```{r readerGwr}
 ##csv lesen
 rolle_gwr<-read.csv(paste(dataPath,"02_GWR/Rolle_GEB-02.csv",sep=""),sep = ";",encoding = "Latin-1")
+summary(rolle_gwr$GWW2)
 
 #only existing buildings
 rolle_gwr<-rolle_gwr[rolle_gwr$GSTAT==1004,]
@@ -87,7 +88,7 @@ rolle_gwr<-spTransform(rolle_gwr,CRSobj = CRS("+init=epsg:21781"))
 #rolle_gwr<-rolle_gwr[is.na(rolle_gwr$GABBJ),]
 
 #filter/rename attributes
-rolle_gwr<-rolle_gwr[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")]
+rolle_gwr<-rolle_gwr[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW","GWWV")]
 
 
 ##mont-sur-rolle
@@ -97,8 +98,8 @@ ms_rolle_gwr<-readOGR(layer = "OIT_OIT_TPR_RCB_BATIMENT", dsn = paste(dataPath,"
 ms_rolle_gwr<-ms_rolle_gwr[ms_rolle_gwr$STATUT_BAT==1004,]
 
 #filter/rename attributes
-ms_rolle_gwr<-ms_rolle_gwr[,c("EGID","STATUT_BAT","CATEGORIE","CLASSE","SURFACE","NB_NIV","CONS_ANNEE","NB_LOG","DEMOL_ANNE","CHAUFF_SYS","CHAUFF_AGT","EAU_CHD_AG")]
-names(ms_rolle_gwr)<-c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")
+ms_rolle_gwr<-ms_rolle_gwr[,c("EGID","STATUT_BAT","CATEGORIE","CLASSE","SURFACE","NB_NIV","CONS_ANNEE","NB_LOG","DEMOL_ANNE","CHAUFF_SYS","CHAUFF_AGT","EAU_CHD_AG","EAU_CHD_IN")]
+names(ms_rolle_gwr)<-c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW","GWWV")
 
 #reprojection
 ms_rolle_gwr<-spTransform(ms_rolle_gwr,CRSobj = CRS("+init=epsg:21781"))
@@ -360,9 +361,9 @@ Die Codes aus den GWR Daten werden mit den zugehörigen ausformulierten Attribut
 
 ```{r explore, message=FALSE, warning=FALSE}
 #combine all build. data
-rolle_bld_gwr_out<-rolle_bld_gwr[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")]
-rolle_bld_gwr_mult_out<-rolle_bld_gwr_mult[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")]
-rolle_osm_gwr_out<-rolle_osm_gwr[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW")]
+rolle_bld_gwr_out<-rolle_bld_gwr[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW","GWWV")]
+rolle_bld_gwr_mult_out<-rolle_bld_gwr_mult[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW","GWWV")]
+rolle_osm_gwr_out<-rolle_osm_gwr[,c("EGID","GSTAT","GKAT","GKLAS","GAREA","GASTW","GBAUJ","GANZWHG","GABBJ","GHEIZ","GENHZ","GENWW","GWWV")]
 
 rolle_bld_gwr_out$source<-"AVs"
 rolle_bld_gwr_mult_out$source<-"AVm"
@@ -378,6 +379,7 @@ rolle_migros<-rolle_migros[,1:13]
 rolle_migros$source<-"manual"
 
 rolle_bld_out<-rolle_bld_out[rolle_bld_out$EGID!=280079171,]
+rolle_migros$GWWV<-NA
 rolle_bld_out<-rbind(rolle_bld_out,rolle_migros)
 
 #loading restaurant building
@@ -387,14 +389,16 @@ rolle_resti<-rolle_resti[,1:13]
 rolle_resti$source<-"manual"
 
 rolle_bld_out<-rolle_bld_out[rolle_bld_out$EGID!=280062591,]
+rolle_resti$GWWV<-NA
 rolle_bld_out<-rbind(rolle_bld_out,rolle_resti)
 
 #loading restaurant building
 rolle_schloss<-readOGR("data/geom", "rolle_schloss_wgs")
 rolle_schloss<-spTransform(rolle_schloss,CRSobj = CRS("+init=epsg:21781"))
 rolle_schloss@data<-rolle_bld_out@data[1,]
-rolle_schloss@data[1,]<-c("9999999",rep(NA,3),round(rolle_schloss@polygons[[1]]@area,0),rep(NA,8))
+rolle_schloss@data[1,]<-c("9999999",rep(NA,3),round(rolle_schloss@polygons[[1]]@area,0),rep(NA,9))
 rolle_schloss$source<-"manual"
+rolle_schloss$GWWV<-NA
 rolle_bld_out<-rbind(rolle_bld_out,rolle_schloss)
 
 #adding AV (!=GWR)
@@ -402,7 +406,7 @@ rolle_av_temp<-rolle_build_av_excl[rolle_build_av_excl$SHAPE_AREA>150,]
 rolle_av<-rolle_av_temp
 rolle_av@data<-rolle_bld_out@data[1:nrow(rolle_av),]
 for(i in 1:nrow(rolle_av)){
-  rolle_av@data[i,]<-c(paste("9999_ID",as.character(rolle_av_temp$ID[i]),sep=""),rep(NA,3),round(rolle_av@polygons[[i]]@area,0),rep(NA,8))
+  rolle_av@data[i,]<-c(paste("9999_ID",as.character(rolle_av_temp$ID[i]),sep=""),rep(NA,3),round(rolle_av@polygons[[i]]@area,0),rep(NA,9))
 }
 rolle_av$source<-"AVextra"
 rolle_bld_out<-rbind(rolle_bld_out,rolle_av)

@@ -33,7 +33,7 @@ source("999_helpers.R")
 
 In diesem Skript wird die Nutzenergie pro Gebäude mit unterschiedlichen Methoden geschätzt. Zum einen wird eine Methode des AWEL verwendet. Zum anderen werden Berechnung von <Stefan Schneider> hinzugenommen.
 
-__Anmerkung: Die AWEL Methode wird im Moment auf alle SIA Gebäudetypen in gleicher Art und Weise angewendet. Dies müsste in Zukunft noch angepasst werden (grosse Lagerhallen haben weniger Energiebedarf, als kleine EFH -> Diesbezüglich haben wir eine Tabelle zur Schätzung des Wärmebedars von Romand Energie in welcher die 12 SIA Kategorien von S. 43, SIA 380 miteinbezogen werden. Die Werte beruhen auf Messungen.). Es ist mir nicht ganz klar, wie der Stromverbrauch von Romande Energie gemessen wurde und in welcher Einheit (für die meisten Gebäude wurde für die meisten Monate kein Verbrauch gemessen!?).__  
+__Anmerkung: Die AWEL Methode wird im Moment auf alle SIA Gebäudetypen in gleicher Art und Weise angewendet. Dies müsste in Zukunft noch angepasst werden (grosse Lagerhallen haben weniger Energiebedarf, als kleine EFH -> Diesbezüglich haben wir eine Tabelle zur Schätzung des Wärmebedars von Romand Energie in welcher die 12 SIA Kategorien von S. 43, SIA 380 miteinbezogen werden. Die Werte beruhen auf Messungen.).__  
 
 #Daten einlesen
 Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Zusätzlich werden ein paar Werte pro Gebäude berechnet, welche für die spätere Visualisierung der SIA Klassifikation informativ sind.
@@ -51,8 +51,15 @@ energyDem_msrolle_ss<-as.data.frame(fread(paste(dataPath,"03_SteSchGenf/HeatDema
 energyDem_ss<-rbind(energyDem_msrolle_ss,energyDem_rolle_ss)
 
 #wärmebedarf geschätzt vom Kanton Waadt, resp. Romand Energie
+#...rolle
 energyDem_re<-readOGR(layer = "DensiteThermPct", dsn = paste(dataPath,"10_Rolle",sep=""))
 energyDem_re<-spTransform(energyDem_re,CRSobj = crsInput)
+#...ms-rolle
+energyDem_re_ms<-readOGR(layer = "ms_rolle_densTherm", dsn = paste(dataPath,"10_Rolle",sep=""))
+energyDem_re_ms<-spTransform(energyDem_re_ms,CRSobj = crsInput)
+
+#...combine
+energyDem_re<-rbind(energyDem_re[,c(22,25)],energyDem_re_ms[,c(22,25)])
 
 #energieverbrauch von romand energie
 #encoding ein bisschen tricky: erst in z.b. notepad++ öffnen und encoding auf UTF-8 konvertieren
@@ -62,7 +69,7 @@ energyVerb_re_msrolle<-fread(paste(dataPath,"08_Elektrizitaet_RE/Consommation_Mo
 energyVerb_re<-rbind(energyVerb_re_rolle,energyVerb_re_msrolle)
 rm(list=c("energyVerb_re_rolle","energyVerb_re_msrolle"))
 
-adresses<-fread(paste(dataPath,"11_Cadastre_AmtlVermessung/Adresses_9814_JYOEGH/Adresses/OIT_OIT_TPR_PT_ADRESSE.csv",sep=""),encoding="Latin-1",header = F)
+adresses<-fread(paste(dataPath,"11_Cadastre_AmtlVermessung/Adresses_9814_JYOEGH/Adresses/OIT_OIT_TPR_PT_ADRESSE.csv",sep=""),encoding="Latin-1",header = F, na.strings = "-")
 adresses<-adresses[,c(1,4,8,12,13)]
 names(adresses)<-c("id","nr","ad","long","lat")
 ```
@@ -141,7 +148,7 @@ Die Schätzungen beruhen auf Messungen von Romand Energie. Der Wärmebedarf wird
 ```{r energieVD, warning=FALSE, paged.print=FALSE}
 rolle_bld_out_pts <- gCentroid(rolle_bld_out,byid=TRUE)
 
-ov<-over(rolle_bld_out_pts,energyDem_re[,c(22,25)])
+ov<-over(rolle_bld_out_pts,energyDem_re)
 
 rolle_bld_out$enerBed_vd<-ov$CONSO_TOT
 ```
@@ -149,7 +156,7 @@ rolle_bld_out$enerBed_vd<-ov$CONSO_TOT
 
 ##Stromverbrauch von Romand Energie
 
-_Anmerkung: Ich verstehe die Daten von RE nicht wirklich. Es gibt beispielsweise zwei Messungen pro Gebäude. Welche soll benützt werden? Zudem haben die meisten Monate keinen Stromverbrauch!? Und welche Einheit haben die Messungen?_
+_Anmerkung: Es haben sich alle Fragen geklärt. Die zwei Messungen pro Wohnung (Hoch- & Niedertarif) wurden summiert. Es können ca. 1/6 der Adressen nicht gefunden werden._
 
 ```{r energieRE, warning=FALSE, paged.print=FALSE}
 #reformatting the adresse data
@@ -170,15 +177,35 @@ adr<-gsub("passage","pass.",adr)
 adr<-gsub("promenade","prom.",adr)
 adr<-gsub("route","rte",adr)
 adr<-gsub("-"," ",adr)
+adr<-gsub("l\' ","l\'",adr)
 
-adresses$adrFin<-paste(adr,adresses$nr)
+nr<-adresses$nr
+nr[is.na(nr)]<-""
+
+adresses$adrFin<-paste(adr,nr)
+adresses$adrFin<-trimws(adresses$adrFin, which = c("both"))
+adresses<-adresses[!duplicated(adresses$adrFin),]
 
 #reformatting the energy database
 energyVerb_re$adrFin<-tolower(energyVerb_re$`Rue PtConso`)
 energyVerb_re$adrFin<-gsub("-"," ",energyVerb_re$adrFin)
+energyVerb_re$adrFin<-gsub("l\' ","l\'",energyVerb_re$adrFin)
+energyVerb_re$adrFin<-trimws(energyVerb_re$adrFin, which = c("both"))
 
 #join adresses (and coordinates) to energy use
-energyVerb_re<-left_join(energyVerb_re,adresses,by=c("adrFin","adrFin"))
+energyVerb_re_j<-left_join(energyVerb_re,adresses,by=c("adrFin","adrFin"))
+
+energyVerb_re_nj<-energyVerb_re[is.na(energyVerb_re_j$lat),]
+energyVerb_re_j<-energyVerb_re_j[!is.na(energyVerb_re_j$lat),]
+
+nr<-gsub("[^0-9\\.]", "", nr)
+adresses$adrFin<-paste(adr,nr)
+adresses$adrFin<-trimws(adresses$adrFin, which = c("both"))
+adresses<-adresses[!duplicated(adresses$adrFin),]
+
+energyVerb_re_nj<-left_join(energyVerb_re_nj,adresses,by=c("adrFin","adrFin"))
+
+energyVerb_re<-rbind(energyVerb_re_j,energyVerb_re_nj)
 
 #convert to spatial data
 energyVerb_re<-energyVerb_re[!is.na(energyVerb_re$lat),]
@@ -220,11 +247,19 @@ rolle_bld_out@data<-left_join(rolle_bld_out@data,energyVerb_re_agg, by="EGID")
 
 ```{r geoviz, fig.width = 10, fig.height = 5.5}
 rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+rolle_bld_out.wgs$rel_AWEL_SS<-as.numeric(rolle_bld_out.wgs$enerBed_awel)/as.numeric(rolle_bld_out.wgs$enerBed_ss)
+summary(rolle_bld_out.wgs$rel_AWEL_SS)
 
 qpal_verb <- colorBin(
   palette = "YlGnBu",
   domain = rolle_bld_out.wgs$enerVer_re,
   bins=quantile(round(rolle_bld_out.wgs$enerVer_re),na.rm=T,seq(0,1,length.out = 8))
+)
+
+qpal_rel <- colorBin(
+  palette = "Spectral",
+  domain = rolle_bld_out.wgs$rel_AWEL_SS,
+  bins=c(0,.5,.75,1,1.25,1.5,5)
 )
 
 qpal_bed <- colorBin(
@@ -305,9 +340,16 @@ m <- leaflet() %>%
               popup = paste("Bedarf (AWEL):",rolle_bld_out.wgs$enerBed_awel,"/ Verbrauch (RE):",rolle_bld_out.wgs$enerVer_re),
               group = "Energieverbrauch (RE)")%>%
   
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8,
+              color = ~qpal_rel(rolle_bld_out.wgs$rel_AWEL_SS),
+              weight=1,
+              group = "Energiebedarf (Rel AWEL/SS)")%>%
+  
   addLayersControl(
     baseGroups = c("OSM (b/w)","normal", "ESRI"),
-    overlayGroups = c("Energiebedarf (AWEL)","Energiebedarf (S.Schneid.)","Energiebedarf (VD / RE)","Energiebedarf (AWEL > SS)","Energiebedarf (AWEL < SS)","Energieverbrauch (RE)"),
+    overlayGroups = c("Energiebedarf (AWEL)","Energiebedarf (S.Schneid.)","Energiebedarf (VD / RE)","Energiebedarf (AWEL > SS)","Energiebedarf (AWEL < SS)","Energieverbrauch (RE)","Energiebedarf (Rel AWEL/SS)"),
     options = layersControlOptions(collapsed = F)
   )%>%
   addLegend(pal = qpal_bed, 
@@ -319,22 +361,28 @@ m <- leaflet() %>%
   addLegend(pal = qpal_over,
             values =rolle_bld_out.wgs.ov$DemDiff,
             opacity = 1,
-            title = "WBL > SS: log10(kWh/a)",
-            position = "bottomleft"
-            )%>%
-  addLegend(pal = qpal_verb, 
-            values =rolle_bld_out.wgs$enerVer_re, 
-            opacity = 1,
-            title = "Energieverbrauch (RE): ?",
+            title = "AWEL > SS: kWh/a",
             position = "bottomleft"
             )%>%
   addLegend(pal = qpal_under,
             values =rolle_bld_out.wgs.und$DemDiff,
             opacity = 1,
-            title = "WBL < SS: log10(kWh/a)",
+            title = "AWEL < SS: kWh/a",
             position = "bottomleft"
             )%>%
-  hideGroup(c("Energiebedarf (S.Schneid.)","Energiebedarf (VD / RE)","Energiebedarf (AWEL > SS)","Energiebedarf (AWEL < SS)","Energieverbrauch (RE)"))
+    addLegend(pal = qpal_verb, 
+            values =rolle_bld_out.wgs$enerVer_re, 
+            opacity = 1,
+            title = "Energieverbrauch (RE): kWh/a",
+            position = "bottomleft"
+            )%>%
+  addLegend(pal = qpal_rel, 
+            values =rolle_bld_out.wgs$rel_AWEL_SS, 
+            opacity = 1,
+            title = "Energieverbrauch (Rel): %",
+            position = "bottomleft"
+            )%>%
+  hideGroup(c("Energiebedarf (S.Schneid.)","Energiebedarf (VD / RE)","Energiebedarf (AWEL > SS)","Energiebedarf (AWEL < SS)","Energieverbrauch (RE)","Energiebedarf (Rel AWEL/SS)"))
 
 #leaflet karte ausführen
 m

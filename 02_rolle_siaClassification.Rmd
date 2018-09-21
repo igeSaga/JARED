@@ -161,6 +161,11 @@ rolle_bld_out_temp<-rolle_bld_out_noSia[rolle_bld_out_noSia$klasKat == "1122_103
                     rolle_bld_out_noSia$klasKat == "1121_1030" |
                     rolle_bld_out_noSia$klasKat == "1274_1040",] 
 rolle_bld_out_temp$sia<- "mischnutzung"
+#...wir möchten keine mischnutzung mehr haben, daher werden die mischnutzungen 50:50 zu verkauf und mfh zugewiesen
+#...um eine randomisierung zu verhindern und damit ein unterschiedliches resultat pro durchlauf, werden alle geraden EGID zu mfh und alle ungeraden zu verkauf (verhältnis fast 50:50)
+rolle_bld_out_temp$sia[as.numeric(rolle_bld_out_temp$EGID) %% 2 == 0]<-"mfh"
+rolle_bld_out_temp$sia[as.numeric(rolle_bld_out_temp$EGID) %% 2 != 0]<-"verkauf"
+
 rolle_bld_out_sia<-rbind(rolle_bld_out_sia,rolle_bld_out_temp)
 rolle_bld_out_noSia<-rolle_bld_out_noSia[rolle_bld_out_noSia$klasKat != "1122_1030"& 
                     rolle_bld_out_noSia$klasKat != "1110_1030"&
@@ -300,7 +305,7 @@ rolle_bld_out$siaNr[rolle_bld_out$sia=="schwimmhalle"]<-12
 #Visualisierung
 
 ##Gebäudenutzung
-Hier wird eine Klassifikation der SIA Gebäudetypen in "wohnen", "mischnutzung" und "nichtWohnen" gemacht und visualisiert.
+Hier wird eine Klassifikation der SIA Gebäudetypen in "wohnen" und "nichtWohnen" gemacht und visualisiert.
 ```{r wohnen, fig.height=9, fig.width=7, warning=FALSE, paged.print=FALSE}
 rolle_bld_out$nutzung<-NA
 rolle_bld_out$nutzung[rolle_bld_out$sia=="efh"|

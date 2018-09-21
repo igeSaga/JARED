@@ -1,0 +1,219 @@
+---
+title: "13 - Geothermie in Rolle"
+author: "Curdin Derungs"
+date: "July 2018"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+#loading libraries
+library(sp)
+library(rgeos)
+library(rgdal)
+library(leaflet)
+library(dplyr)
+
+#empty workspace
+rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
+```
+
+In diesem Skript wird das Potential der Geothermie abgeschätzt. In einer relativ kleinen Zone ist der Nutzen von Geothermie nicht erlaubt. Im Rest der Gemeinde, bezeichnet mit den Zonen "Limitation" und "Autorisation", darf grundsätzlich bis zu 300m tief gebohrt werden. Eine Bewilligung ist natürlich in jedem Fall nötig.
+
+__TODO: Die mit Warmwasser vs. Heizbedarf umgehen? Die Jahresbetriebszeiten sind im Moment so gewählt, dass nur der Heizbedarf gedeckt wird...__
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommt die Information zur Geothermie vom Kanton Waadt.  
+```{r reader, message=FALSE, warning=FALSE}
+load("output/12_output/geom/12_rolle_bld_out.Rdata")
+rolleCRS<-proj4string(rolle_bld_out)
+
+#conductivity 300m below surface (mximum)
+#for rolle
+geoth_300<-readOGR(layer = "MN95_DGE_TPR_GEOTH_BT_COND_300_rolle", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_300<-spTransform(geoth_300,CRSobj = rolleCRS)
+geoth_300<-geoth_300[,-c(2,3)]
+
+#and ms-rolle
+geoth_300_ms<-readOGR(layer = "ms_rolle_GEOTH_BT_COND_300", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_300_ms<-spTransform(geoth_300_ms,CRSobj = rolleCRS)
+geoth_300_ms<-geoth_300_ms[,-c(1,3,4)]
+
+#combine the two rolles
+geoth_300<-rbind(geoth_300_ms,geoth_300)
+
+
+#convert conduction text into numeric values
+cond_nr<-as.character(geoth_300$CONDUCT)
+cond_nr<-gsub(" W/mK","",cond_nr)
+cond_nr<-strsplit(cond_nr,split = " - ")
+
+cond_min<-sapply(cond_nr,function(x) x[1])
+cond_max<-sapply(cond_nr,function(x) x[2])
+
+geoth_300$cond_min<-as.numeric(cond_min)
+geoth_300$cond_max<-as.numeric(cond_max)
+
+#admission for the use of geothermic energy
+#Autorisation = allowed but an autorisation is required
+#Limitation = allowed but to a limited degree, limitation concerns a maximum depth
+#Interdiction = not allowed
+#...rolle
+geoth_adm<-readOGR(layer = "MN95_DGE_TPR_GEOTH_BT_ADM_SGV_Rolle", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_adm<-spTransform(geoth_adm,CRSobj = rolleCRS)
+
+#...ms-rolle
+geoth_adm_ms<-readOGR(layer = "ms_rolle_geoth_adm", dsn = paste(dataPath,"10_Rolle",sep=""))
+#change projection
+geoth_adm_ms<-spTransform(geoth_adm_ms,CRSobj = rolleCRS)
+
+geoth_adm_ms<-geoth_adm_ms[,-c(1,3,4,5)]
+geoth_adm<-geoth_adm[,-c(2,3,4)]
+names(geoth_adm)<-"TYPE"
+
+#combine rolles
+geoth_adm<-rbind(geoth_adm,geoth_adm_ms)
+```
+
+#Berechtigung pro Gebäude
+Es gibt die drei Zonen "Limitation", "Autorisation" und "Interdiction". Nur in letzterer ist der Nutzen der Geothermie untersagt.   
+
+```{r intersect, message=FALSE, warning=FALSE}
+#build to points
+rolle_bld_pts <- gCentroid(rolle_bld_out,byid=TRUE)
+
+#intersection with admission zones
+ov<-over(rolle_bld_pts,geoth_adm)
+ov$TYPE<-as.character(ov$TYPE)
+ov$TYPE[is.na(ov$TYPE)]<-"noInfo"
+
+rolle_bld_out$geotherm_berechtigung<-ov$TYPE
+```
+
+#Geothermie-Potential für "Autorisation" & "Limitation"
+Für die Bewilligungsstufe "Autrisation" wird die maximale Sondenlänge von 300m angenommen. Es wird darum auch nur die Wärmeleitfähigeit dieser Bodentiefe berücksichtigt.   
+Als Berechungsgrundlage dient die SIA 384 und insbesondere Figur 7 - zur Übersetzung von Wärmeleitfähigkeit in Leistung pro Meter Sonde - und Figur 10 - zur Abschätzung der Jahresbetriebszeit in Stunden.   
+
+__ANMERKUNG: Wie mit Warmwasser vs. Heizbedarf umgehen? Die Jahresbetriebszeiten sind im Moment so gewählt, dass nur der Heizbedarf gedeckt wird. Zudem ist das Potential hier für eine Bohrung pro Haus berechnet. Es könnten aufgrund der Gebäudefläche Annahmen zu Mehrfachbohrungen (inkl. entsprechendem Potentialverlust) gemacht werden.__   
+
+```{r aut, message=FALSE, warning=FALSE}
+#convert bld to points
+rolle_bld_out_pts<-gCentroid(rolle_bld_out,byid=TRUE)
+
+#get conduction at 300m depth for each building
+ov<-over(rolle_bld_out_pts,geoth_300[,2:3])
+
+#create a lookup table to translate conductivity to "leistung pro m sondenlänge"
+#the translation is based on figure 7, p.43 of SIA 384
+cond_unique<-unique(c(as.numeric(cond_min),as.numeric(cond_max)))
+cond2leistPm<-data.frame(cond=cond_unique,leistPm=c(34.5,37,32.5,38.5))
+
+#translate conductivity to "leistung"
+ov<-left_join(ov,cond2leistPm,by=c("cond_min"="cond"))
+ov$leistPm_min<-ov$leistPm
+ov$leistPm<-NULL
+ov<-left_join(ov,cond2leistPm,by=c("cond_max"="cond"))
+ov$leistPm_max<-ov$leistPm
+ov$leistPm<-NULL
+
+#multiply the length of the "erdsonde""
+ov$leist_max<-ov$leistPm_max*300
+ov$leist_min<-ov$leistPm_min*300
+
+#multiply the "jahresbetriebszeit"
+#according to figure 10, p.45 of SIA 384 the Jahresbetriebszeit is 1800h on 300-400 MüM
+ov$energie_max<-ov$leist_max*1800
+ov$energie_min<-ov$leist_min*1800
+
+rolle_bld_out$geotherm_energie_min<-ov$energie_min/1000
+rolle_bld_out$geotherm_energie_max<-ov$energie_max/1000
+
+#set to 0 where it is not allowed
+rolle_bld_out$geotherm_energie_min[rolle_bld_out$geotherm_berechtigung=="3"]<-0
+rolle_bld_out$geotherm_energie_max[rolle_bld_out$geotherm_berechtigung=="3"]<-0
+
+rolle_bld_out$geotherm_energie_min[rolle_bld_out$geotherm_berechtigung=="noInfo"]<-NA
+rolle_bld_out$geotherm_energie_max[rolle_bld_out$geotherm_berechtigung=="noInfo"]<-NA
+```
+
+
+#Visualisierung des Potentials und der Berechtigung
+```{r viz1, message=FALSE, warning=FALSE}
+#erst alle daten in wgs projezieren fuer leaflet projektion
+rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+geoth_adm.wgs<-spTransform(geoth_adm,CRSobj = CRS("+init=epsg:4326"))
+
+pal <- colorFactor(palette=c("green","red","blue","grey"), rolle_bld_out.wgs$geotherm_berechtigung)
+pal_pot <- colorNumeric(palette="YlGnBu", rolle_bld_out.wgs$geotherm_energie_max)
+
+#visualisierung mit leaflet
+m <- leaflet() %>%
+  
+  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
+  addProviderTiles(providers$OpenStreetMap, group = "OSM") %>%
+  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 1, 
+              color = ~pal_pot(rolle_bld_out.wgs$geotherm_energie_max),
+              opacity = 1,
+              weight=1,
+              fillColor = ~pal_pot(rolle_bld_out.wgs$geotherm_energie_max),
+              popup=as.character(rolle_bld_out.wgs$geotherm_energie_max),
+              group = "Gebaeude (Potential)")%>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 1, 
+              color = ~pal(rolle_bld_out.wgs$geotherm_berechtigung),
+              opacity = 1,
+              weight=1,
+              fillColor = ~pal(rolle_bld_out.wgs$geotherm_berechtigung),
+              popup=rolle_bld_out.wgs$geotherm_berechtigung,
+              group = "Gebaeude (Berecht.)")%>%
+    
+  addPolygons(data=geoth_adm.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.5, 
+              color = ~pal(geoth_adm.wgs$TYPE),
+              opacity = 0.5,
+              weight=1,
+              fillColor = ~pal(geoth_adm.wgs$TYPE_TXT),
+              popup=geoth_adm.wgs$TYPE_TXT,
+              group = "Zonen")%>%
+
+  addLayersControl(
+    baseGroups = c("OSM (b/w)", "OSM","ESRI"),
+    overlayGroups = c("Gebaeude (Potential)","Gebaeude (Berecht.)","Zonen"),
+    options = layersControlOptions(collapsed = F)
+  )%>%
+  hideGroup(c("Gebaeude (Berecht.)"))%>%
+  addLegend(title = "Berechtigung", pal = pal, values = rolle_bld_out.wgs$geotherm_berechtigung, opacity = 1,position = "bottomright")%>%
+  addLegend(title = "Potential", pal = pal_pot, values = rolle_bld_out.wgs$geotherm_energie_max, opacity = 1,position = "bottomright")
+
+#leaflet karte ausführen
+m
+```
+
+##Save all Information
+```{r save}
+#html karte speichern
+wd<-getwd()
+htmlwidgets::saveWidget(m, file=paste(wd,"/output/13_output/map/mapPrimaerEnergie.html",sep=""),selfcontained = T)
+
+#buildings speichern
+save(rolle_bld_out,file="output/13_output/geom/13_rolle_bld_out.Rdata")
+```

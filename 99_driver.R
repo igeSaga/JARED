@@ -4,7 +4,7 @@ library(rmarkdown)
 
 temp <- list.files(path="../JARED/",pattern="*.Rmd")
 i<-5
-for(i in 11:length(temp)){
+for(i in 1:length(temp)){
   fileN<-temp[i]
   print(paste("rendering:",fileN))
   rmarkdown::render(fileN, 

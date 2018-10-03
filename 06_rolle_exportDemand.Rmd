@@ -124,7 +124,7 @@ rolle_bld_out@data<-rolle_bld_out@data[,c("EGID","GAREA","GASTW","GBAUJ","ebf","
                                           "gVal","gVal_saniert",
                                           "fensterFl","fensterFl_breite","fensterFl_laenge","fensterFl_proz",
                                           "longitude","latitude","breite","laenge","ausricht",
-                                          "enerBed_awel","enerBed_ss","enerBed_vd","nutzungsgrad",
+                                          "enerBed_awel","enerBed_ss","enerBed_vd","enerVer_re","nutzungsgrad",
                                           "kbob_PEne","kbob_PEer","kbob_GHG",
                                           "bestand_Geraete","bestand_Beleuchtung","bestand_Lueftung","bestand_Klimakaelte",
                                           "bestand_Heizwaerme","bestand_Warmwasser")]
@@ -140,86 +140,86 @@ rolle_bld_tbl<-rolle_bld_out@data
 
 #some plots
 ```{r plot, fig.height=10, fig.width=10}
-#daten für karte aufbereiten
-rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
-rolle_bld_out.wgs.f = fortify(rolle_bld_out.wgs,by="EGID")
-
-rolle_bld_out.wgs$id<-sapply(rolle_bld_out.wgs@polygons,function(x){x@ID})
-rolle_bld_out.wgs.f<-merge(rolle_bld_out.wgs.f,rolle_bld_out.wgs@data,by="id")
-
-#basemap
-library(ggmap)
-lat <- c(46.45083,46.47911)
-long <- c(6.315,6.36)
-bbox <- make_bbox(long,lat,f=0.05)
-b <- get_map("Irkutsk",maptype="toner-lite",source="stamen")
-
-##sia karte
-#farben für sia kategorien auswählen
-cols<- levels(factor(rolle_bld_out.wgs.f$sia))
-color <- grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
-    
-    if(length(cols)>12){
-      myColors<-color[sample(1:length(color),size=length(cols),replace=F)]
-    }else{
-      myColors <- brewer.pal(length(cols),"Set3")
-    }
-    
-names(myColors) <- cols
-colScale2 <- scale_fill_manual(name = "grp",values = myColors,drop=F)
-
-#karte zeichnen
-ggmap(b) + 
-  geom_polygon(data = rolle_bld_out.wgs.f,
-             aes(long,lat,group=group,fill=sia),alpha=0.9) +
-  colScale2+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank(),
-          axis.title.y=element_blank(),
-          axis.text.y=element_blank(),
-          axis.ticks.y=element_blank(),
-          legend.title = element_blank())
-
-
-##gebäudealter karte
-#farben wählen
-cc <- scales::seq_gradient_pal("blue","orange", "red")(seq(0,1,length.out=length(levels(factor(rolle_bld_out.wgs.f$GBAUP)))))
-
-#karte zeichnen
-ggmap(b) + 
-  geom_polygon(data = rolle_bld_out.wgs.f,
-             aes(long,lat,group=group,fill=GBAUP),alpha=0.9) +
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank(),
-          axis.title.y=element_blank(),
-          axis.text.y=element_blank(),
-          axis.ticks.y=element_blank(),
-          legend.title = element_blank())+
-  scale_fill_manual(values=cc)
-
-
-#energiebedarf karte
-rolle_bld_pts <- gCentroid(rolle_bld_out.wgs,byid=TRUE)
-
-ggmap(b) + 
-  geom_polygon(data = rolle_bld_out.wgs.f,
-             aes(long,lat,group=group), fill="grey50",alpha=0.5) +
-  geom_point(data=rolle_bld_out.wgs@data,
-             aes(x = rolle_bld_pts@coords[,1],
-                 y = rolle_bld_pts@coords[,2], 
-                 size=enerBed_vd),
-             shape=1,
-             color="black",alpha=1)+
-  theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank(),
-          axis.title.y=element_blank(),
-          axis.text.y=element_blank(),
-          axis.ticks.y=element_blank(),
-          legend.title = element_text())+
-  scale_radius(breaks=round(seq(from=0,to = max(rolle_bld_out.wgs$enerBed_vd,na.rm=T),by = 300000)),range = c(.5, 10))+ guides(size=guide_legend(title="Energiebedarf (kWh/a)"))
+# #daten für karte aufbereiten
+# rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+# rolle_bld_out.wgs.f = fortify(rolle_bld_out.wgs,by="EGID")
+# 
+# rolle_bld_out.wgs$id<-sapply(rolle_bld_out.wgs@polygons,function(x){x@ID})
+# rolle_bld_out.wgs.f<-merge(rolle_bld_out.wgs.f,rolle_bld_out.wgs@data,by="id")
+# 
+# #basemap
+# library(ggmap)
+# lat <- c(46.45083,46.47911)
+# long <- c(6.315,6.36)
+# bbox <- make_bbox(long,lat,f=0.05)
+# b <- get_map("Irkutsk",maptype="toner-lite",source="stamen")
+# 
+# ##sia karte
+# #farben für sia kategorien auswählen
+# cols<- levels(factor(rolle_bld_out.wgs.f$sia))
+# color <- grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
+#     
+#     if(length(cols)>12){
+#       myColors<-color[sample(1:length(color),size=length(cols),replace=F)]
+#     }else{
+#       myColors <- brewer.pal(length(cols),"Set3")
+#     }
+#     
+# names(myColors) <- cols
+# colScale2 <- scale_fill_manual(name = "grp",values = myColors,drop=F)
+# 
+# #karte zeichnen
+# ggmap(b) + 
+#   geom_polygon(data = rolle_bld_out.wgs.f,
+#              aes(long,lat,group=group,fill=sia),alpha=0.9) +
+#   colScale2+
+#     theme(axis.title.x=element_blank(),
+#           axis.text.x=element_blank(),
+#           axis.ticks.x=element_blank(),
+#           axis.title.y=element_blank(),
+#           axis.text.y=element_blank(),
+#           axis.ticks.y=element_blank(),
+#           legend.title = element_blank())
+# 
+# 
+# ##gebäudealter karte
+# #farben wählen
+# cc <- scales::seq_gradient_pal("blue","orange", "red")(seq(0,1,length.out=length(levels(factor(rolle_bld_out.wgs.f$GBAUP)))))
+# 
+# #karte zeichnen
+# ggmap(b) + 
+#   geom_polygon(data = rolle_bld_out.wgs.f,
+#              aes(long,lat,group=group,fill=GBAUP),alpha=0.9) +
+#     theme(axis.title.x=element_blank(),
+#           axis.text.x=element_blank(),
+#           axis.ticks.x=element_blank(),
+#           axis.title.y=element_blank(),
+#           axis.text.y=element_blank(),
+#           axis.ticks.y=element_blank(),
+#           legend.title = element_blank())+
+#   scale_fill_manual(values=cc)
+# 
+# 
+# #energiebedarf karte
+# rolle_bld_pts <- gCentroid(rolle_bld_out.wgs,byid=TRUE)
+# 
+# ggmap(b) + 
+#   geom_polygon(data = rolle_bld_out.wgs.f,
+#              aes(long,lat,group=group), fill="grey50",alpha=0.5) +
+#   geom_point(data=rolle_bld_out.wgs@data,
+#              aes(x = rolle_bld_pts@coords[,1],
+#                  y = rolle_bld_pts@coords[,2], 
+#                  size=enerBed_vd),
+#              shape=1,
+#              color="black",alpha=1)+
+#   theme(axis.title.x=element_blank(),
+#           axis.text.x=element_blank(),
+#           axis.ticks.x=element_blank(),
+#           axis.title.y=element_blank(),
+#           axis.text.y=element_blank(),
+#           axis.ticks.y=element_blank(),
+#           legend.title = element_text())+
+#   scale_radius(breaks=round(seq(from=0,to = max(rolle_bld_out.wgs$enerBed_vd,na.rm=T),by = 300000)),range = c(.5, 10))+ guides(size=guide_legend(title="Energiebedarf (kWh/a)"))
 ```
 
 

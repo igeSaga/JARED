@@ -324,7 +324,7 @@ fl<-(10^2)*3.14
 rolle_bld_out$anzahl_sonden_parzelle<-floor(rolle_bld_out$parzArea/fl)
 rolle_bld_out$anzahl_sonden_gebaeude<-floor(rolle_bld_out$anzahl_sonden_parzelle/rolle_bld_out$nEgids)+1
 
-rolle_leist<-rolle_bld_out@data[,72:79]*rolle_bld_out@data[,81]
+rolle_leist<-rolle_bld_out@data[,79:86]*rolle_bld_out$anzahl_sonden_gebaeude
 names(rolle_leist)<-gsub("_proSonde_","_proGebaeude_",names(rolle_leist))
 rolle_bld_out@data<-cbind(rolle_bld_out@data,rolle_leist)
 ```
@@ -336,7 +336,6 @@ rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
 geoth_adm.wgs<-spTransform(geoth_adm,CRSobj = CRS("+init=epsg:4326"))
 parz_bld.wgs<-spTransform(parz_bld_ga_clip_clip,CRSobj = CRS("+init=epsg:4326"))
 parz.wgs<-spTransform(parz,CRSobj = CRS("+init=epsg:4326"))
-
 
 pal <- colorFactor(palette=c("green","red","blue","grey"), geoth_adm.wgs$TYPE)
 pal_leist <- colorNumeric(palette="YlGnBu",
@@ -406,7 +405,7 @@ m <- leaflet() %>%
     options = layersControlOptions(collapsed = F)
   )%>%
   hideGroup(c("Leistung: min 50m","Parzellen (bearbeitet)", "Parzellen (original)","Zonen"))%>%
-  addLegend(title = "Berechtigung", pal = pal, values = geoth_adm.wgs$TYPE, opacity = 1,position = "bottomright")%>%
+  addLegend(title = "Zonen", pal = pal, values = geoth_adm.wgs$TYPE, opacity = 1,position = "bottomright")%>%
   addLegend(title = "Leistung (kW/a)", pal = pal_leist, values = rolle_bld_out.wgs$leist_max_proGebaeude_300, opacity = 1,position = "bottomright")
 
 #leaflet karte ausführen

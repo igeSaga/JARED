@@ -20,6 +20,8 @@ library(rgeos)
 library(leaflet)
 library(ggplot2)
 library(RColorBrewer)
+library(gridExtra)
+library(gstat)
 
 #empty workspace
 rm(list=ls())
@@ -71,32 +73,119 @@ rolle_bld_out$distanceLake<-distL_bld
 ```
 
 
-#Plot Building Characteristics
-```{r viz, fig.height=5, fig.width=10}
+#SIA Typen nach Höhe über See und Distanz zum See zusammenfassen
+```{r viz, fig.height=10, fig.width=12}
 #maxDist<-max(rolle_bld_out$distanceLake)
 #classify distances into 100m cuts
-lake_dist_cut<-cut(rolle_bld_out$distanceLake,breaks=seq(0,3000,by = 100),labels=paste(seq(0,2900,by = 100),seq(100,3000,by = 100),sep="-"))
+lake_height_cut<-cut(rolle_bld_out$aboveLake,breaks=seq(0,400,by = 10),labels=paste(seq(0,390,by = 10),seq(10,400,by = 10),sep="-"))
 
-dat<-data.frame(dist=lake_dist_cut,enerBed=rolle_bld_out$enerBed_awel,siaType=rolle_bld_out$sia)
+lake_dist_cut<-cut(rolle_bld_out$distanceLake,breaks=seq(0,2000,by = 50),labels=paste(seq(0,1950,by = 50),seq(50,2000,by = 50),sep="-"))
+
+dat<-data.frame(dist=lake_dist_cut, height=lake_height_cut,
+                enerBed=rolle_bld_out$enerBed_awel,
+                siaType=rolle_bld_out$sia)
 
 colourCount <- length(levels(dat$siaType)) # number of levels
 getPalette <- colorRampPalette(brewer.pal(9, "Set1"))
 
-p<-ggplot(dat, aes(x=dist,y=enerBed,fill=factor(siaType)))+
+p1<-ggplot(dat, aes(x=dist,y=enerBed,fill=factor(siaType)))+
   geom_col()+
   theme_minimal()+
-  ggtitle(paste("Energiebedarf (AWEL) in Abhaengigkeit der See-Distanz",sep=""))+
+  ggtitle(paste("Energiebedarf (AWEL) in Abhaengigkeit zur See-Distanz",sep=""))+
   theme(axis.text.x = element_text(angle = 45, hjust = 1,size=14))+
   scale_fill_manual(values = colorRampPalette(brewer.pal(12, "Set1"))(colourCount))+
   xlab("Distance (m)")+
-  ylab("Energiebedarf (kWh/a)")
-p
+  ylab("Energiebedarf (kWh/a)")+
+  theme(legend.position="bottom")
+
+p2<-ggplot(dat, aes(x=height,y=enerBed,fill=factor(siaType)))+
+  geom_col()+
+  theme_minimal()+
+  ggtitle(paste("Energiebedarf (AWEL) in Abhaengigkeit zur Höhe-über-See",sep=""))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=14))+
+  scale_fill_manual(values = colorRampPalette(brewer.pal(12, "Set1"))(colourCount))+
+  xlab("Distance (m)")+
+  ylab("Energiebedarf (kWh/a)")+
+  theme(legend.position = "none")
+
+grid.arrange(p1,p2,nrow=2, heights=c(3,2))
 ```
+
+#Interpolation der Energiedichte in Ufernähe
+```{r inter}
+rolle_bld_prox<-rolle_bld_out[rolle_bld_out$aboveLake<=20,c("enerBed_awel")]
+rolle_bld_pts <- gCentroid(rolle_bld_prox,byid=TRUE)
+
+rolle_bld_prox$ids<-sapply(rolle_bld_prox@polygons,function(x){x@ID})
+
+rolle_bld_pts<-SpatialPointsDataFrame(rolle_bld_pts,rolle_bld_prox@data,match.ID = "ids")
+
+rolle_grid <- expand.grid(
+  x = seq(rolle_bld_pts@bbox[1,1]-100, rolle_bld_pts@bbox[1,2]+100, by= 100),
+  y = seq(rolle_bld_pts@bbox[2,1]+100, rolle_bld_pts@bbox[2,2]+100, by= 100)
+  )
+
+coordinates(rolle_grid) <- ~x+y
+gridded(rolle_grid) <- TRUE
+proj4string(rolle_grid)<-proj4string(rolle_bld_out)
+
+rolle_idw<-gstat::idw(enerBed_awel~1, 
+               rolle_bld_pts,
+               newdata=rolle_grid,idp=4,maxdist=100)
+
+```
+
+#Kartographie
+```{r kart}
+rolle_bld_out.wgs<-spTransform(rolle_bld_prox,CRSobj = CRS("+init=epsg:4326"))
+rolle_grid.wgs<-spTransform(rolle_idw,CRSobj = CRS("+init=epsg:4326"))
+
+qpal<- colorBin(
+  palette = "YlOrRd",
+  domain = rolle_grid.wgs$var1.pred,
+  bins=quantile(rolle_grid.wgs$var1.pred,na.rm=T,seq(0,1,length.out = 10))
+)
+
+#visualisierung mit leaflet
+m <- leaflet() %>%
+  
+  setView(lat = 46.45940, lng = 6.33887, zoom = 13) %>%
+  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
+
+  addProviderTiles(providers$OpenStreetMap, group = "normal") %>%
+  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              color = "grey30",
+              weight=1,
+              group = "Haeuser")%>%
+  
+    addCircles(data=rolle_grid.wgs,
+              radius = 2,
+              fillOpacity = 0.8, 
+              color = ~qpal(rolle_grid.wgs$var1.pred),
+              group = "Grid")%>%
+  
+  addLayersControl(
+    baseGroups = c("OSM (b/w)","normal","ESRI"),
+    overlayGroups = c("Haeuser","Grid"),
+    options = layersControlOptions(collapsed = F)
+  )%>%
+  addLegend(title = "Grid", pal = qpal, values = rolle_grid.wgs$var1.pred, 
+            opacity = 1,position = "bottomright")
+
+#leaflet karte ausführen
+m
+```
+
 
 ##Save all Information
 ```{r save}
 #abbildung speichern
-ggsave(p,filename = "output/12_output/viz/lakeDistance.png",dpi = 500,width = 15,height = 8)
+ggsave(p1,filename = "output/12_output/viz/lakeDistance.png",dpi = 500,width = 15,height = 8)
+ggsave(p2,filename = "output/12_output/viz/lakeAbove.png",dpi = 500,width = 15,height = 8)
 
 #buildings speichern
 save(rolle_bld_out,file="output/12_output/geom/12_rolle_bld_out.Rdata")

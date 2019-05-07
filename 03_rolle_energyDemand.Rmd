@@ -158,7 +158,7 @@ rolle_bld_out$enerBed_vd<-ov$CONSO_TOT
 
 _Anmerkung: Es haben sich alle Fragen geklärt. Die zwei Messungen pro Wohnung (Hoch- & Niedertarif) wurden summiert. Es können ca. 1/6 der Adressen nicht gefunden werden._
 
-```{r energieRE, warning=FALSE, paged.print=FALSE}
+```{r energieRE, fig.height=6, fig.width=16, warning=FALSE, paged.print=FALSE}
 #reformatting the adresse data
 adr<-strsplit(adresses$ad,split = "  ")
 adr<-sapply(adr, function(x){
@@ -239,7 +239,34 @@ energyVerb_re_agg <- energyVerb_re%>%
   dplyr::summarise(enerVer_re=sum(enerVer_re,na.rm=T))
 
 #link energy use to the bld of rolle
-rolle_bld_out@data<-left_join(rolle_bld_out@data,energyVerb_re_agg, by="EGID")
+dat<-left_join(rolle_bld_out@data,energyVerb_re_agg, by="EGID")
+rolle_bld_out@data<-dat
+```
+
+Visualisierung des Stromverbrauchs
+```{r strom viz, fig.height=6, fig.width=16, warning=FALSE}
+#stromverbrauch neuer gebaeude pro m2 EBF
+dat<-dat%>%
+  mutate(enerVer_m2=enerVer_re/ebf)
+
+p1<-ggplot(dat)+
+  geom_density(aes(x = enerVer_m2, group=sia, fill=sia))+
+  facet_wrap(.~sia)+
+  xlim(c(0,100))+
+  xlab("Stromverbrauch (kW*h/a*m2)")+
+  theme_minimal()
+
+p2<-dat%>%
+  filter(sia=="efh" | sia=="mfh" )%>%
+  filter(!is.na(GBAUP_rough))%>%
+  ggplot(.)+
+  geom_density(aes(x = enerVer_m2, group=sia, color=sia))+
+  facet_wrap(.~GBAUP_rough)+
+  xlim(c(0,100))+
+  xlab("Stromverbrauch (kW*h/a*m2)")+
+  theme_minimal()
+
+grid.arrange(p1,p2,nrow=1)
 ```
 
 

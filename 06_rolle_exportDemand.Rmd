@@ -117,13 +117,14 @@ rolle_bld_out$gVal_saniert[rolle_bld_out$GBAUJ>2000]<-NA
 ```{r wahl, fig.height=10, fig.width=6, warning=FALSE, paged.print=FALSE}
 rolle_bld_out@data<-rolle_bld_out@data[,c("EGID","GAREA","GASTW","GBAUJ","ebf","GKLAS_text",
                                           "GHEIZ_text","GENHZ_text","GENWW_text","GKAT_text","GWWV",
-                                          "sia","siaNr","nutzung","typ",
+                                          "sia","siaNr","nutzung","typ","denkmalschutz","zonenAffecation",
                                           "uVal_ground","uVal_roof","uVal_wall","uVal_window",
                                           "uVal_ground_saniert",
                                           "uVal_roof_saniert","uVal_wall_saniert","uVal_window_saniert",
                                           "gVal","gVal_saniert",
                                           "fensterFl","fensterFl_breite","fensterFl_laenge","fensterFl_proz",
-                                          "longitude","latitude","breite","laenge","ausricht",
+                                          "longitude","latitude","longitude_mt","latitude_mt",
+                                          "breite","laenge","ausricht",
                                           "enerBed_awel","enerBed_ss","enerBed_vd","enerVer_re","nutzungsgrad",
                                           "kbob_PEne","kbob_PEer","kbob_GHG",
                                           "bestand_Geraete","bestand_Beleuchtung","bestand_Lueftung","bestand_Klimakaelte",
@@ -133,95 +134,10 @@ rolle_bld_out$GBAUP<-cut(as.numeric(rolle_bld_out$GBAUJ),
                            breaks=c(0,1919,1945,1960,1970,1980,1985,1990,1995,2000,2005,2010,2015,2500),
                            labels = c("vor 1919","1920-1945","1946-1960","1961-1970",
                                       "1971-1980","1981-1985","1986-1990","1991-1995",
-                                      "1991-2000","2001-2005","2006-2010","2011-2015","nach 2015"))
+                                      "1995-2000","2001-2005","2006-2010","2011-2015","nach 2015"))
 
 rolle_bld_tbl<-rolle_bld_out@data
 ```
-
-#some plots
-```{r plot, fig.height=10, fig.width=10}
-# #daten für karte aufbereiten
-# rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
-# rolle_bld_out.wgs.f = fortify(rolle_bld_out.wgs,by="EGID")
-# 
-# rolle_bld_out.wgs$id<-sapply(rolle_bld_out.wgs@polygons,function(x){x@ID})
-# rolle_bld_out.wgs.f<-merge(rolle_bld_out.wgs.f,rolle_bld_out.wgs@data,by="id")
-# 
-# #basemap
-# library(ggmap)
-# lat <- c(46.45083,46.47911)
-# long <- c(6.315,6.36)
-# bbox <- make_bbox(long,lat,f=0.05)
-# b <- get_map("Irkutsk",maptype="toner-lite",source="stamen")
-# 
-# ##sia karte
-# #farben für sia kategorien auswählen
-# cols<- levels(factor(rolle_bld_out.wgs.f$sia))
-# color <- grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
-#     
-#     if(length(cols)>12){
-#       myColors<-color[sample(1:length(color),size=length(cols),replace=F)]
-#     }else{
-#       myColors <- brewer.pal(length(cols),"Set3")
-#     }
-#     
-# names(myColors) <- cols
-# colScale2 <- scale_fill_manual(name = "grp",values = myColors,drop=F)
-# 
-# #karte zeichnen
-# ggmap(b) + 
-#   geom_polygon(data = rolle_bld_out.wgs.f,
-#              aes(long,lat,group=group,fill=sia),alpha=0.9) +
-#   colScale2+
-#     theme(axis.title.x=element_blank(),
-#           axis.text.x=element_blank(),
-#           axis.ticks.x=element_blank(),
-#           axis.title.y=element_blank(),
-#           axis.text.y=element_blank(),
-#           axis.ticks.y=element_blank(),
-#           legend.title = element_blank())
-# 
-# 
-# ##gebäudealter karte
-# #farben wählen
-# cc <- scales::seq_gradient_pal("blue","orange", "red")(seq(0,1,length.out=length(levels(factor(rolle_bld_out.wgs.f$GBAUP)))))
-# 
-# #karte zeichnen
-# ggmap(b) + 
-#   geom_polygon(data = rolle_bld_out.wgs.f,
-#              aes(long,lat,group=group,fill=GBAUP),alpha=0.9) +
-#     theme(axis.title.x=element_blank(),
-#           axis.text.x=element_blank(),
-#           axis.ticks.x=element_blank(),
-#           axis.title.y=element_blank(),
-#           axis.text.y=element_blank(),
-#           axis.ticks.y=element_blank(),
-#           legend.title = element_blank())+
-#   scale_fill_manual(values=cc)
-# 
-# 
-# #energiebedarf karte
-# rolle_bld_pts <- gCentroid(rolle_bld_out.wgs,byid=TRUE)
-# 
-# ggmap(b) + 
-#   geom_polygon(data = rolle_bld_out.wgs.f,
-#              aes(long,lat,group=group), fill="grey50",alpha=0.5) +
-#   geom_point(data=rolle_bld_out.wgs@data,
-#              aes(x = rolle_bld_pts@coords[,1],
-#                  y = rolle_bld_pts@coords[,2], 
-#                  size=enerBed_vd),
-#              shape=1,
-#              color="black",alpha=1)+
-#   theme(axis.title.x=element_blank(),
-#           axis.text.x=element_blank(),
-#           axis.ticks.x=element_blank(),
-#           axis.title.y=element_blank(),
-#           axis.text.y=element_blank(),
-#           axis.ticks.y=element_blank(),
-#           legend.title = element_text())+
-#   scale_radius(breaks=round(seq(from=0,to = max(rolle_bld_out.wgs$enerBed_vd,na.rm=T),by = 300000)),range = c(.5, 10))+ guides(size=guide_legend(title="Energiebedarf (kWh/a)"))
-```
-
 
 ##Save all Information
 ```{r save}

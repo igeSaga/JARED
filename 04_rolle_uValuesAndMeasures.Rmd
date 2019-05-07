@@ -84,6 +84,9 @@ Die Geographischen Koordinaten werden aus den Centroiden pro Gebäude gewonnen. 
 centr <- gCentroid(spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326")),byid=TRUE)
 rolle_bld_out$longitude<-centr@coords[,1]
 rolle_bld_out$latitude<-centr@coords[,2]
+centr <- gCentroid(rolle_bld_out,byid=TRUE)
+rolle_bld_out$longitude_mt<-centr@coords[,1]
+rolle_bld_out$latitude_mt<-centr@coords[,2]
 ```
 
 #Ausrichtung und Länge/Breite der Gebäude

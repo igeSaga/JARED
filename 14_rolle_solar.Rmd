@@ -176,6 +176,7 @@ htmlwidgets::saveWidget(m, file=paste(wd,"/output/14_output/map/mapPVPotential.h
 #buildings speichern
 save(rolle_bld_out,file="output/14_output/geom/14_rolle_bld_out.Rdata")
 writeOGR(dach_bld_inter.sp, "output/14_output/geom", "dach_bld_intersect", driver="ESRI Shapefile",overwrite_layer = T)
+writeOGR(rolle_bld_out, "output/14_output/geom", "rolle_bld", driver="ESRI Shapefile",overwrite_layer = T)
 write.csv(rolle_bld_out@data,file="output/14_output/geom/14_rolle_bld_out.csv")
 ```
 

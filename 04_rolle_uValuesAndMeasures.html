@@ -273,7 +273,10 @@ rolle_bld_out$gVal_saniert&lt;-0.55</code></pre>
 <p>Die Geographischen Koordinaten werden aus den Centroiden pro Gebäude gewonnen. Sie werden in WGS Koordianten angegeben (Grad Ost-West und Nord-Süd).</p>
 <pre class="r"><code>centr &lt;- gCentroid(spTransform(rolle_bld_out,CRSobj = CRS(&quot;+init=epsg:4326&quot;)),byid=TRUE)
 rolle_bld_out$longitude&lt;-centr@coords[,1]
-rolle_bld_out$latitude&lt;-centr@coords[,2]</code></pre>
+rolle_bld_out$latitude&lt;-centr@coords[,2]
+centr &lt;- gCentroid(rolle_bld_out,byid=TRUE)
+rolle_bld_out$longitude_mt&lt;-centr@coords[,1]
+rolle_bld_out$latitude_mt&lt;-centr@coords[,2]</code></pre>
 </div>
 <div id="ausrichtung-und-langebreite-der-gebaude" class="section level1">
 <h1>Ausrichtung und Länge/Breite der Gebäude</h1>

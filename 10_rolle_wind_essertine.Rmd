@@ -1,0 +1,290 @@
+---
+title: "10 - Windpark Essertine-Sur-Rolle"
+author: "Curdin Derungs"
+date: "November 2018"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+
+#loading libraries
+library(sp)
+library(rgdal)
+library(rgeos)
+library(dplyr)
+library(leaflet)
+library(ggplot2)
+library(gridExtra)
+library(lubridate)
+library(zoo)
+
+#empty workspace
+rm(list=ls())
+
+#load helpers
+source("999_helpers.R")
+
+#encoding
+Sys.setlocale(category = "LC_ALL", locale = "en_US.UTF-8")
+```
+
+In diesem Skript wird eine Abschätzung des Windpotentials für Rolle und Mont-sur-Rolle gemacht. Es ist bekannt, dass in Essertine-Sur-Rolle ein Windpark für den Jahresbedarf von ca. 5400 Haushalte entstehen soll. Folgendes Vorgehen wird verfolgt:  
+
+*In einem ersten Schritt prüfen wir, ob Rolle und Mont-Sur-Rolle im Perimeter der nächsten 5400 Haushalte zu liegen kommen.  
+*Im folgenden wird angenommen, dass die beiden Gemeinden einen Anteil der gesamten Produktion des Windkraftwerkes zur Verfügung haben, welcher gerade dem Anteil an den insgesamt 5400 Haushalten entspricht (n Haushalte Roll / 5400).  
+*Nun wird ein gemessenes Windprofil (Stundenwerte 2017) der Station Saint-Prex (nächste Windstation von Meteo Schweiz) so aufbereitet, dass nur für die Stromproduktion relevante Geschwindigkeiten vorkommen. Zudem wird das Windprofil geglättet.   
+*Das Jahrepotential Wind, welches Rolle und Mont-Sur-Roll vom neuen Windpark zusteht, wird nun proportional auf das Windprofil aufgeteilt, so dass nun Stundenwerte zur verfügung stehen und die Summe noch immer dem Jahrepotential entspricht.  
+
+In einem spätere Schritt kann dieses Potential-Profil, entsprechend der Bedarfsprofile, auf jeden einzelnen Haushalt übertragen werden.  
+
+#Daten einlesen
+Die Daten aus dem vorhergehenden Arbeitsschritt werden eingelesen. Hinzu kommt das Windprofil von Saint-Prex und die GWS Daten.
+```{r reader av, message=FALSE, warning=FALSE}
+load("output/05_output/geom/05_rolle_bld_out.Rdata")
+rolleCRS<-proj4string(rolle_bld_out)
+
+#gws von Rolle und Umgebung einlesen
+rolle_gws<-readOGR(layer = "rolleUmgebung", dsn = paste(dataPath,"18_GWS/",sep=""))
+rolle_gws<-spTransform(rolle_gws,CRSobj = rolleCRS)
+
+rolle_gws@data<-rolle_gws@data[,c("OBJECTID","W13TOT","W13TF")]
+
+#ort des windkraftwerks
+wind_loc<-SpatialPointsDataFrame(coords = matrix(data = c(512402.22, 148480.89),nrow = 1), 
+                                 data = data.frame(id=1),
+                                 proj4string = CRS(rolleCRS))
+
+#windprofil st-prex
+wind<-read.csv(paste(dataPath,"14_wind/stPrex_10minMean_wind_2017.txt",sep=""),sep=";", na.strings = "-")
+names(wind)<-c("st","time","wind")
+
+wind$wind<-wind$wind/3.6
+```
+
+# Abdeckung Windpark
+Die Abdeckung des Windparks wird anhand des Wissens um ein Potential von 5400 Haushalten und mit den Daten des GWS geschätzt. Die GWS Daten enthalten als Attribut die Anzahl Wohnungen pro Hektar.    
+
+## Verschneidung der GWS Daten mit dem Einflussgebiet des Windparks
+In einem ersten Schritt wird die Distanz vom geplanten Standort des Windparks zum Zentrum jedes Hektarrasters des GWS berechnet. In Folge werde die Anzahl in Reihenfolge zunehmender Distanz summiert.    
+
+```{r windProf, fig.height=5, fig.width=9, warning=FALSE, paged.print=FALSE}
+gws_dist<-spDistsN1(coordinates(rolle_gws),wind_loc,longlat = F)
+rolle_gws$distToWind<-gws_dist
+
+rolle_gws_dat<-rolle_gws@data
+rolle_gws_dat<-rolle_gws_dat[order(rolle_gws_dat$distToWind,decreasing = F),]
+
+rolle_gws_dat$W13TOT<-as.numeric(as.character(rolle_gws_dat$W13TOT))
+rolle_gws_dat$W13TF<-as.numeric(as.character(rolle_gws_dat$W13TF))
+
+rolle_gws_dat$W13TOT_distSum<-rolle_gws_dat$W13TOT
+rolle_gws_dat$W13TF_distSum<-rolle_gws_dat$W13TF
+for(i in 2:nrow(rolle_gws_dat)){
+  rolle_gws_dat$W13TOT_distSum[i]<-rolle_gws_dat$W13TOT[i]+rolle_gws_dat$W13TOT_distSum[i-1]
+  rolle_gws_dat$W13TF_distSum[i]<-rolle_gws_dat$W13TF[i]+rolle_gws_dat$W13TF_distSum[i-1]
+}
+
+rolle_gws_dat_orig<-rolle_gws@data
+rolle_gws_dat_orig<-rolle_gws_dat_orig%>%
+  left_join(rolle_gws_dat[,c("OBJECTID","W13TOT_distSum","W13TF_distSum")],by="OBJECTID")
+
+rolle_gws@data<-rolle_gws_dat_orig
+```
+
+##Visualisierung
+In folgender Karte werden einerseits die Summen von Wohnungen (in Abhängigkeit der Distanz zum Windpark) gezeigt. Zudem wird das maximale Potential von 5400 Wohnungen räumlich dargestellt.  
+
+```{r geoviz, fig.width = 7, fig.height = 5.5}
+wind_loc.wgs<-spTransform(wind_loc,CRSobj = CRS("+init=epsg:4326"))
+rolle_gws.wgs<-spTransform(rolle_gws,CRSobj = CRS("+init=epsg:4326"))
+rolle_bld_out.wgs<-spTransform(rolle_bld_out,CRSobj = CRS("+init=epsg:4326"))
+
+pal <- colorBin(
+  palette = "YlGnBu",
+  domain = rolle_gws.wgs$W13TOT_distSum,
+  bins=quantile(rolle_gws.wgs$W13TOT_distSum,na.rm=T,seq(0,1,length.out = 8))
+)
+
+qpal_bed <- colorBin(
+  palette = "Reds",
+  domain = rolle_bld_out.wgs$enerBed_awel,
+  bins=quantile(rolle_bld_out.wgs$enerBed_awel,na.rm=T,seq(0,1,length.out = 8))
+)
+
+#visualisierung mit leaflet
+m <- leaflet() %>%
+    
+  addProviderTiles(providers$OpenStreetMap, group = "normal") %>%
+  addProviderTiles(providers$Stamen.TonerLite, group = "OSM (b/w)") %>%
+  addProviderTiles("Esri.WorldImagery", group = "ESRI") %>%
+  
+  addPolygons(data=rolle_gws.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8, 
+              color = ~pal(rolle_gws.wgs$W13TOT_distSum),
+              weight=1,
+              group = "Anzahl Wohnungen (GWS)")%>%
+  
+  addPolygons(data=rolle_gws.wgs[rolle_gws.wgs$W13TOT_distSum<5400,],
+              stroke = TRUE,
+              fillOpacity = 0.5, 
+              color = "grey30",
+              weight=1,
+              group = "Haushalte im Umkreis (< 5400)")%>%
+  
+  addCircleMarkers(lng = wind_loc.wgs@coords[,1],
+                   lat = wind_loc.wgs@coords[,2],
+              fillOpacity = 0.8, 
+              color = "red",
+              weight=1,
+              group = "Standort Windkraftwerk")%>%
+  
+  addPolygons(data=rolle_bld_out.wgs,
+              stroke = TRUE,
+              fillOpacity = 0.8,
+              color = ~qpal_bed(rolle_bld_out.wgs$enerBed_awel),
+              weight=1,
+              group = "Energiebedarf (AWEL)")%>%
+  
+  addLayersControl(
+    baseGroups = c("OSM (b/w)","normal","ESRI"),
+    overlayGroups = c("Anzahl Wohnungen (GWS)","Haushalte im Umkreis (< 5400)","Standort Windkraftwerk","Energiebedarf (AWEL)"),
+    options = layersControlOptions(collapsed = F)
+  )%>%
+  addLegend(pal = pal, values = rolle_gws.wgs$W13TOT_distSum,
+    title = "Anzahl Wohnungen")%>%
+  addLegend(pal = qpal_bed, 
+            values =rolle_bld_out.wgs$enerBed_awel, 
+            opacity = 1,
+            title = "Energiebedarf: kWh/a",
+            position = "bottomleft"
+            )
+
+#leaflet karte ausführen
+m
+```
+
+Die Karte zeigt, dass die meisten Häuser in Roll Teil der 5400 Haushalte sind, welche am nächsten zum neuen Windpark in Essertine-Sur-Rolle liegen. Mont-Sur-Rolle ist ganz im Perimeter enthalten. Es ist daher anzunehmen, dass ganz Rolle erschlossen werden wird.  
+
+#Windpark-Potential als Stundenprofil
+Das Jahrespotential des Windparkes wird auf die Haushalte in Rolle heruntergerechnet. Das entprechende Potential wird in ein Jahresprofil mit Stundenwerten umgerechnet. Diese Umrechnung wird proportional entlang eines Windprofils einer nahe gelegenen Windstation gemacht (Saint-Prex).  
+
+##Explorative Windanalyse
+In einem ersten Schritt wird das Windprofil von Saint-Prex dargestellt.  
+
+```{r profile, fig.height=4, fig.width=12}
+year<-substr(as.character(format(wind$time, scientific=F)),start = 1,stop = 4)
+month<-substr(as.character(format(wind$time, scientific=F)),start = 5,stop = 6)
+day<-substr(as.character(format(wind$time, scientific=F)),start = 7,stop = 8)
+hour<-substr(as.character(format(wind$time, scientific=F)),start = 9,stop = 10)
+min<-substr(as.character(format(wind$time, scientific=F)),start = 11,stop = 12)
+date<-paste(year,".",month,".",day," ",hour,":",min,sep="")
+wind$date<-as.POSIXct(date, format="%Y.%m.%d %H:%M", tz = "GMT")
+
+
+wind.agg<-wind%>%
+  mutate(index = as.POSIXct(round(date,"hours")),
+         wind=as.numeric(as.character(wind)),
+         date=NULL,
+         time=NULL,
+         st=NULL)%>%
+  dplyr::group_by(index) %>%
+  dplyr::summarise(windH=mean(wind,na.rm=T)) %>%
+  mutate(hour=as.numeric(strftime(index, format="%H")),
+                weekDay=lubridate::wday(as.Date(index),week_start=1),
+                week = as.numeric(format(as.Date(index),"%W")),
+                month = as.numeric(format(as.Date(index),"%m")),
+                season = cut(month,breaks = seq(0,12,by = 2),labels = c(1,2,3,3,4,1)),
+                year = as.numeric(format(as.Date(index),"%Y")),
+                weekYear = paste(week,year,sep="_"),
+                monthYear = paste(month,year,sep="_"))
+
+levels(wind.agg$season)<-c("Winter","Spring","Summer","Autumn")
+
+ggplot(wind.agg)+
+  geom_path(aes(x=index,y=windH),color="black")+
+  theme_minimal()+
+  ggtitle("Windprofil Saint-Prex 2017")+
+  ylab("Windgeschwindigkeit (m/s)")+
+  xlab("Tageszeit")
+```
+
+Das Jahresprofil wird im folgenden noch auf Saisonalitäten untersucht.   
+
+```{r seasonal, fig.height=8, fig.width=12}
+p3<-wind.agg%>%
+  dplyr::group_by(season,hour)%>%
+  dplyr::summarise(windMean=mean(windH,na.rm=T),
+            windSD=sd(windH,na.rm=T))%>%
+  ggplot(.)+
+  geom_path(aes(x=hour+1,y=windMean),color="black")+
+  geom_path(aes(x=hour+1,y=windMean-windSD),color="grey80")+
+  geom_path(aes(x=hour+1,y=windMean+windSD),color="grey80")+
+  facet_wrap(.~season)+
+  theme_minimal()+
+  ggtitle("Tagesverlauf pro Jahreszeit")+
+  ylab("Windgeschwindigkeit (m/s)")+
+  xlab("Tageszeit")+
+  scale_x_continuous(breaks = 1:24)
+
+p3
+```
+
+Die vier Jahreszeiten zeigen stark unterschiedliche Tagesverläufe. Am Nachmittag ist jeweils ein leichter Anstieg des Windes zu verzeichnen. Die Windgeschwindigkeit ist mit ca. 3-4 m/s über das ganze Jahr hinweg relativ konstant und stark.   
+
+##Windpotential für Rolle
+Die oben besprochene Umrechnung wird vorgenommen. Das Jahrespotential der Windanalage wird auf den Anteil der Häuser in Rolle heruntergebrochen. Das Potential, welches Rolle zur Verfügung steht, wird auf das Windprofil übertragen. Die Jahressumme bleibt dabei erhalten, wird aber proportional auf Stundenwerte übertragen.   
+Für diese Berechnung wird das Windprofil erst leicht angepasst. Zum einen werden die Spitzen-Windgeschwindigkeiten von über 11.5 m/s auf konstant 10 m/s heruntergesetzt. Werte tiefer als 2 werden auf 0 gesetzt, da bei solch leichtem Wind keine Elektrizität produziert werden kann. Die Werte sind einer typischen [Kennlinie von Windkraftanalgen](https://www.wind-turbine-models.com/turbines/1335-enercon-e-115-ep3-3.000) entnommen. Als letzte Anpassung werden die Stundenwerte leicht geglättet, damit die Werte ein bisschen weniger Rauschen und die Partikularitäten des Jahres 2017 weniger zu Tage treten.  
+
+```{r haush}
+#anzahl haushalte in Rolle aus GWS
+rolle.ch<-gConvexHull(rolle_bld_out)
+ov<-over(rolle_gws,rolle.ch)
+rolle_gws.s<-rolle_gws[!is.na(ov),]
+nHaus<-sum(as.numeric(as.character(rolle_gws.s$W13TOT)))
+
+#potential für Rolle als Anteil der Rolle Haushalte an allen 5400 Haushalte, die beliefert werden
+potRolle<-nHaus/5400*(5400*3500)
+
+#Windprofil einschränken
+#<2 -> 0
+#>15 -> 15
+wind.agg<-wind.agg%>%
+  mutate(windEing = if_else(windH<2, 0,if_else(windH>=11.5, 11.5,windH)),
+         windEing.ma = rollmean(x=windEing, 5, align="center",fill = NA))
+
+wind.agg$windEing.ma[is.na(wind.agg$windEing.ma)]<-mean(wind.agg$windEing.ma,na.rm=T)
+
+wind.sum<-sum(wind.agg$windEing.ma,na.rm=T)
+
+potRolle.rel<-potRolle/wind.sum
+
+wind.agg$potRolleRel<-potRolle.rel*wind.agg$windEing
+
+ggplot(wind.agg)+
+  geom_path(aes(x=index,y=potRolleRel),color="black")+
+  theme_minimal()+
+  ggtitle("Jahresprofil Windpotential")+
+  ylab("Windpotential Rolle (kWh)")+
+  xlab("Tageszeit")
+```
+
+Das resultierende Profil zeigt das Windpotential, welches Rolle über den Verlauf eines Jahres (pro Stunde) zur Verfügung steht. Wenn beispielsweise die Bedarfsprofile für Elektrizität für alle Gebäude von Rolle bekannt sind (bzw. geschätzt wurden), kann das Windpotential proportional auf die Gebäude aufgeteilt werden. Damit ist eine Schätzung gegeben, wie viel des Elektrizitätsbedarf pro Stunde und Gebäude durch Wind abgedeckt werden kann.  
+
+## Resultate speichern
+Alle wichtigen Informationen werden abschliessend gespeichert...
+```{r save}
+#html karte speichern
+wd<-getwd()
+htmlwidgets::saveWidget(m, 
+                        file=paste(wd,"/output/10_output/map/10_windMap.html",sep=""),
+                        selfcontained = T)
+
+#windprofil speichern
+save(wind.agg,file="output/10_output/geom/10_windProfile.Rdata")
+```

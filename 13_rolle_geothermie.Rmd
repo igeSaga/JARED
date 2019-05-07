@@ -167,6 +167,7 @@ geoth_adm<-rbind(geoth_adm,geoth_adm_ms)
 parz<-readOGR(layer = "MOVD_CAD_TPR_PARV_S", dsn = paste(dataPath,"11_Cadastre_AmtlVermessung/Cadastre_9719_NO66KX/Cadastre",sep=""))
 #change projection
 parz<-spTransform(parz,CRSobj = rolleCRS)
+dat<-parz@data
 ```
 
 #Nur Parzellen mit Häusern auswählen
@@ -313,7 +314,7 @@ rolle_bld_out@data<-cbind(rolle_bld_out@data,
                           ov100[,c(5,6)],
                           ov200[,c(5,6)],
                           ov300[,c(5,6)])
-
+test<-rolle_bld_out@data[,79:86]
 ```
 
 #Anzahl Sonden pro Gebäude
@@ -324,7 +325,14 @@ fl<-(10^2)*3.14
 rolle_bld_out$anzahl_sonden_parzelle<-floor(rolle_bld_out$parzArea/fl)
 rolle_bld_out$anzahl_sonden_gebaeude<-floor(rolle_bld_out$anzahl_sonden_parzelle/rolle_bld_out$nEgids)+1
 
-rolle_leist<-rolle_bld_out@data[,79:86]*rolle_bld_out$anzahl_sonden_gebaeude
+rolle_leist<-rolle_bld_out@data[,c("leist_min_proSonde_50",
+                                   "leist_max_proSonde_50",
+                                   "leist_min_proSonde_100",
+                                   "leist_max_proSonde_100",
+                                   "leist_min_proSonde_200",
+                                   "leist_max_proSonde_200",
+                                   "leist_min_proSonde_300",
+                                   "leist_max_proSonde_300")]*rolle_bld_out$anzahl_sonden_gebaeude
 names(rolle_leist)<-gsub("_proSonde_","_proGebaeude_",names(rolle_leist))
 rolle_bld_out@data<-cbind(rolle_bld_out@data,rolle_leist)
 ```
@@ -405,8 +413,11 @@ m <- leaflet() %>%
     options = layersControlOptions(collapsed = F)
   )%>%
   hideGroup(c("Leistung: min 50m","Parzellen (bearbeitet)", "Parzellen (original)","Zonen"))%>%
-  addLegend(title = "Zonen", pal = pal, values = geoth_adm.wgs$TYPE, opacity = 1,position = "bottomright")%>%
-  addLegend(title = "Leistung (kW/a)", pal = pal_leist, values = rolle_bld_out.wgs$leist_max_proGebaeude_300, opacity = 1,position = "bottomright")
+  addLegend(title = "Zonen", pal = pal, values = geoth_adm.wgs$TYPE, opacity = 1,position = "bottomright")
+# %>%
+#   addLegend(title = "Leistung (kW/a)", pal = pal_leist, 
+#             values = rolle_bld_out.wgs$leist_max_proGebaeude_300, 
+#             opacity = 1,position = "bottomright")
 
 #leaflet karte ausführen
 m
@@ -419,5 +430,8 @@ wd<-getwd()
 htmlwidgets::saveWidget(m, file=paste(wd,"/output/13_output/map/mapPrimaerEnergie.html",sep=""),selfcontained = T)
 
 #buildings speichern
+writeOGR(parz_bld_ga_clip_clip, "output/13_output/geom", "parzClip", driver="ESRI Shapefile",overwrite_layer = T)
+writeOGR(parz, "output/13_output/geom", "parz", driver="ESRI Shapefile",overwrite_layer = T)
+writeOGR(geoth_adm, "output/13_output/geom", "admin", driver="ESRI Shapefile",overwrite_layer = T)
 save(rolle_bld_out,file="output/13_output/geom/13_rolle_bld_out.Rdata")
 ```

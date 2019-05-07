@@ -18,6 +18,7 @@ library(leaflet)
 library(rgeos)
 library(plyr)
 library(dplyr)
+library(rgdal)
 
 
 #empty workspace
@@ -135,5 +136,6 @@ wd<-getwd()
 htmlwidgets::saveWidget(m, file=paste(wd,"/output/20_output/map/mapEnergyGrid.html",sep=""),selfcontained = T)
 
 #grid speichern
+writeOGR(grd.spdf, "output/20_output/geom", "rolle_energyGrid", driver="ESRI Shapefile",overwrite_layer = T)
 save(grd.spdf,file="output/20_output/geom/rolle_energygrid.Rdata")
 ```
